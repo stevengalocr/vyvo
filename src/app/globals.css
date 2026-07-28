@@ -821,6 +821,29 @@ img {
   pointer-events: none;
 }
 
+.hero__kinetic-layer {
+  position: absolute;
+  z-index: 0;
+  width: clamp(220px, 30vw, 520px);
+  aspect-ratio: 1;
+  clip-path: polygon(0 0, 22% 0, 50% 62%, 78% 0, 100% 0, 50% 100%);
+  pointer-events: none;
+}
+
+.hero__kinetic-layer--one {
+  top: 12%;
+  right: 31%;
+  background: rgba(111, 44, 255, 0.055);
+  transform: rotate(-8deg);
+}
+
+.hero__kinetic-layer--two {
+  right: -7%;
+  bottom: -18%;
+  background: rgba(255, 90, 31, 0.04);
+  transform: rotate(16deg) scale(1.28);
+}
+
 .hero__layout {
   position: relative;
   display: grid;
@@ -842,7 +865,7 @@ img {
   font-family: var(--font-display);
   font-size: clamp(3.35rem, 5.8vw, 6.7rem);
   font-weight: 810;
-  letter-spacing: -0.075em;
+  letter-spacing: -0.04em;
   line-height: 0.88;
 }
 
@@ -936,18 +959,23 @@ img {
   z-index: 5;
   right: 3%;
   bottom: 32px;
-  display: grid;
+  display: block;
   width: min(440px, 74%);
   min-height: 114px;
-  grid-template-columns: 84px 1fr 46px;
-  align-items: center;
-  gap: 16px;
   border: 1px solid rgba(17, 17, 17, 0.1);
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.84);
   box-shadow: 0 18px 55px rgba(17, 17, 17, 0.12);
   padding: 12px;
   backdrop-filter: blur(18px);
+}
+
+.hero-focus__content {
+  display: grid;
+  min-height: 88px;
+  grid-template-columns: 84px 1fr 46px;
+  align-items: center;
+  gap: 16px;
 }
 
 .hero-focus::before {
@@ -1015,7 +1043,8 @@ img {
   white-space: nowrap;
 }
 
-.hero-focus > a {
+.hero-focus > a,
+.hero-focus__content > a {
   display: flex;
   width: 44px;
   height: 44px;
@@ -1051,6 +1080,15 @@ img {
   border-radius: 50%;
   background: transparent;
   cursor: pointer;
+  transition:
+    border-color var(--motion-fast) ease,
+    background-color var(--motion-fast) ease,
+    transform var(--motion-fast) var(--motion-out);
+}
+
+.hero-controls > button:active,
+.hero-chips button:active {
+  transform: scale(0.96);
 }
 
 .hero-controls > button:first-child svg {
@@ -1083,6 +1121,11 @@ img {
   font-size: 0.73rem;
   font-weight: 680;
   padding: 0 12px;
+  transition:
+    border-color var(--motion-ui) ease,
+    background-color var(--motion-ui) ease,
+    color var(--motion-ui) ease,
+    transform var(--motion-fast) var(--motion-out);
 }
 
 .hero-chips button span {
@@ -1095,6 +1138,128 @@ img {
   background: white;
   color: var(--vyvo-black);
   box-shadow: 0 8px 22px rgba(17, 17, 17, 0.06);
+}
+
+@keyframes hero-copy-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 26px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes hero-visual-enter {
+  from {
+    clip-path: inset(0 0 0 18% round 0 0 0 64px);
+    opacity: 0.45;
+  }
+  to {
+    clip-path: inset(0 0 0 0 round 0 0 0 64px);
+    opacity: 1;
+  }
+}
+
+@keyframes hero-layer-enter {
+  from {
+    opacity: 0;
+    translate: 0 36px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+@keyframes hero-focus-enter {
+  from {
+    filter: blur(3px);
+    opacity: 0;
+    transform: translate3d(12px, 0, 0);
+  }
+  to {
+    filter: blur(0);
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes hero-scroll-depth {
+  from {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  to {
+    transform: translate3d(0, 38px, 0) scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero__copy > .eyebrow,
+  .hero__copy > h1,
+  .hero__copy > p,
+  .hero__copy > .hero__actions {
+    animation: hero-copy-enter var(--motion-scene) var(--motion-out) both;
+  }
+
+  .hero__copy > h1 {
+    animation-delay: 70ms;
+  }
+
+  .hero__copy > p:not(.hero__trust) {
+    animation-delay: 140ms;
+  }
+
+  .hero__copy > .hero__actions {
+    animation-delay: 190ms;
+  }
+
+  .hero__copy > .hero__trust {
+    animation-delay: 230ms;
+  }
+
+  .hero__image-wrap {
+    animation: hero-visual-enter 880ms var(--motion-out) 80ms both;
+  }
+
+  .hero__kinetic-layer {
+    animation: hero-layer-enter 980ms var(--motion-out) 160ms both;
+  }
+
+  .hero-focus__content {
+    animation: hero-focus-enter 260ms var(--motion-out) both;
+  }
+}
+
+@supports (animation-timeline: view()) {
+  .hero {
+    view-timeline-name: --vyvo-hero;
+    view-timeline-axis: block;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .hero__visual {
+      animation: hero-scroll-depth linear both;
+      animation-range: exit 0% exit 92%;
+      animation-timeline: --vyvo-hero;
+    }
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hero__image {
+    transition: transform 600ms var(--motion-out);
+  }
+
+  .hero__visual:hover .hero__image {
+    transform: scale(1.018);
+  }
+
+  .hero-controls > button:hover {
+    border-color: rgba(17, 17, 17, 0.28);
+    background: white;
+  }
 }
 
 /* Intent */

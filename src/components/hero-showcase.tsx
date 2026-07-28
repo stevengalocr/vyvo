@@ -50,8 +50,21 @@ export function HeroShowcase({ products }: { products: StorefrontProduct[] }) {
   }, []);
 
   return (
-    <section className="hero" ref={heroRef} aria-labelledby="hero-title">
+    <section
+      className="hero"
+      ref={heroRef}
+      aria-labelledby="hero-title"
+      data-hero-state={focusProduct ? "product" : "family"}
+    >
       <div className="hero__texture" aria-hidden="true" />
+      <div
+        className="hero__kinetic-layer hero__kinetic-layer--one"
+        aria-hidden="true"
+      />
+      <div
+        className="hero__kinetic-layer hero__kinetic-layer--two"
+        aria-hidden="true"
+      />
       <div className="container hero__layout">
         <div className="hero__copy">
           <span className="eyebrow">Figuras hechas en Costa Rica.</span>
@@ -90,6 +103,11 @@ export function HeroShowcase({ products }: { products: StorefrontProduct[] }) {
             />
           </div>
           <div className={`hero-focus accent-${focusProduct?.accent ?? "purple"}`}>
+            <div
+              className="hero-focus__content"
+              data-focus-key={focusProduct?.slug ?? "family"}
+              key={focusProduct?.slug ?? "family"}
+            >
             {focusProduct ? (
               <>
                 <div className="hero-focus__thumb">
@@ -120,6 +138,7 @@ export function HeroShowcase({ products }: { products: StorefrontProduct[] }) {
                 <strong>Nueve ideas. Un mismo universo.</strong>
               </div>
             )}
+            </div>
           </div>
         </div>
       </div>
