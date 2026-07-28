@@ -9,7 +9,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/colecciones/origins",
     "/personalizar",
     "/drops",
-    "/club",
     "/politicas",
     "/privacidad",
     "/terminos",

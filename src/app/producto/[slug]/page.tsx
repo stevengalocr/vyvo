@@ -180,8 +180,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   <span key={option}>{option}</span>
                 ))}
               </div>
-              <Link href="/personalizar" className="button button--dark">
-                Explorar el flujo <Icon name="arrow" />
+              <Link
+                href={`/personalizar/${product.slug}`}
+                className="button button--dark"
+              >
+                Configurar {product.name} <Icon name="arrow" />
               </Link>
             </div>
           ) : null}

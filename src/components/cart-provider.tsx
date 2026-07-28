@@ -19,6 +19,7 @@ import {
 } from "@/lib/commerce/cart";
 import type {
   CartItem,
+  CartConfiguration,
   CartLine,
   CartTotals,
 } from "@/types/commerce";
@@ -29,9 +30,14 @@ type CartContextValue = {
   lines: CartLine[];
   totals: CartTotals;
   itemCount: number;
-  addItem: (slug: string, variantId: string, quantity?: number) => void;
-  updateQuantity: (slug: string, variantId: string, quantity: number) => void;
-  removeItem: (slug: string, variantId: string) => void;
+  addItem: (
+    slug: string,
+    variantId: string,
+    quantity?: number,
+    configuration?: CartConfiguration,
+  ) => void;
+  updateQuantity: (id: string, quantity: number) => void;
+  removeItem: (id: string) => void;
   clearCart: () => void;
 };
 
@@ -69,19 +75,23 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [hydrated, items]);
 
   const addItem = useCallback(
-    (slug: string, variantId: string, quantity = 1) => {
+    (
+      slug: string,
+      variantId: string,
+      quantity = 1,
+      configuration?: CartConfiguration,
+    ) => {
+      const id = configuration?.id ?? `${slug}:${variantId}`;
       setItems((current) => {
-        const existing = current.find(
-          (item) => item.slug === slug && item.variantId === variantId,
-        );
+        const existing = current.find((item) => item.id === id);
         if (!existing) {
           return normalizeCartItems([
             ...current,
-            { slug, variantId, quantity },
+            { id, slug, variantId, quantity, configuration },
           ]);
         }
         return current.map((item) =>
-          item.slug === slug && item.variantId === variantId
+          item.id === id
             ? {
                 ...item,
                 quantity: Math.min(
@@ -97,18 +107,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 
   const updateQuantity = useCallback(
-    (slug: string, variantId: string, quantity: number) => {
+    (id: string, quantity: number) => {
       if (quantity < 1) {
-        setItems((current) =>
-          current.filter(
-            (item) => item.slug !== slug || item.variantId !== variantId,
-          ),
-        );
+        setItems((current) => current.filter((item) => item.id !== id));
         return;
       }
       setItems((current) =>
         current.map((item) =>
-          item.slug === slug && item.variantId === variantId
+          item.id === id
             ? {
                 ...item,
                 quantity: Math.min(
@@ -123,12 +129,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [],
   );
 
-  const removeItem = useCallback((slug: string, variantId: string) => {
-    setItems((current) =>
-      current.filter(
-        (item) => item.slug !== slug || item.variantId !== variantId,
-      ),
-    );
+  const removeItem = useCallback((id: string) => {
+    setItems((current) => current.filter((item) => item.id !== id));
   }, []);
 
   const clearCart = useCallback(() => setItems([]), []);

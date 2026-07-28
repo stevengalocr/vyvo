@@ -18,6 +18,33 @@ export function ProductPurchasePanel({
 
   if (!variant?.price) return null;
 
+  if (product.customization) {
+    return (
+      <div className="purchase-panel">
+        <div className="purchase-panel__price">
+          <span>Precio demostrativo base</span>
+          <strong>{formatMoney(variant.price)}</strong>
+        </div>
+        <p>
+          Prepará primero la dirección de tu pieza. El precio final dependerá
+          del alcance, materiales y detalles que se validen después.
+        </p>
+        <div className="purchase-panel__actions">
+          <Link
+            className="button button--purple"
+            href={`/personalizar/${product.slug}`}
+          >
+            Configurar {product.name} <Icon name="arrow" />
+          </Link>
+        </div>
+        <div className="purchase-panel__trust">
+          <span><Icon name="lock" size={16} /> Brief local y privado</span>
+          <span><Icon name="shield" size={16} /> Sin cotización automática</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="purchase-panel">
       <div className="purchase-panel__price">
@@ -32,6 +59,7 @@ export function ProductPurchasePanel({
         <button
           className="button button--purple"
           type="button"
+          disabled={added}
           onClick={() => {
             addItem(product.slug, variant.id);
             setAdded(true);

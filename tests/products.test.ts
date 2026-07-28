@@ -75,3 +75,35 @@ test("cart normalizes persisted data and calculates demo totals", () => {
   assert.equal(totals.shipping.amountMinor, 0);
   assert.equal(totals.total.amountMinor, totals.subtotal.amountMinor);
 });
+
+test("configured products keep a safe local brief in the cart", () => {
+  const shift = storefrontProducts.find((product) => product.slug === "vyvo-shift");
+  assert.ok(shift);
+  const variant = shift.commerce.variants[0];
+  assert.ok(variant);
+
+  const items = normalizeCartItems([
+    {
+      slug: shift.slug,
+      variantId: variant.id,
+      quantity: 1,
+      configuration: {
+        id: "cfg-12345678",
+        label: "SHIFT · VECTOR",
+        details: [
+          { label: "Paleta principal", value: "Negro + violeta" },
+          { label: "Nombre corto", value: "VECTOR" },
+        ],
+      },
+    },
+  ]);
+
+  assert.equal(items.length, 1);
+  assert.equal(items[0]?.id, "cfg-12345678");
+  assert.equal(items[0]?.configuration?.label, "SHIFT · VECTOR");
+  assert.equal(items[0]?.configuration?.details.length, 2);
+  assert.equal(
+    resolveCartLines(items)[0]?.configuration?.details[0]?.value,
+    "Negro + violeta",
+  );
+});

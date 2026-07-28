@@ -55,7 +55,7 @@ export function CartPageClient() {
 
         <div className="cart-lines">
           {lines.map((line) => (
-            <article className="cart-line" key={`${line.slug}:${line.variantId}`}>
+            <article className="cart-line" key={line.id}>
               <Link
                 href={`/producto/${line.slug}`}
                 className="cart-line__image"
@@ -75,11 +75,23 @@ export function CartPageClient() {
                     {line.product.name}
                   </Link>
                 </h2>
-                <p>{line.variant.title} · {line.variant.sku}</p>
+                <p>
+                  {line.configuration?.label ?? line.variant.title} · {line.variant.sku}
+                </p>
+                {line.configuration ? (
+                  <dl className="cart-line__configuration">
+                    {line.configuration.details.slice(0, 4).map((detail) => (
+                      <div key={detail.label}>
+                        <dt>{detail.label}</dt>
+                        <dd>{detail.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : null}
                 <button
                   type="button"
                   className="remove-line"
-                  onClick={() => removeItem(line.slug, line.variantId)}
+                  onClick={() => removeItem(line.id)}
                 >
                   <Icon name="trash" size={15} /> Eliminar
                 </button>
@@ -91,11 +103,7 @@ export function CartPageClient() {
                     type="button"
                     aria-label={`Reducir cantidad de ${line.product.name}`}
                     onClick={() =>
-                      updateQuantity(
-                        line.slug,
-                        line.variantId,
-                        line.quantity - 1,
-                      )
+                      updateQuantity(line.id, line.quantity - 1)
                     }
                   >
                     <Icon name="minus" size={15} />
@@ -106,11 +114,7 @@ export function CartPageClient() {
                     aria-label={`Aumentar cantidad de ${line.product.name}`}
                     disabled={line.quantity >= MAX_ITEM_QUANTITY}
                     onClick={() =>
-                      updateQuantity(
-                        line.slug,
-                        line.variantId,
-                        line.quantity + 1,
-                      )
+                      updateQuantity(line.id, line.quantity + 1)
                     }
                   >
                     <Icon name="plus" size={15} />

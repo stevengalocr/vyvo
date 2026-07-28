@@ -14,6 +14,10 @@ export function Header() {
   const { hydrated, itemCount } = useCart();
   const pathname = usePathname();
   const darkHero = pathname === "/drops" && !scrolled && !open;
+  const isActive = (href: string) =>
+    pathname === href ||
+    pathname.startsWith(`${href}/`) ||
+    (href === "/catalogo" && pathname.startsWith("/producto/"));
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 32);
@@ -38,7 +42,7 @@ export function Header() {
             <Link
               href={item.href}
               key={item.href}
-              aria-current={pathname === item.href ? "page" : undefined}
+              aria-current={isActive(item.href) ? "page" : undefined}
             >
               {item.label}
             </Link>
@@ -51,7 +55,9 @@ export function Header() {
           <Link
             href="/carrito"
             className="cart-link"
-            aria-label={`Carrito${itemCount ? `, ${itemCount} productos` : " vacío"}`}
+            aria-label={`Carrito${
+              hydrated && itemCount ? `, ${itemCount} productos` : " vacío"
+            }`}
           >
             <Icon name="cart" size={21} />
             <span aria-live="polite">{hydrated ? itemCount : 0}</span>
@@ -78,7 +84,7 @@ export function Header() {
             href={item.href}
             key={item.href}
             aria-label={item.label}
-            aria-current={pathname === item.href ? "page" : undefined}
+            aria-current={isActive(item.href) ? "page" : undefined}
             onClick={() => setOpen(false)}
           >
             <span aria-hidden="true">0{index + 1}</span>

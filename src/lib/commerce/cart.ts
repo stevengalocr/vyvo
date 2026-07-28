@@ -4,6 +4,7 @@ import {
 } from "@/data/storefront";
 import type {
   CartItem,
+  CartConfiguration,
   CartLine,
   CartTotals,
   Money,
@@ -11,6 +12,40 @@ import type {
 
 export const CART_STORAGE_KEY = "vyvo:cart:v1";
 export const MAX_ITEM_QUANTITY = 8;
+
+function normalizeConfiguration(value: unknown): CartConfiguration | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const raw = value as Record<string, unknown>;
+  if (
+    typeof raw.id !== "string" ||
+    !/^cfg-[a-z0-9-]{6,64}$/i.test(raw.id) ||
+    typeof raw.label !== "string" ||
+    raw.label.length < 1 ||
+    raw.label.length > 80 ||
+    !Array.isArray(raw.details)
+  ) {
+    return undefined;
+  }
+
+  const details = raw.details.flatMap((candidate) => {
+    if (!candidate || typeof candidate !== "object") return [];
+    const detail = candidate as Record<string, unknown>;
+    if (
+      typeof detail.label !== "string" ||
+      typeof detail.value !== "string" ||
+      detail.label.length < 1 ||
+      detail.label.length > 80 ||
+      detail.value.length < 1 ||
+      detail.value.length > 180
+    ) {
+      return [];
+    }
+    return [{ label: detail.label, value: detail.value }];
+  });
+
+  if (!details.length || details.length > 8) return undefined;
+  return { id: raw.id, label: raw.label, details };
+}
 
 function money(amountMinor: number): Money {
   return {
@@ -47,15 +82,18 @@ export function normalizeCartItems(value: unknown): CartItem[] {
       (item) => item.id === raw.variantId,
     );
     if (!product || !variant || !variant.enabled || !variant.price) return [];
+    const configuration = normalizeConfiguration(raw.configuration);
 
     return [
       {
+        id: configuration?.id ?? `${product.slug}:${variant.id}`,
         slug: product.slug,
         variantId: variant.id,
         quantity: Math.max(
           1,
           Math.min(MAX_ITEM_QUANTITY, Math.floor(raw.quantity)),
         ),
+        ...(configuration ? { configuration } : {}),
       },
     ];
   });

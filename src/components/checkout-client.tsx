@@ -311,12 +311,15 @@ export function CheckoutClient() {
         </div>
         <div className="checkout-mini-lines">
           {lines.map((line) => (
-            <div key={`${line.slug}:${line.variantId}`}>
+            <div key={line.id}>
               <span className="checkout-mini-image">
                 <Image src={line.product.image} alt="" fill sizes="64px" />
                 <b>{line.quantity}</b>
               </span>
-              <p><strong>{line.product.name}</strong><small>{line.variant.title}</small></p>
+              <p>
+                <strong>{line.product.name}</strong>
+                <small>{line.configuration?.label ?? line.variant.title}</small>
+              </p>
               <span>{formatMoney(line.lineTotal)}</span>
             </div>
           ))}

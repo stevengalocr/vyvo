@@ -67,9 +67,20 @@ export type StorefrontProduct = Product & {
 };
 
 export type CartItem = {
+  id: string;
   slug: string;
   variantId: string;
   quantity: number;
+  configuration?: CartConfiguration;
+};
+
+export type CartConfiguration = {
+  id: string;
+  label: string;
+  details: {
+    label: string;
+    value: string;
+  }[];
 };
 
 export type CartLine = CartItem & {

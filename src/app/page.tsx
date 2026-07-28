@@ -321,31 +321,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="section club-section">
-        <div className="container club-section__grid">
-          <div>
-            <span className="eyebrow">VYVO Club · Próximamente</span>
-            <h2>Tu pieza tiene una historia. El Club la mantiene cerca.</h2>
-            <p>
-              Registro de autenticidad, historia del personaje y acceso a futuras
-              transmisiones. Sin humo, monedas ni promesas vacías.
-            </p>
-            <Link href="/club" className="text-link">
-              Conocer el Club <Icon name="arrow" />
-            </Link>
-          </div>
-          <div className="auth-card">
-            <span className="auth-card__mark">V</span>
-            <p>VYVO · ORIGINS</p>
-            <strong>Autenticidad preparada</strong>
-            <div>
-              <Icon name="shield" />
-              <span>Se activará con piezas y seriales reales</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
       <section className="section faq-section">
         <div className="container faq-section__grid">
           <SectionHeading

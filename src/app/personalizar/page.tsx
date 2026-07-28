@@ -19,7 +19,7 @@ const paths = [
     image: "/products/shift/concept-primary.png",
     alt: "VYVO SHIFT como referencia de figura modular.",
     accent: "purple",
-    href: "/producto/vyvo-shift",
+    href: "/personalizar/vyvo-shift",
     features: ["Paleta", "Módulos", "Símbolo"],
   },
   {
@@ -30,7 +30,7 @@ const paths = [
     image: "/products/arena/concept-primary.png",
     alt: "VYVO ARENA como referencia de figura deportiva.",
     accent: "green",
-    href: "/producto/vyvo-arena",
+    href: "/personalizar/vyvo-arena",
     features: ["Disciplina", "Colores", "Número"],
   },
   {
@@ -41,7 +41,7 @@ const paths = [
     image: "/products/nexo/concept-primary.png",
     alt: "VYVO NEXO como referencia de compañero inspirado en mascota.",
     accent: "orange",
-    href: "/producto/vyvo-nexo",
+    href: "/personalizar/vyvo-nexo",
     features: ["Silueta", "Rasgos", "Nombre"],
   },
 ] as const;
@@ -148,7 +148,7 @@ export default function CustomizePage() {
                   ))}
                 </ul>
                 <Link href={path.href} className="button button--dark">
-                  Explorar {path.code} <Icon name="arrow" />
+                  Configurar {path.code} <Icon name="arrow" />
                 </Link>
               </article>
             ))}

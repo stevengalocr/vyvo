@@ -15,9 +15,9 @@ const groups = [
     title: "Crear",
     links: [
       ["Personalizar", "/personalizar"],
-      ["SHIFT", "/producto/vyvo-shift"],
-      ["ARENA", "/producto/vyvo-arena"],
-      ["NEXO", "/producto/vyvo-nexo"],
+      ["SHIFT", "/personalizar/vyvo-shift"],
+      ["ARENA", "/personalizar/vyvo-arena"],
+      ["NEXO", "/personalizar/vyvo-nexo"],
     ],
   },
   {

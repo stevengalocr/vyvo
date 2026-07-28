@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { useState, type FormEvent } from "react";
 import { Icon } from "./icon";
 
 type FormState = "idle" | "loading" | "preview" | "error";
@@ -20,7 +20,8 @@ export function WaitlistForm({
     setState("loading");
     setMessage("");
 
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     const payload = {
       email: form.get("email"),
       consent: form.get("consent") === "on",
@@ -42,7 +43,7 @@ export function WaitlistForm({
       setMessage(result.message ?? "No pudimos completar el registro.");
       if (response.ok) {
         setState(result.mode === "preview" ? "preview" : "error");
-        event.currentTarget.reset();
+        formElement.reset();
       } else {
         setState("error");
       }
@@ -68,7 +69,6 @@ export function WaitlistForm({
     <form
       className={`waitlist-form${compact ? " waitlist-form--compact" : ""}`}
       onSubmit={onSubmit}
-      noValidate
     >
       <div className="waitlist-form__row">
         <label>

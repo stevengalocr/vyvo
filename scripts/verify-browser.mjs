@@ -8,6 +8,9 @@ const routes = [
   "/catalogo",
   "/producto/vyvo-core",
   "/personalizar",
+  "/personalizar/vyvo-shift",
+  "/personalizar/vyvo-arena",
+  "/personalizar/vyvo-nexo",
   "/drops",
   "/carrito",
   "/checkout",
@@ -96,15 +99,23 @@ async function verifyPrimaryJourneys(context) {
   });
 
   await page.goto(`${baseUrl}/catalogo`, { waitUntil: "networkidle" });
+  await page.evaluate(() => localStorage.clear());
+  await page.reload({ waitUntil: "networkidle" });
   const navigationLabels = await page
     .locator(".desktop-nav > a")
     .allTextContents();
   await page.getByLabel("Buscar en el catálogo").fill("NEXO");
+  await page.waitForFunction(
+    () => document.querySelectorAll(".product-card").length === 1,
+  );
   const catalogSearchCount = await page.locator(".product-card").count();
   const catalogSearchName = await page
     .locator(".product-card h3")
     .first()
     .textContent();
+  await page.getByRole("button", { name: "Limpiar filtros" }).click();
+  await page.getByRole("button", { name: "Personalizables" }).click();
+  const customizableProductCount = await page.locator(".product-card").count();
 
   await page.goto(`${baseUrl}/personalizar`, { waitUntil: "networkidle" });
   const customizationPathCount = await page
@@ -112,26 +123,122 @@ async function verifyPrimaryJourneys(context) {
     .count();
   await page
     .locator(".customize-path-grid")
-    .getByRole("link", { name: "Explorar SHIFT" })
+    .getByRole("link", { name: "Configurar SHIFT" })
     .click();
-  await page.waitForURL("**/producto/vyvo-shift");
+  await page.waitForURL("**/personalizar/vyvo-shift");
   const personalizationDestination = page.url();
+  const activePersonalizationNavigation = await page
+    .locator('.desktop-nav a[aria-current="page"]')
+    .textContent();
+
+  await page.getByLabel("La pieza es").selectOption({ label: "Para mí" });
+  await page
+    .getByLabel("Intención principal")
+    .selectOption({ label: "Crear algo original" });
+  await page
+    .getByLabel("Historia esencial")
+    .fill("Una pieza modular que represente movimiento y tecnología.");
+  await page.getByRole("button", { name: "Continuar" }).click();
+
+  await page
+    .getByLabel("Paleta principal")
+    .selectOption({ label: "Negro + violeta" });
+  await page
+    .getByLabel("Módulo de identidad")
+    .selectOption({ label: "Movimiento" });
+  await page.getByLabel("Símbolo o inicial").fill("V");
+  await page.getByLabel("Nombre corto").fill("VECTOR");
+  await page.getByRole("button", { name: "Continuar" }).click();
+
+  await page
+    .getByLabel(
+      "Entiendo que es una configuración demostrativa, no una cotización ni una orden de producción.",
+    )
+    .check();
+  await page
+    .getByRole("button", { name: "Agregar configuración al carrito" })
+    .click();
+  const customizationConfirmationVisible = await page
+    .getByRole("heading", {
+      name: "Tu SHIFT ya tiene una dirección clara.",
+    })
+    .isVisible();
+  await page.waitForFunction(() => {
+    const stored = localStorage.getItem("vyvo:cart:v1");
+    if (!stored) return false;
+    try {
+      return JSON.parse(stored).some((item) => item.configuration);
+    } catch {
+      return false;
+    }
+  });
+  await page
+    .getByRole("link", { name: "Ver configuración en carrito" })
+    .click();
+  await page.waitForURL("**/carrito");
+  await page.getByText("SHIFT · VECTOR").waitFor();
+  const configurationInCart = await page
+    .getByText("SHIFT · VECTOR")
+    .isVisible();
+  const configurationDetailInCart = await page
+    .getByText("Negro + violeta")
+    .isVisible();
 
   await page.goto(`${baseUrl}/drops`, { waitUntil: "networkidle" });
   const dropStatusCount = await page.locator(".drop-status__grid > div").count();
   const dropPurchaseVisible = await page
     .getByRole("button", { name: "Agregar al carrito" })
     .isVisible();
+  await page.getByRole("link", { name: "Seguir el lanzamiento" }).click();
+  const dropAlertAnchorReached = page.url().endsWith("/drops#alerta");
+  await page.getByLabel("Correo electrónico").fill("alerta@vyvo.demo");
+  await page
+    .getByLabel(
+      "Acepto recibir novedades de VYVO. Puedo retirar mi consentimiento cuando quiera.",
+    )
+    .check();
+  const waitlistResponsePromise = page.waitForResponse(
+    (response) =>
+      response.url().endsWith("/api/waitlist") &&
+      response.request().method() === "POST",
+  );
+  await page.getByRole("button", { name: "Unirme" }).click();
+  const waitlistResponse = await waitlistResponsePromise;
+  await page.getByText("El flujo está listo.").waitFor();
+  const waitlistPreviewVisible = await page
+    .getByText("El flujo está listo.")
+    .isVisible();
+
+  await page.goto(baseUrl, { waitUntil: "networkidle" });
+  const clubSectionCount = await page.getByText("VYVO Club · Próximamente").count();
+  const selectedBefore = await page
+    .locator('.hero-chips [aria-selected="true"]')
+    .textContent();
+  await page.getByRole("button", { name: "Personaje siguiente" }).click();
+  const selectedAfter = await page
+    .locator('.hero-chips [aria-selected="true"]')
+    .textContent();
 
   results.push({
     label: "primary-journeys",
     navigationLabels,
     catalogSearchCount,
     catalogSearchName: catalogSearchName?.trim() ?? null,
+    customizableProductCount,
     customizationPathCount,
     personalizationDestination,
+    activePersonalizationNavigation:
+      activePersonalizationNavigation?.trim() ?? null,
+    customizationConfirmationVisible,
+    configurationInCart,
+    configurationDetailInCart,
     dropStatusCount,
     dropPurchaseVisible,
+    dropAlertAnchorReached,
+    waitlistStatus: waitlistResponse.status(),
+    waitlistPreviewVisible,
+    clubSectionCount,
+    heroCarouselChanged: selectedBefore !== selectedAfter,
     consoleErrors,
     pageErrors,
     failedResponses,
@@ -156,6 +263,8 @@ async function verifyPurchaseFlow(context, label) {
     }
   });
 
+  await page.goto(baseUrl, { waitUntil: "networkidle" });
+  await page.evaluate(() => localStorage.clear());
   await page.goto(`${baseUrl}/producto/vyvo-core`, {
     waitUntil: "networkidle",
   });
@@ -226,6 +335,126 @@ async function verifyPurchaseFlow(context, label) {
   await page.close();
 }
 
+async function verifyInteractionIntegrity(context) {
+  const page = await context.newPage();
+  const routesToAudit = [
+    "/",
+    "/catalogo",
+    "/personalizar",
+    "/personalizar/vyvo-shift",
+    "/personalizar/vyvo-arena",
+    "/personalizar/vyvo-nexo",
+    "/drops",
+    "/carrito",
+    "/checkout",
+    "/cuidados",
+    "/politicas",
+    "/privacidad",
+    "/terminos",
+    "/colecciones/origins",
+    ...[
+      "vyvo-core",
+      "vyvo-rush",
+      "vyvo-wild",
+      "vyvo-echo",
+      "vyvo-shift",
+      "vyvo-nova",
+      "vyvo-arena",
+      "vyvo-nexo",
+      "vyvo-abyss",
+    ].map((slug) => `/producto/${slug}`),
+  ];
+  const unnamedButtons = [];
+  const formsWithoutSubmit = [];
+  const deadHashes = [];
+  const hrefs = new Set();
+
+  for (const route of routesToAudit) {
+    await page.goto(`${baseUrl}${route}`, {
+      waitUntil: "networkidle",
+      timeout: 30_000,
+    });
+    const audit = await page.evaluate(() => {
+      const visible = (element) => {
+        const style = getComputedStyle(element);
+        return (
+          style.display !== "none" &&
+          style.visibility !== "hidden" &&
+          style.opacity !== "0"
+        );
+      };
+      return {
+        unnamedButtons: [...document.querySelectorAll("button")]
+          .filter(visible)
+          .filter(
+            (button) =>
+              !(
+                button.getAttribute("aria-label") ||
+                button.textContent?.trim() ||
+                button.getAttribute("title")
+              ),
+          ).length,
+        formsWithoutSubmit: [...document.querySelectorAll("form")]
+          .filter(visible)
+          .filter(
+            (form) =>
+              !form.querySelector(
+                'button[type="submit"], input[type="submit"]',
+              ),
+          ).length,
+        links: [...document.querySelectorAll("a[href]")].map((anchor) => ({
+          href: anchor.href,
+          rawHref: anchor.getAttribute("href"),
+        })),
+      };
+    });
+
+    if (audit.unnamedButtons) {
+      unnamedButtons.push(`${route}: ${audit.unnamedButtons}`);
+    }
+    if (audit.formsWithoutSubmit) {
+      formsWithoutSubmit.push(`${route}: ${audit.formsWithoutSubmit}`);
+    }
+    for (const link of audit.links) {
+      const url = new URL(link.href);
+      if (url.origin !== baseUrl) continue;
+      hrefs.add(`${url.pathname}${url.search}`);
+      if (url.hash && url.pathname === new URL(page.url()).pathname) {
+        const targetExists = await page.evaluate(
+          (id) => Boolean(document.getElementById(id)),
+          decodeURIComponent(url.hash.slice(1)),
+        );
+        if (!targetExists) deadHashes.push(`${route}: ${link.rawHref}`);
+      }
+    }
+  }
+
+  const brokenLinks = [];
+  for (const href of hrefs) {
+    const response = await context.request.get(`${baseUrl}${href}`);
+    if (response.status() >= 400) {
+      brokenLinks.push(`${response.status()} ${href}`);
+    }
+  }
+
+  const clubRedirect = await context.request.get(`${baseUrl}/club`, {
+    maxRedirects: 0,
+    timeout: 15_000,
+  });
+  results.push({
+    label: "interaction-integrity",
+    auditedRouteCount: routesToAudit.length,
+    auditedLinkCount: hrefs.size,
+    unnamedButtons,
+    formsWithoutSubmit,
+    deadHashes,
+    brokenLinks,
+    clubRedirectDestination: clubRedirect.headers().location ?? null,
+    clubRedirectStatus: clubRedirect.status(),
+  });
+  await page.close();
+}
+
 const desktop = await browser.newContext({
   viewport: { width: 1440, height: 1000 },
   deviceScaleFactor: 1,
@@ -237,6 +466,7 @@ for (const route of routes) {
   await inspectRoute(desktop, route, "desktop");
 }
 await verifyPrimaryJourneys(desktop);
+await verifyInteractionIntegrity(desktop);
 await verifyPurchaseFlow(desktop, "desktop");
 await desktop.close();
 
@@ -248,7 +478,13 @@ const mobile = await browser.newContext({
   colorScheme: "light",
   reducedMotion: "reduce",
 });
-for (const route of ["/", "/catalogo", "/personalizar", "/drops"]) {
+for (const route of [
+  "/",
+  "/catalogo",
+  "/personalizar",
+  "/personalizar/vyvo-nexo",
+  "/drops",
+]) {
   await inspectRoute(mobile, route, "mobile");
 }
 await verifyPurchaseFlow(mobile, "mobile");
@@ -299,13 +535,33 @@ const failures = results.filter((result) => {
         JSON.stringify(["Catálogo", "Personalizar", "Drops"]) ||
       result.catalogSearchCount !== 1 ||
       result.catalogSearchName !== "NEXO" ||
+      result.customizableProductCount !== 3 ||
       result.customizationPathCount !== 3 ||
-      !result.personalizationDestination.endsWith("/producto/vyvo-shift") ||
+      !result.personalizationDestination.endsWith("/personalizar/vyvo-shift") ||
+      result.activePersonalizationNavigation !== "Personalizar" ||
+      !result.customizationConfirmationVisible ||
+      !result.configurationInCart ||
+      !result.configurationDetailInCart ||
       result.dropStatusCount !== 3 ||
       !result.dropPurchaseVisible ||
+      !result.dropAlertAnchorReached ||
+      result.waitlistStatus !== 202 ||
+      !result.waitlistPreviewVisible ||
+      result.clubSectionCount !== 0 ||
+      !result.heroCarouselChanged ||
       result.consoleErrors.length > 0 ||
       result.pageErrors.length > 0 ||
       result.failedResponses.length > 0
+    );
+  }
+  if (result.label === "interaction-integrity") {
+    return (
+      result.unnamedButtons.length > 0 ||
+      result.formsWithoutSubmit.length > 0 ||
+      result.deadHashes.length > 0 ||
+      result.brokenLinks.length > 0 ||
+      result.clubRedirectDestination !== "/personalizar" ||
+      result.clubRedirectStatus !== 308
     );
   }
   if (result.label.startsWith("purchase-flow-")) {
