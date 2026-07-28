@@ -6,11 +6,9 @@ const executablePath = "C:\\Program Files\\Google\\Chrome\\Application\\chrome.e
 const routes = [
   "/",
   "/catalogo",
-  "/colecciones/origins",
   "/producto/vyvo-core",
   "/personalizar",
   "/drops",
-  "/club",
   "/carrito",
   "/checkout",
 ];
@@ -70,12 +68,74 @@ async function inspectRoute(context, route, label) {
     failedResponses,
   });
 
-  if (route === "/") {
+  if (["/", "/catalogo", "/personalizar", "/drops"].includes(route)) {
+    const slug = route === "/" ? "home" : route.slice(1);
     await page.screenshot({
-      path: `artifacts/vyvo-home-${label}.png`,
+      path: `artifacts/vyvo-${slug}-${label}.png`,
       fullPage: false,
     });
   }
+
+  await page.close();
+}
+
+async function verifyPrimaryJourneys(context) {
+  const page = await context.newPage();
+  const consoleErrors = [];
+  const pageErrors = [];
+  const failedResponses = [];
+
+  page.on("console", (message) => {
+    if (message.type() === "error") consoleErrors.push(message.text());
+  });
+  page.on("pageerror", (error) => pageErrors.push(error.message));
+  page.on("response", (response) => {
+    if (response.status() >= 400) {
+      failedResponses.push(`${response.status()} ${response.url()}`);
+    }
+  });
+
+  await page.goto(`${baseUrl}/catalogo`, { waitUntil: "networkidle" });
+  const navigationLabels = await page
+    .locator(".desktop-nav > a")
+    .allTextContents();
+  await page.getByLabel("Buscar en el catálogo").fill("NEXO");
+  const catalogSearchCount = await page.locator(".product-card").count();
+  const catalogSearchName = await page
+    .locator(".product-card h3")
+    .first()
+    .textContent();
+
+  await page.goto(`${baseUrl}/personalizar`, { waitUntil: "networkidle" });
+  const customizationPathCount = await page
+    .locator(".customize-path-grid .customize-path")
+    .count();
+  await page
+    .locator(".customize-path-grid")
+    .getByRole("link", { name: "Explorar SHIFT" })
+    .click();
+  await page.waitForURL("**/producto/vyvo-shift");
+  const personalizationDestination = page.url();
+
+  await page.goto(`${baseUrl}/drops`, { waitUntil: "networkidle" });
+  const dropStatusCount = await page.locator(".drop-status__grid > div").count();
+  const dropPurchaseVisible = await page
+    .getByRole("button", { name: "Agregar al carrito" })
+    .isVisible();
+
+  results.push({
+    label: "primary-journeys",
+    navigationLabels,
+    catalogSearchCount,
+    catalogSearchName: catalogSearchName?.trim() ?? null,
+    customizationPathCount,
+    personalizationDestination,
+    dropStatusCount,
+    dropPurchaseVisible,
+    consoleErrors,
+    pageErrors,
+    failedResponses,
+  });
 
   await page.close();
 }
@@ -176,6 +236,7 @@ const desktop = await browser.newContext({
 for (const route of routes) {
   await inspectRoute(desktop, route, "desktop");
 }
+await verifyPrimaryJourneys(desktop);
 await verifyPurchaseFlow(desktop, "desktop");
 await desktop.close();
 
@@ -187,7 +248,9 @@ const mobile = await browser.newContext({
   colorScheme: "light",
   reducedMotion: "reduce",
 });
-await inspectRoute(mobile, "/", "mobile");
+for (const route of ["/", "/catalogo", "/personalizar", "/drops"]) {
+  await inspectRoute(mobile, route, "mobile");
+}
 await verifyPurchaseFlow(mobile, "mobile");
 
 const menuPage = await mobile.newPage();
@@ -197,6 +260,11 @@ const menuVisible = await menu.isVisible();
 if (menuVisible) await menu.click();
 await menuPage.waitForTimeout(250);
 const mobileNavVisible = await menuPage.locator("#mobile-navigation").isVisible();
+const mobileNavLabels = await menuPage
+  .locator("#mobile-navigation > a")
+  .evaluateAll((links) =>
+    links.map((link) => link.getAttribute("aria-label") ?? link.textContent?.trim()),
+  );
 const mobileNavState = await menuPage.locator("#mobile-navigation").evaluate((element) => ({
   className: element.className,
   visibility: getComputedStyle(element).visibility,
@@ -204,7 +272,13 @@ const mobileNavState = await menuPage.locator("#mobile-navigation").evaluate((el
   display: getComputedStyle(element).display,
   ariaExpanded: document.querySelector(".menu-toggle")?.getAttribute("aria-expanded"),
 }));
-results.push({ label: "mobile-menu", menuVisible, mobileNavVisible, mobileNavState });
+results.push({
+  label: "mobile-menu",
+  menuVisible,
+  mobileNavVisible,
+  mobileNavLabels,
+  mobileNavState,
+});
 await menuPage.close();
 await mobile.close();
 
@@ -212,7 +286,27 @@ await browser.close();
 
 const failures = results.filter((result) => {
   if (result.label === "mobile-menu") {
-    return !result.menuVisible || !result.mobileNavVisible;
+    return (
+      !result.menuVisible ||
+      !result.mobileNavVisible ||
+      JSON.stringify(result.mobileNavLabels) !==
+        JSON.stringify(["Catálogo", "Personalizar", "Drops"])
+    );
+  }
+  if (result.label === "primary-journeys") {
+    return (
+      JSON.stringify(result.navigationLabels) !==
+        JSON.stringify(["Catálogo", "Personalizar", "Drops"]) ||
+      result.catalogSearchCount !== 1 ||
+      result.catalogSearchName !== "NEXO" ||
+      result.customizationPathCount !== 3 ||
+      !result.personalizationDestination.endsWith("/producto/vyvo-shift") ||
+      result.dropStatusCount !== 3 ||
+      !result.dropPurchaseVisible ||
+      result.consoleErrors.length > 0 ||
+      result.pageErrors.length > 0 ||
+      result.failedResponses.length > 0
+    );
   }
   if (result.label.startsWith("purchase-flow-")) {
     return (

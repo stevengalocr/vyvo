@@ -6,10 +6,9 @@ const groups = [
     title: "Descubrir",
     links: [
       ["Catálogo", "/catalogo"],
-      ["Origins", "/colecciones/origins"],
-      ["Carrito", "/carrito"],
+      ["Personalizar", "/personalizar"],
       ["Drops", "/drops"],
-      ["VYVO Club", "/club"],
+      ["Carrito", "/carrito"],
     ],
   },
   {

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { primaryNavigation } from "@/lib/site";
 import { BrandMark } from "./brand-mark";
@@ -11,6 +12,8 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const { hydrated, itemCount } = useCart();
+  const pathname = usePathname();
+  const darkHero = pathname === "/drops" && !scrolled && !open;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 32);
@@ -26,13 +29,17 @@ export function Header() {
 
   return (
     <header
-      className={`site-header${scrolled || open ? " site-header--solid" : ""}`}
+      className={`site-header${scrolled || open ? " site-header--solid" : ""}${darkHero ? " site-header--dark" : ""}`}
     >
       <div className="site-header__inner">
         <BrandMark />
         <nav className="desktop-nav" aria-label="Navegación principal">
           {primaryNavigation.map((item) => (
-            <Link href={item.href} key={item.href}>
+            <Link
+              href={item.href}
+              key={item.href}
+              aria-current={pathname === item.href ? "page" : undefined}
+            >
               {item.label}
             </Link>
           ))}
@@ -67,20 +74,18 @@ export function Header() {
         aria-label="Navegación móvil"
       >
         {primaryNavigation.map((item, index) => (
-          <Link href={item.href} key={item.href} onClick={() => setOpen(false)}>
-            <span>0{index + 1}</span>
+          <Link
+            href={item.href}
+            key={item.href}
+            aria-label={item.label}
+            aria-current={pathname === item.href ? "page" : undefined}
+            onClick={() => setOpen(false)}
+          >
+            <span aria-hidden="true">0{index + 1}</span>
             {item.label}
             <Icon name="arrow" />
           </Link>
         ))}
-        <Link href="/personalizar" className="button button--purple" onClick={() => setOpen(false)}>
-          Crear mi figura
-        </Link>
-        <Link href="/carrito" className="mobile-cart-link" onClick={() => setOpen(false)}>
-          <Icon name="cart" />
-          Ver carrito
-          <span>{hydrated ? itemCount : 0}</span>
-        </Link>
       </nav>
     </header>
   );

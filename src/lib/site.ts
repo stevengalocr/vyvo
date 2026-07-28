@@ -18,8 +18,6 @@ export const siteConfig = {
 
 export const primaryNavigation = [
   { href: "/catalogo", label: "Catálogo" },
-  { href: "/colecciones/origins", label: "Origins" },
   { href: "/personalizar", label: "Personalizar" },
   { href: "/drops", label: "Drops" },
-  { href: "/club", label: "Club" },
 ] as const;

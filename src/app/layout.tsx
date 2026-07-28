@@ -43,7 +43,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es-CR">
+    <html lang="es-CR" data-scroll-behavior="smooth">
       <body>
         <CartProvider>
           <a href="#contenido" className="skip-link">

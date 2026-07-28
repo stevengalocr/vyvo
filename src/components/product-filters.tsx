@@ -1,88 +1,122 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { productLines } from "@/data/products";
+import { useDeferredValue, useMemo, useState } from "react";
 import type { StorefrontProduct } from "@/types/commerce";
-import type { Accent, ProductLine } from "@/types/product";
+import { Icon } from "./icon";
 import { ProductCard } from "./product-card";
 
-type LineFilter = ProductLine | "all";
-type AccentFilter = Accent | "all";
+type Segment = "all" | "collectible" | "custom" | "drop";
+type SortMode = "featured" | "price-asc" | "price-desc";
 
-export function ProductFilters({ products }: { products: StorefrontProduct[] }) {
-  const [line, setLine] = useState<LineFilter>("all");
-  const [accent, setAccent] = useState<AccentFilter>("all");
-  const [customOnly, setCustomOnly] = useState(false);
+const segments: { id: Segment; label: string }[] = [
+  { id: "all", label: "Todos" },
+  { id: "collectible", label: "Coleccionables" },
+  { id: "custom", label: "Personalizables" },
+  { id: "drop", label: "Drops" },
+];
 
-  const filtered = useMemo(
-    () =>
-      products.filter((product) => {
-        const lineMatch = line === "all" || product.line === line;
-        const accentMatch = accent === "all" || product.accent === accent;
-        const customMatch = !customOnly || Boolean(product.customization);
-        return lineMatch && accentMatch && customMatch;
-      }),
-    [accent, customOnly, line, products],
-  );
+function matchesSegment(product: StorefrontProduct, segment: Segment) {
+  if (segment === "all") return true;
+  if (segment === "collectible") return product.line === "mini";
+  if (segment === "drop") return product.line === "drop";
+  return Boolean(product.customization);
+}
+
+export function ProductFilters({
+  products,
+}: {
+  products: StorefrontProduct[];
+}) {
+  const [segment, setSegment] = useState<Segment>("all");
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<SortMode>("featured");
+  const deferredQuery = useDeferredValue(query.trim().toLocaleLowerCase("es"));
+
+  const filtered = useMemo(() => {
+    const result = products.filter((product) => {
+      if (!matchesSegment(product, segment)) return false;
+      if (!deferredQuery) return true;
+      const searchable = [
+        product.name,
+        product.descriptor,
+        product.shortDescription,
+        product.lineLabel,
+        ...product.tags,
+      ]
+        .join(" ")
+        .toLocaleLowerCase("es");
+      return searchable.includes(deferredQuery);
+    });
+
+    return [...result].sort((first, second) => {
+      if (sort === "featured") return first.displayOrder - second.displayOrder;
+      const firstPrice = first.commerce.price?.amountMinor ?? 0;
+      const secondPrice = second.commerce.price?.amountMinor ?? 0;
+      return sort === "price-asc"
+        ? firstPrice - secondPrice
+        : secondPrice - firstPrice;
+    });
+  }, [deferredQuery, products, segment, sort]);
+
+  function resetFilters() {
+    setSegment("all");
+    setQuery("");
+    setSort("featured");
+  }
 
   return (
     <>
-      <div className="filters" aria-label="Filtros del catálogo">
-        <fieldset>
-          <legend>Línea</legend>
-          <div className="filter-pills">
-            {productLines.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                aria-pressed={line === item.id}
-                onClick={() => setLine(item.id)}
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
-        </fieldset>
-        <fieldset>
-          <legend>Acento</legend>
-          <div className="color-filters">
-            {(["all", "purple", "orange", "green", "white"] as const).map(
-              (color) => (
-                <button
-                  key={color}
-                  type="button"
-                  aria-pressed={accent === color}
-                  onClick={() => setAccent(color)}
-                  className={`color-filter color-filter--${color}`}
-                >
-                  <span />
-                  {color === "all"
-                    ? "Todos"
-                    : color === "purple"
-                      ? "Morado"
-                      : color === "orange"
-                        ? "Naranja"
-                        : color === "green"
-                          ? "Verde"
-                          : "Blanco"}
-                </button>
-              ),
-            )}
-          </div>
-        </fieldset>
-        <label className="toggle">
-          <input
-            type="checkbox"
-            checked={customOnly}
-            onChange={(event) => setCustomOnly(event.target.checked)}
-          />
-          <span />
-          Personalizables
+      <div className="catalog-toolbar">
+        <div className="catalog-toolbar__search">
+          <Icon name="search" size={18} />
+          <label>
+            <span>Buscar en el catálogo</span>
+            <input
+              type="search"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Nombre, línea o carácter…"
+            />
+          </label>
+        </div>
+        <label className="catalog-toolbar__sort">
+          <span>Ordenar</span>
+          <select
+            value={sort}
+            onChange={(event) => setSort(event.target.value as SortMode)}
+          >
+            <option value="featured">Destacados</option>
+            <option value="price-asc">Precio: menor primero</option>
+            <option value="price-desc">Precio: mayor primero</option>
+          </select>
         </label>
       </div>
-      <div className="results-count" aria-live="polite">
-        {filtered.length} {filtered.length === 1 ? "producto" : "productos"}
+
+      <div className="catalog-segments" aria-label="Categorías del catálogo">
+        {segments.map((item) => (
+          <button
+            key={item.id}
+            type="button"
+            aria-pressed={segment === item.id}
+            onClick={() => setSegment(item.id)}
+          >
+            {item.label}
+          </button>
+        ))}
       </div>
+
+      <div className="catalog-results-heading">
+        <p aria-live="polite">
+          <strong>{filtered.length}</strong>{" "}
+          {filtered.length === 1 ? "producto" : "productos"}
+        </p>
+        {segment !== "all" || query || sort !== "featured" ? (
+          <button type="button" onClick={resetFilters}>
+            Limpiar filtros
+          </button>
+        ) : null}
+      </div>
+
       {filtered.length ? (
         <div className="product-grid">
           {filtered.map((product) => (
@@ -91,18 +125,17 @@ export function ProductFilters({ products }: { products: StorefrontProduct[] }) 
         </div>
       ) : (
         <div className="empty-state">
-          <h2>No hay productos con esa combinación.</h2>
-          <p>Probá cambiando un filtro para volver a explorar Origins.</p>
+          <span><Icon name="search" size={28} /></span>
+          <h2>No encontramos esa señal.</h2>
+          <p>
+            Probá otro nombre o volvé a ver todos los productos de VYVO.
+          </p>
           <button
             className="button button--dark"
             type="button"
-            onClick={() => {
-              setLine("all");
-              setAccent("all");
-              setCustomOnly(false);
-            }}
+            onClick={resetFilters}
           >
-            Limpiar filtros
+            Ver todo el catálogo
           </button>
         </div>
       )}
