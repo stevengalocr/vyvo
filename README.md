@@ -137,6 +137,23 @@ Las pruebas cubren los nueve productos, SKU y slugs únicos, ausencia de Origins
 007, configuración demo, variantes, carrito, totales y referencias de
 inventario externo.
 
+## Movimiento y verificación visual
+
+La animación acompaña la exploración de producto sin cambiar la identidad de
+tienda infantil. El hero destaca un personaje por vez, las entradas de
+contenido ocurren una sola vez y los controles comunican sus cambios de estado
+con transiciones breves.
+
+El movimiento funciona como mejora progresiva: el contenido permanece visible
+si JavaScript no carga y `prefers-reduced-motion` elimina desplazamientos,
+profundidad y revelados pendientes. Los efectos de hover que mueven elementos
+solo se aplican a punteros precisos.
+
+`npm run verify:browser` recorre landing, catálogo, fichas, personalización,
+Drops, carrito y checkout en escritorio y móvil. También valida menús,
+enlaces, consola, respuestas fallidas, overflow horizontal, flujo completo de
+compra y la ausencia de revelados pendientes con movimiento reducido.
+
 ## Vercel
 
 1. Importar el repositorio.

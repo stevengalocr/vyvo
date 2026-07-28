@@ -64,6 +64,9 @@ async function inspectRoute(context, route, label) {
     viewportWidth: window.innerWidth,
     scrollWidth: document.documentElement.scrollWidth,
     links: document.querySelectorAll("a").length,
+    reducedMotion: window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    pendingReveals: document.querySelectorAll('[data-reveal-state="pending"]')
+      .length,
   }));
 
   results.push({
@@ -687,6 +690,7 @@ const failures = results.filter((result) => {
     result.bodyLength === 0 ||
     result.hasOverlay ||
     result.horizontalOverflow ||
+    (result.reducedMotion && result.pendingReveals !== 0) ||
     result.consoleErrors.length > 0 ||
     result.pageErrors.length > 0 ||
     result.failedResponses.length > 0
