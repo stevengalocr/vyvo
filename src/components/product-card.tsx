@@ -8,13 +8,20 @@ import { Icon } from "./icon";
 export function ProductCard({
   product,
   priority = false,
+  revealIndex = 0,
 }: {
   product: StorefrontProduct;
   priority?: boolean;
+  revealIndex?: number;
 }) {
   return (
-    <article className={`product-card accent-${product.accent}`}>
+    <article
+      className={`product-card accent-${product.accent}`}
+      data-reveal
+      data-reveal-index={revealIndex}
+    >
       <Link href={`/producto/${product.slug}`} className="product-card__image">
+        <span className="product-card__accent" aria-hidden="true" />
         <div className="product-card__badges">
           <span>Render conceptual</span>
           <span>Origins {product.originsNumber}</span>

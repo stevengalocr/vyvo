@@ -98,11 +98,13 @@ export default function HomePage() {
             align="center"
           />
           <div className="intent-grid">
-            {intents.map((intent) => (
+            {intents.map((intent, index) => (
               <Link
                 href={intent.href}
                 key={intent.title}
                 className={`intent-card accent-${intent.accent}`}
+                data-reveal
+                data-reveal-index={index}
               >
                 <span className="intent-card__icon"><Icon name={intent.icon} size={26} /></span>
                 <h3>{intent.title}</h3>
@@ -124,8 +126,13 @@ export default function HomePage() {
             </p>
           </div>
           <div className="line-grid">
-            {lines.map((line) => (
-              <article className={`line-card accent-${line.accent}`} key={line.name}>
+            {lines.map((line, index) => (
+              <article
+                className={`line-card accent-${line.accent}`}
+                key={line.name}
+                data-reveal
+                data-reveal-index={index}
+              >
                 <span>{line.code}</span>
                 <h3>VYVO {line.name}</h3>
                 <p>{line.copy}</p>
@@ -138,7 +145,7 @@ export default function HomePage() {
 
       <section className="section origins-preview">
         <div className="container">
-          <div className="split-heading split-heading--action">
+          <div className="split-heading split-heading--action" data-reveal>
             <SectionHeading
               eyebrow="Origins · Primera transmisión"
               title="Nueve personajes. Ninguno de relleno."
@@ -150,7 +157,12 @@ export default function HomePage() {
           </div>
           <div className="product-grid product-grid--preview">
             {storefrontProducts.slice(0, 6).map((product, index) => (
-              <ProductCard key={product.slug} product={product} priority={index < 3} />
+              <ProductCard
+                key={product.slug}
+                product={product}
+                priority={index < 3}
+                revealIndex={index}
+              />
             ))}
           </div>
         </div>
@@ -158,7 +170,7 @@ export default function HomePage() {
 
       <section className="section custom-section">
         <div className="container custom-section__grid">
-          <div className="custom-visual">
+          <div className="custom-visual" data-reveal>
             <div className="custom-visual__card custom-visual__card--sketch">
               <span>01 · Referencia</span>
               <svg viewBox="0 0 260 240" aria-hidden="true">
@@ -233,7 +245,7 @@ export default function HomePage() {
 
       <section className="section abyss-section">
         <div className="container abyss-section__grid">
-          <div className="abyss-visual">
+          <div className="abyss-visual" data-reveal>
             <Image
               src="/products/abyss/concept-primary.png"
               alt="Render conceptual VYVO ABYSS, guardián premium de seis extremidades."
@@ -242,7 +254,7 @@ export default function HomePage() {
             />
             <span className="concept-label concept-label--dark">Render conceptual</span>
           </div>
-          <div className="abyss-copy">
+          <div className="abyss-copy" data-reveal data-reveal-index="1">
             <span className="eyebrow eyebrow--orange">Origins 010 · Próximo drop</span>
             <h2>ABYSS</h2>
             <p className="abyss-tagline">Lo desconocido también observa.</p>
@@ -279,7 +291,12 @@ export default function HomePage() {
                 ["Signature", "Caja, inserto, personaje y autenticidad."],
                 ["Collector", "Edición, serial y presentación premium."],
               ].map(([name, copy], index) => (
-                <div key={name} className={index === 1 ? "is-featured" : ""}>
+                <div
+                  key={name}
+                  className={index === 1 ? "is-featured" : ""}
+                  data-reveal
+                  data-reveal-index={index}
+                >
                   <span>0{index + 1}</span>
                   <h3>{name}</h3>
                   <p>{copy}</p>
@@ -304,7 +321,7 @@ export default function HomePage() {
           </div>
           <div className="process-grid">
             {process.map(([number, title, copy]) => (
-              <article key={number}>
+              <article key={number} data-reveal data-reveal-index={Number(number) - 1}>
                 <span>{number}</span>
                 <h3>{title}</h3>
                 <p>{copy}</p>

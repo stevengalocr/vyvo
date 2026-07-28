@@ -223,6 +223,12 @@ async function verifyPrimaryJourneys(context) {
       .querySelector(".hero-focus__content")
       ?.getAttribute("data-focus-key"),
   }));
+  const landingMotion = {
+    revealCount: await page.locator("[data-reveal]").count(),
+    productAccentCount: await page
+      .locator(".origins-preview .product-card__accent")
+      .count(),
+  };
   await page.getByRole("button", { name: "Personaje siguiente" }).click();
   const selectedAfter = await page
     .locator('.hero-chips [aria-selected="true"]')
@@ -249,6 +255,7 @@ async function verifyPrimaryJourneys(context) {
     clubSectionCount,
     heroCarouselChanged: selectedBefore !== selectedAfter,
     heroMotion,
+    landingMotion,
     consoleErrors,
     pageErrors,
     failedResponses,
@@ -562,6 +569,8 @@ const failures = results.filter((result) => {
       !result.heroMotion.state ||
       result.heroMotion.decorativeLayers !== 2 ||
       !result.heroMotion.focusKey ||
+      result.landingMotion.revealCount < 12 ||
+      result.landingMotion.productAccentCount !== 6 ||
       result.consoleErrors.length > 0 ||
       result.pageErrors.length > 0 ||
       result.failedResponses.length > 0
