@@ -5,6 +5,7 @@ import "./globals.css";
 import { CartProvider } from "@/components/cart-provider";
 import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
+import { MotionController } from "@/components/motion-controller";
 import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -52,6 +53,7 @@ export default function RootLayout({
           <Header />
           <main id="contenido">{children}</main>
           <Footer />
+          <MotionController />
         </CartProvider>
       </body>
     </html>

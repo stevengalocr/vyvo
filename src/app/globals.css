@@ -16,6 +16,31 @@
   --container: min(1360px, calc(100vw - 48px));
   --font-display: "Sora Variable", "Sora", Arial, sans-serif;
   --font-body: "Inter Variable", "Inter", Arial, sans-serif;
+  --motion-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --motion-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --motion-fast: 160ms;
+  --motion-ui: 240ms;
+  --motion-scene: 720ms;
+}
+
+[data-reveal] {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal][data-reveal-state="pending"] {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+  }
+
+  [data-reveal][data-reveal-state="visible"] {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    transition:
+      opacity var(--motion-scene) var(--motion-out) var(--reveal-delay, 0ms),
+      transform var(--motion-scene) var(--motion-out) var(--reveal-delay, 0ms);
+  }
 }
 
 /* Guided customization */
