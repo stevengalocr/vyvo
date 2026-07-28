@@ -43,7 +43,7 @@ export function CartPageClient() {
   }
 
   return (
-    <div className="cart-layout">
+    <div className="cart-layout" data-cart-empty="false">
       <section className="cart-main" aria-labelledby="cart-title">
         <div className="cart-heading">
           <div>

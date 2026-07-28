@@ -234,6 +234,9 @@ async function verifyPrimaryJourneys(context) {
       "Acepto recibir novedades de VYVO. Puedo retirar mi consentimiento cuando quiera.",
     )
     .check();
+  const waitlistSubmitStateBefore = await page
+    .locator("#alerta .waitlist-form")
+    .getAttribute("data-submit-state");
   const waitlistResponsePromise = page.waitForResponse(
     (response) =>
       response.url().endsWith("/api/waitlist") &&
@@ -293,6 +296,7 @@ async function verifyPrimaryJourneys(context) {
     dropAlertAnchorReached,
     waitlistStatus: waitlistResponse.status(),
     waitlistPreviewVisible,
+    waitlistSubmitStateBefore,
     clubSectionCount,
     heroCarouselChanged: selectedBefore !== selectedAfter,
     heroMotion,
@@ -332,8 +336,14 @@ async function verifyPurchaseFlow(context, label) {
     waitUntil: "networkidle",
   });
   await page.getByRole("button", { name: "Agregar al carrito" }).click();
+  const purchaseState = await page
+    .locator(".purchase-panel")
+    .getAttribute("data-purchase-state");
   await page.getByRole("link", { name: "Ver carrito" }).click();
   await page.waitForURL("**/carrito");
+  const cartEmptyState = await page
+    .locator(".cart-layout")
+    .getAttribute("data-cart-empty");
 
   const cartTotal = await page
     .locator(".order-summary__total dd")
@@ -347,12 +357,18 @@ async function verifyPurchaseFlow(context, label) {
     .getByRole("link", { name: "Continuar al checkout" })
     .click();
   await page.waitForURL("**/checkout");
+  const checkoutStepStart = await page
+    .locator(".checkout-layout")
+    .getAttribute("data-checkout-step");
 
   await page.getByLabel("Correo electrónico").fill("cliente@vyvo.demo");
   await page.getByLabel("Nombre").fill("Cliente");
   await page.getByLabel("Apellidos").fill("VYVO");
   await page.getByLabel("Teléfono").fill("+506 8888 8888");
   await page.getByRole("button", { name: "Continuar" }).click();
+  const checkoutStepDelivery = await page
+    .locator(".checkout-layout")
+    .getAttribute("data-checkout-step");
 
   await page.getByLabel("Dirección").fill("Dirección de demostración");
   await page.getByLabel("Provincia").selectOption("San José");
@@ -363,6 +379,9 @@ async function verifyPurchaseFlow(context, label) {
   const paymentDemoVisible = await page
     .getByText("Pago seguro · modo demostración")
     .isVisible();
+  const checkoutStepReview = await page
+    .locator(".checkout-layout")
+    .getAttribute("data-checkout-step");
   await page.screenshot({
     path: `artifacts/vyvo-checkout-${label}.png`,
     fullPage: false,
@@ -387,6 +406,11 @@ async function verifyPurchaseFlow(context, label) {
   results.push({
     label: `purchase-flow-${label}`,
     cartTotal,
+    purchaseState,
+    cartEmptyState,
+    checkoutStepStart,
+    checkoutStepDelivery,
+    checkoutStepReview,
     paymentDemoVisible,
     confirmationVisible,
     confirmationUrl,
@@ -620,6 +644,7 @@ const failures = results.filter((result) => {
       !result.dropAlertAnchorReached ||
       result.waitlistStatus !== 202 ||
       !result.waitlistPreviewVisible ||
+      result.waitlistSubmitStateBefore !== "idle" ||
       result.clubSectionCount !== 0 ||
       !result.heroCarouselChanged ||
       !result.heroMotion.state ||
@@ -645,6 +670,11 @@ const failures = results.filter((result) => {
   if (result.label.startsWith("purchase-flow-")) {
     return (
       !result.cartTotal ||
+      result.purchaseState !== "added" ||
+      result.cartEmptyState !== "false" ||
+      result.checkoutStepStart !== "1" ||
+      result.checkoutStepDelivery !== "2" ||
+      result.checkoutStepReview !== "3" ||
       !result.paymentDemoVisible ||
       !result.confirmationVisible ||
       result.consoleErrors.length > 0 ||

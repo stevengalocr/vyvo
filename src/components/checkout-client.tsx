@@ -80,7 +80,7 @@ export function CheckoutClient() {
   }
 
   return (
-    <div className="checkout-layout">
+    <div className="checkout-layout" data-checkout-step={step}>
       <section className="checkout-main">
         <Link href="/carrito" className="back-link">
           <Icon name="chevron" /> Volver al carrito

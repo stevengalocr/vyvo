@@ -631,6 +631,11 @@ img {
   transform: translateY(-2px);
 }
 
+.button:active:not(:disabled) {
+  transform: scale(0.97);
+  transition-duration: 120ms;
+}
+
 .button:disabled {
   cursor: not-allowed;
   opacity: 0.65;
@@ -2278,6 +2283,18 @@ img {
   border-radius: 17px;
   background: rgba(121, 201, 67, 0.12);
   padding: 18px;
+}
+
+.form-error,
+.form-success {
+  transition:
+    opacity var(--motion-ui) var(--motion-out),
+    transform var(--motion-ui) var(--motion-out);
+
+  @starting-style {
+    opacity: 0;
+    transform: translate3d(0, 8px, 0);
+  }
 }
 
 .form-success > span {
@@ -5449,6 +5466,18 @@ img {
   cursor: pointer;
 }
 
+.quantity-control button,
+.quantity-control output {
+  transition:
+    background-color var(--motion-fast) ease,
+    color var(--motion-fast) ease,
+    transform var(--motion-fast) var(--motion-out);
+}
+
+.quantity-control button:active:not(:disabled) {
+  transform: scale(0.92);
+}
+
 .quantity-control button:disabled {
   cursor: not-allowed;
   opacity: 0.35;
@@ -5613,6 +5642,15 @@ img {
   font-size: 0.68rem;
 }
 
+.checkout-steps li,
+.checkout-steps li > span {
+  transition:
+    border-color var(--motion-ui) ease,
+    background-color var(--motion-ui) ease,
+    color var(--motion-ui) ease,
+    transform var(--motion-ui) var(--motion-out);
+}
+
 .checkout-steps li.is-current,
 .checkout-steps li.is-complete {
   color: var(--vyvo-black);
@@ -5622,6 +5660,7 @@ img {
   border-color: var(--vyvo-purple);
   background: var(--vyvo-purple);
   color: white;
+  transform: scale(1.06);
 }
 
 .checkout-steps li.is-complete > span {

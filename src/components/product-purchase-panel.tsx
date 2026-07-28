@@ -20,7 +20,7 @@ export function ProductPurchasePanel({
 
   if (product.customization) {
     return (
-      <div className="purchase-panel">
+      <div className="purchase-panel" data-purchase-state="configure">
         <div className="purchase-panel__price">
           <span>Precio demostrativo base</span>
           <strong>{formatMoney(variant.price)}</strong>
@@ -46,7 +46,10 @@ export function ProductPurchasePanel({
   }
 
   return (
-    <div className="purchase-panel">
+    <div
+      className="purchase-panel"
+      data-purchase-state={added ? "added" : "idle"}
+    >
       <div className="purchase-panel__price">
         <span>Precio demostrativo</span>
         <strong>{formatMoney(variant.price)}</strong>

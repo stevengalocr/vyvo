@@ -69,6 +69,7 @@ export function WaitlistForm({
     <form
       className={`waitlist-form${compact ? " waitlist-form--compact" : ""}`}
       onSubmit={onSubmit}
+      data-submit-state={state}
     >
       <div className="waitlist-form__row">
         <label>
