@@ -40,6 +40,7 @@ export default function DropsPage() {
       <section className="drops-hero drops-hero--refined">
         <div className="container drops-hero__grid">
           <div className="drops-hero__visual">
+            <span className="drops-hero__depth" aria-hidden="true" />
             <Image
               src="/products/abyss/concept-primary.png"
               alt="Render conceptual VYVO ABYSS, primer drop premium."
@@ -98,7 +99,7 @@ export default function DropsPage() {
       {abyss ? (
         <section className="section drop-purchase" id="comprar">
           <div className="container drop-purchase__grid">
-            <div>
+            <div data-reveal>
               <span className="eyebrow">Probá el recorrido</span>
               <h2>Sentí cómo sería entrar al primer drop.</h2>
               <p>
@@ -131,7 +132,11 @@ export default function DropsPage() {
           </div>
           <div className="drop-rule-grid">
             {rules.map((rule, index) => (
-              <article key={rule.title}>
+              <article
+                key={rule.title}
+                data-reveal
+                data-reveal-index={index}
+              >
                 <span>0{index + 1}</span>
                 <h3>{rule.title}</h3>
                 <p>{rule.copy}</p>
@@ -143,7 +148,7 @@ export default function DropsPage() {
 
       <section className="section drop-alert" id="alerta">
         <div className="container drop-alert__grid">
-          <div>
+          <div data-reveal>
             <span className="eyebrow eyebrow--light">Señal de profundidad</span>
             <h2>Enterate cuando el estado cambie.</h2>
             <p>

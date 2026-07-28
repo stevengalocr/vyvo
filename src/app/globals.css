@@ -3316,7 +3316,20 @@ img {
 }
 
 .drops-hero__visual img {
+  z-index: 1;
   object-fit: cover;
+}
+
+.drops-hero__depth {
+  position: absolute;
+  z-index: 0;
+  inset: 10% 3% 4% 8%;
+  background: rgba(111, 44, 255, 0.2);
+  clip-path: polygon(0 0, 24% 0, 50% 65%, 76% 0, 100% 0, 50% 100%);
+  filter: blur(1px);
+  opacity: 0.72;
+  pointer-events: none;
+  transform: rotate(-8deg);
 }
 
 .drops-hero h1 {
@@ -4784,6 +4797,55 @@ img {
   background: rgba(17, 17, 17, 0.65);
   color: white;
   backdrop-filter: blur(12px);
+}
+
+@keyframes drops-product-enter {
+  from {
+    clip-path: inset(0 14% 0 0 round 28px);
+    opacity: 0.45;
+    transform: translate3d(22px, 0, 0) scale(0.97);
+  }
+  to {
+    clip-path: inset(0 0 0 0 round 28px);
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+@keyframes drops-depth-enter {
+  from {
+    opacity: 0;
+    transform: rotate(-13deg) scale(0.9);
+  }
+  to {
+    opacity: 0.72;
+    transform: rotate(-8deg) scale(1);
+  }
+}
+
+@keyframes drops-mark-enter {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 18px, 0) rotate(7deg);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .drops-hero__visual img {
+    animation: drops-product-enter 820ms var(--motion-out) both;
+  }
+
+  .drops-hero__depth {
+    animation: drops-depth-enter 900ms var(--motion-out) 110ms both;
+  }
+
+  .drop-edition-mark {
+    animation: drops-mark-enter 620ms var(--motion-out) 260ms both;
+  }
 }
 
 .drop-edition-mark span {

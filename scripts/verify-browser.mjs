@@ -218,6 +218,11 @@ async function verifyPrimaryJourneys(context) {
 
   await page.goto(`${baseUrl}/drops`, { waitUntil: "networkidle" });
   const dropStatusCount = await page.locator(".drop-status__grid > div").count();
+  const dropMotionHooks = {
+    depthLayers: await page.locator(".drops-hero__depth").count(),
+    purchaseAnchor: await page.locator("#comprar").count(),
+    alertAnchor: await page.locator("#alerta").count(),
+  };
   const dropPurchaseVisible = await page
     .getByRole("button", { name: "Agregar al carrito" })
     .isVisible();
@@ -283,6 +288,7 @@ async function verifyPrimaryJourneys(context) {
     configurationInCart,
     configurationDetailInCart,
     dropStatusCount,
+    dropMotionHooks,
     dropPurchaseVisible,
     dropAlertAnchorReached,
     waitlistStatus: waitlistResponse.status(),
@@ -607,6 +613,9 @@ const failures = results.filter((result) => {
       !result.configurationInCart ||
       !result.configurationDetailInCart ||
       result.dropStatusCount !== 3 ||
+      result.dropMotionHooks.depthLayers !== 1 ||
+      result.dropMotionHooks.purchaseAnchor !== 1 ||
+      result.dropMotionHooks.alertAnchor !== 1 ||
       !result.dropPurchaseVisible ||
       !result.dropAlertAnchorReached ||
       result.waitlistStatus !== 202 ||
