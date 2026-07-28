@@ -1,20 +1,41 @@
 # VYVO — Sistema cinético «Transmisión Modular»
 
-**Estado:** Diseño aprobado para planificación  
+**Estado:** Revisión 2 pendiente de aprobación
 **Fecha:** 2026-07-28  
 **Alcance:** Landing, Catálogo, Personalizar, Drops y continuidad del flujo de compra  
 **Dirección aprobada:** Futurista cinética, con tipografía, parallax y transiciones de mayor energía
 
 ## 1. Objetivo
 
-Elevar la experiencia pública de VYVO para que se sienta como una marca de
-coleccionables contemporánea, tecnológica y humana. El movimiento debe expresar
-que las ideas cobran vida, que las figuras se articulan y que cada producto
-pertenece a un mismo universo.
+Mejorar visualmente la tienda actual sin reemplazar su identidad, arquitectura,
+contenido ni flujos. VYVO debe leerse primero como una tienda atractiva de
+figuras, coleccionables y regalos para niños y familias. La comunicación
+comercial continúa dirigida con claridad al adulto comprador.
 
-La experiencia no debe parecer una interfaz de videojuego, un sitio cyberpunk,
-una plantilla SaaS o un catálogo genérico de impresión 3D. El producto, la
-historia y la facilidad de compra siguen siendo protagonistas.
+Las animaciones, el parallax y las transiciones son una capa de pulido: generan
+impacto visible, ayudan a descubrir productos y hacen que la experiencia se
+sienta moderna. No convierten la navegación en una demostración tecnológica.
+
+La fabricación 3D no es el concepto visual ni el mensaje principal. Puede
+aparecer como parte secundaria del proceso o los cuidados, pero la propuesta de
+valor se centra en personajes, personalización, juego, regalo, colección,
+movimiento y vínculo emocional.
+
+La experiencia no debe parecer una interfaz SaaS, una página experimental, un
+videojuego, un sitio cyberpunk ni un taller de fabricación. Producto, precio,
+imagen, historia y facilidad de compra son siempre protagonistas.
+
+## 1.1. Postura de intervención
+
+Este trabajo es una **mejora evolutiva**, no un rediseño:
+
+- conservar la estructura y el contenido actual de las pantallas;
+- conservar la navegación Catálogo, Personalizar y Drops;
+- conservar los flujos funcionales ya verificados;
+- mantener la jerarquía comercial de imágenes, información y CTAs;
+- mejorar composición, ritmo, profundidad, feedback y continuidad;
+- añadir movimiento solo donde aumente comprensión, deseo o confianza;
+- no introducir metáforas técnicas que oculten que se trata de una tienda.
 
 ## 2. Fundamentos de marca
 
@@ -36,35 +57,40 @@ El sistema parte de estas reglas oficiales:
 
 ## 3. Concepto rector
 
-**Transmisión Modular** convierte la interfaz en un sistema de piezas que se
-alinean, se separan, ganan profundidad y vuelven a ensamblarse.
+**Transmisión Modular** es el nombre interno de la capa de movimiento. No se usa
+como concepto comercial ni aparece en el copy público. La interfaz conserva su
+lenguaje de tienda y añade piezas visuales que se alinean, ganan profundidad y
+responden a la interacción.
 
 El movimiento se inspira en:
 
 - la superposición de las dos V del isotipo;
-- las capas de filamento;
 - las articulaciones visibles de las figuras;
-- el paso de una referencia a un objeto físico;
-- una transmisión que cambia el protagonista sin perder de vista la familia.
+- la apertura de una caja y el descubrimiento de un personaje;
+- la colección que cambia de protagonista sin perder de vista la familia;
+- la energía, curiosidad y sorpresa propias de una tienda de figuras.
 
-La sensación buscada es precisa, energética y física. Las aceleraciones serán
-decididas; los aterrizajes, suaves. El usuario debe percibir intención, no
-ornamento.
+La sensación buscada es alegre, energética, coleccionable y cuidada. Debe ser
+suficientemente divertida para atraer a un niño, suficientemente clara para
+tranquilizar a un padre y suficientemente sofisticada para interesar a un
+coleccionista adulto. Las aceleraciones serán decididas y los aterrizajes,
+suaves.
 
 ## 4. Jerarquía de movimiento
 
 La intensidad cambia según la tarea.
 
-### Nivel 1 — Inmersivo
+### Nivel 1 — Impacto comercial
 
 Aplicado a la landing y Drops:
 
 - parallax de producto y planos gráficos;
 - tipografía cinética;
-- composiciones que se compactan o despliegan con el scroll;
-- máscaras angulares inspiradas en la doble V;
+- composiciones que presentan y ordenan productos con el scroll;
+- formas de marca que acompañan sin dominar;
 - cambios de foco entre personajes;
-- transiciones de sección con mayor recorrido.
+- transiciones de sección visibles pero breves;
+- llamadas a catálogo, compra o personalización siempre accesibles.
 
 ### Nivel 2 — Expresivo
 
@@ -76,6 +102,9 @@ Aplicado a Catálogo, PDP y Personalizar:
 - respuestas físicas en cards y controles;
 - continuidad entre card y detalle de producto;
 - progreso visual claro en personalización.
+
+La animación no reemplaza títulos, filtros, precio, disponibilidad, información
+de producto ni controles de compra.
 
 ### Nivel 3 — Funcional
 
@@ -89,7 +118,7 @@ Aplicado a Carrito y Checkout:
 ## 5. Sistema tipográfico cinético
 
 Sora permanece como única tipografía display. No se introduce una fuente
-«futurista» adicional.
+«futurista» adicional ni se altera el tono amable y comercial de la tienda.
 
 ### Comportamientos
 
@@ -107,13 +136,15 @@ Sora permanece como única tipografía display. No se introduce una fuente
 
 El parallax se construye con un máximo de tres planos:
 
-1. **Plano ambiente:** patrones de doble V, contornos o líneas de filamento.
+1. **Plano ambiente:** patrones de doble V, formas de colección o superficies.
 2. **Plano producto:** figura o familia VYVO.
 3. **Plano interfaz:** copy, controles y estados comerciales.
 
 Reglas:
 
 - El producto se desplaza menos que el ambiente para conservar peso visual.
+- El parallax nunca separa imagen, precio y CTA hasta volverlos difíciles de
+  relacionar.
 - Los controles no deben alejarse de su objetivo ni perseguir el cursor.
 - El recorrido permanece contenido y reversible.
 - No se usa scroll hijacking.
@@ -126,6 +157,8 @@ Reglas:
 ### Hero
 
 - La familia VYVO conserva el primer cuadro unificado.
+- El copy, los CTAs y la comprensión inmediata de tienda conservan su estructura
+  actual.
 - CORE funciona como ancla y ABYSS aporta profundidad.
 - El foco rota entre personajes sin ocultar completamente al resto.
 - El personaje activo avanza ligeramente, aumenta su presencia y activa un
@@ -135,6 +168,8 @@ Reglas:
 - La interacción manual pausa la rotación automática.
 - Al abandonar el hero, la escena se comprime y entrega continuidad al
   descubrimiento de producto.
+- El impacto visual debe ayudar a responder rápidamente qué se vende y cómo
+  explorar o comprar.
 
 ### Secciones
 
@@ -144,15 +179,18 @@ Reglas:
   decoración gratuita.
 - Origins revela productos en una secuencia editorial; la cuadrícula no salta
   ni retrasa el acceso.
-- Personalizar usa la transformación referencia → sistema → figura.
+- Personalizar usa una transición sencilla de idea → personaje → figura.
 - Articulación utiliza callouts que aparecen conectados a la pieza.
 - ABYSS incrementa profundidad y contraste sin recurrir a neón.
-- Unboxing y proceso usan movimiento explicativo, no teatral.
+- Unboxing usa movimiento de apertura y descubrimiento; el proceso permanece
+  secundario frente al producto terminado.
 - El CTA final recoge el movimiento anterior y lo resuelve en una acción clara.
 
 ## 8. Catálogo
 
 - La cabecera se mantiene compacta y orientada a descubrimiento.
+- La cuadrícula, la imagen, el nombre, el precio o estado y el acceso al producto
+  conservan la jerarquía de una tienda.
 - Los filtros se sienten como controles de una colección, con selección
   inequívoca y actualización estable.
 - Las cards pueden tener una inclinación o separación de capas mínima en
@@ -160,6 +198,8 @@ Reglas:
 - La imagen no se recorta ni se desplaza de modo que oculte el producto.
 - Las entradas por scroll se ejecutan una sola vez; el contenido permanece
   estable al volver hacia arriba.
+- En móvil, tocar una card navega de inmediato; no se exige un primer toque para
+  revelar controles de hover.
 - El orden, los resultados y la disponibilidad nunca dependen de una animación.
 - Estados vacíos y limpieza de filtros tienen acciones funcionales.
 
@@ -167,6 +207,8 @@ Reglas:
 
 - El flujo se representa como una construcción progresiva, no como un formulario
   extenso.
+- La experiencia se expresa como crear un personaje o regalo propio, no como
+  configurar una fabricación.
 - Cada paso entra desde la dirección lógica del avance; volver invierte esa
   dirección.
 - El preview responde a selecciones válidas y conserva continuidad entre pasos.
@@ -189,8 +231,8 @@ Reglas:
 ## 11. Navegación y transiciones
 
 - El header mantiene continuidad sobre el hero y se solidifica al avanzar.
-- Las transiciones de ruta usarán una respuesta breve de superficie o máscara,
-  sin retrasar la navegación.
+- Las transiciones de ruta serán sutiles y no cubrirán la pantalla con una
+  secuencia temática.
 - Enlaces, botones, cards y filtros ofrecen feedback inmediato.
 - Los botones no cambian de posición al activarse.
 - La navegación móvil conserva objetivos táctiles mínimos de 44 px.
@@ -217,6 +259,9 @@ No se permite:
 - cursores personalizados;
 - elementos que huyan del puntero;
 - animaciones de carga falsas.
+- convertir todas las secciones en escenas dependientes del scroll;
+- ocultar información comercial hasta que termine una animación;
+- usar vocabulario visual de maquinaria como mensaje principal.
 
 ## 13. Accesibilidad
 
@@ -250,6 +295,15 @@ No se permite:
 
 - La landing se percibe más energética sin perder claridad en menos de diez
   segundos.
+- Una persona nueva identifica inmediatamente que VYVO vende figuras,
+  coleccionables, personalizaciones y regalos.
+- La interfaz conserva la estructura, información y funcionalidad de la tienda
+  actual.
+- El resultado se percibe como una mejora visual del producto existente, no como
+  un rediseño hacia SaaS, videojuego o sitio experimental.
+- La experiencia es atractiva para niños y clara y confiable para adultos.
+- La fabricación 3D no domina el hero, la navegación ni las decisiones de
+  compra.
 - La experiencia conserva el vocabulario oficial de VYVO.
 - El logo no recibe tratamientos prohibidos.
 - Cada composición usa un acento dominante.
