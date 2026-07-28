@@ -4307,6 +4307,17 @@ img {
   border-radius: 16px;
   background: var(--vyvo-white);
   padding: 0 17px;
+  transition:
+    border-color var(--motion-ui) ease,
+    box-shadow var(--motion-ui) var(--motion-out),
+    transform var(--motion-ui) var(--motion-out);
+}
+
+.catalog-toolbar__search:focus-within,
+.catalog-toolbar__sort:focus-within {
+  border-color: rgba(111, 44, 255, 0.5);
+  box-shadow: 0 12px 30px rgba(111, 44, 255, 0.09);
+  transform: translate3d(0, -2px, 0);
 }
 
 .catalog-toolbar__search > svg {
@@ -4356,7 +4367,7 @@ img {
 }
 
 .catalog-segments button {
-  min-height: 42px;
+  min-height: 44px;
   border: 1px solid var(--border);
   border-radius: 999px;
   background: transparent;
@@ -4365,6 +4376,15 @@ img {
   font-size: 0.72rem;
   font-weight: 680;
   padding: 0 16px;
+  transition:
+    border-color var(--motion-ui) ease,
+    background-color var(--motion-ui) ease,
+    color var(--motion-ui) ease,
+    transform var(--motion-fast) var(--motion-out);
+}
+
+.catalog-segments button:active {
+  transform: scale(0.96);
 }
 
 .catalog-segments button[aria-pressed="true"] {
@@ -4388,6 +4408,14 @@ img {
   margin: 0;
   color: var(--muted);
   font-size: 0.72rem;
+  transition:
+    opacity 180ms var(--motion-out),
+    transform 180ms var(--motion-out);
+
+  @starting-style {
+    opacity: 0;
+    transform: translate3d(0, 5px, 0);
+  }
 }
 
 .catalog-results-heading strong {
@@ -4402,6 +4430,14 @@ img {
   cursor: pointer;
   font-size: 0.68rem;
   font-weight: 720;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .catalog-segments button:hover:not([aria-pressed="true"]) {
+    border-color: rgba(17, 17, 17, 0.28);
+    color: var(--vyvo-black);
+    transform: translate3d(0, -2px, 0);
+  }
 }
 
 .empty-state > span {

@@ -32,7 +32,12 @@ async function inspectRoute(context, route, label) {
   const failedResponses = [];
 
   page.on("console", (message) => {
-    if (message.type() === "error") consoleErrors.push(message.text());
+    if (message.type() === "error") {
+      consoleErrors.push({
+        text: message.text(),
+        location: message.location(),
+      });
+    }
   });
   page.on("pageerror", (error) => pageErrors.push(error.message));
   page.on("response", (response) => {
@@ -89,7 +94,12 @@ async function verifyPrimaryJourneys(context) {
   const failedResponses = [];
 
   page.on("console", (message) => {
-    if (message.type() === "error") consoleErrors.push(message.text());
+    if (message.type() === "error") {
+      consoleErrors.push({
+        text: message.text(),
+        location: message.location(),
+      });
+    }
   });
   page.on("pageerror", (error) => pageErrors.push(error.message));
   page.on("response", (response) => {
@@ -116,6 +126,16 @@ async function verifyPrimaryJourneys(context) {
   await page.getByRole("button", { name: "Limpiar filtros" }).click();
   await page.getByRole("button", { name: "Personalizables" }).click();
   const customizableProductCount = await page.locator(".product-card").count();
+  const catalogMotionHooks = {
+    heroCopy: await page.locator(".page-hero__grid > [data-reveal]").count(),
+    toolbar: await page.locator(".catalog-toolbar[data-reveal]").count(),
+    activeSegmentPressed: await page
+      .getByRole("button", { name: "Personalizables" })
+      .getAttribute("aria-pressed"),
+    resultAnnouncement: await page
+      .locator(".catalog-results-heading [aria-live='polite']")
+      .textContent(),
+  };
 
   await page.goto(`${baseUrl}/personalizar`, { waitUntil: "networkidle" });
   const customizationPathCount = await page
@@ -240,6 +260,7 @@ async function verifyPrimaryJourneys(context) {
     catalogSearchCount,
     catalogSearchName: catalogSearchName?.trim() ?? null,
     customizableProductCount,
+    catalogMotionHooks,
     customizationPathCount,
     personalizationDestination,
     activePersonalizationNavigation:
@@ -271,7 +292,12 @@ async function verifyPurchaseFlow(context, label) {
   const failedResponses = [];
 
   page.on("console", (message) => {
-    if (message.type() === "error") consoleErrors.push(message.text());
+    if (message.type() === "error") {
+      consoleErrors.push({
+        text: message.text(),
+        location: message.location(),
+      });
+    }
   });
   page.on("pageerror", (error) => pageErrors.push(error.message));
   page.on("response", (response) => {
@@ -553,6 +579,10 @@ const failures = results.filter((result) => {
       result.catalogSearchCount !== 1 ||
       result.catalogSearchName !== "NEXO" ||
       result.customizableProductCount !== 3 ||
+      result.catalogMotionHooks.heroCopy !== 2 ||
+      result.catalogMotionHooks.toolbar !== 1 ||
+      result.catalogMotionHooks.activeSegmentPressed !== "true" ||
+      !result.catalogMotionHooks.resultAnnouncement?.includes("3") ||
       result.customizationPathCount !== 3 ||
       !result.personalizationDestination.endsWith("/personalizar/vyvo-shift") ||
       result.activePersonalizationNavigation !== "Personalizar" ||

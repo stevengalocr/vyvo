@@ -66,7 +66,7 @@ export function ProductFilters({
 
   return (
     <>
-      <div className="catalog-toolbar">
+      <div className="catalog-toolbar" data-reveal>
         <div className="catalog-toolbar__search">
           <Icon name="search" size={18} />
           <label>
@@ -92,7 +92,12 @@ export function ProductFilters({
         </label>
       </div>
 
-      <div className="catalog-segments" aria-label="Categorías del catálogo">
+      <div
+        className="catalog-segments"
+        aria-label="Categorías del catálogo"
+        data-reveal
+        data-reveal-index="1"
+      >
         {segments.map((item) => (
           <button
             key={item.id}
@@ -105,8 +110,11 @@ export function ProductFilters({
         ))}
       </div>
 
-      <div className="catalog-results-heading">
-        <p aria-live="polite">
+      <div className="catalog-results-heading" data-reveal data-reveal-index="2">
+        <p
+          aria-live="polite"
+          key={`${filtered.length}-${segment}-${deferredQuery}`}
+        >
           <strong>{filtered.length}</strong>{" "}
           {filtered.length === 1 ? "producto" : "productos"}
         </p>
@@ -119,8 +127,12 @@ export function ProductFilters({
 
       {filtered.length ? (
         <div className="product-grid">
-          {filtered.map((product) => (
-            <ProductCard product={product} key={product.slug} />
+          {filtered.map((product, index) => (
+            <ProductCard
+              product={product}
+              key={product.slug}
+              revealIndex={index}
+            />
           ))}
         </div>
       ) : (

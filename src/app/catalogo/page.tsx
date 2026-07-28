@@ -16,7 +16,7 @@ export default function CatalogPage() {
     <>
       <header className="page-hero">
         <div className="container page-hero__grid">
-          <div>
+          <div data-reveal>
             <span className="eyebrow">Catálogo VYVO</span>
             <h1>
               Encontrá la
@@ -24,7 +24,7 @@ export default function CatalogPage() {
               pieza que <span>habla por vos.</span>
             </h1>
           </div>
-          <div className="catalog-hero__aside">
+          <div className="catalog-hero__aside" data-reveal data-reveal-index="1">
             <p>
               Explorá toda la colección, compará caminos y recorré una compra
               demostrativa clara de principio a fin.
