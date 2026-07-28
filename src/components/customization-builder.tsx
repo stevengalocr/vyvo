@@ -19,6 +19,7 @@ export function CustomizationBuilder({
 }) {
   const { addItem } = useCart();
   const [step, setStep] = useState(1);
+  const [direction, setDirection] = useState<"forward" | "backward">("forward");
   const [completed, setCompleted] = useState(false);
   const [reference, setReference] = useState("");
   const [intent, setIntent] = useState("");
@@ -32,6 +33,7 @@ export function CustomizationBuilder({
   }
 
   function moveBack() {
+    setDirection("backward");
     setStep((current) => Math.max(1, current - 1));
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
@@ -39,6 +41,7 @@ export function CustomizationBuilder({
   function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (step < 3) {
+      setDirection("forward");
       setStep((current) => current + 1);
       window.scrollTo({ top: 0, behavior: "smooth" });
       return;
@@ -137,7 +140,11 @@ export function CustomizationBuilder({
 
           <form className="checkout-form custom-builder__form" onSubmit={onSubmit}>
             {step === 1 ? (
-              <fieldset>
+              <fieldset
+                className="customization-builder__panel"
+                data-step="1"
+                data-step-direction={direction}
+              >
                 <legend>¿Qué debe representar esta pieza?</legend>
                 <p>
                   Esta información mantiene las siguientes decisiones conectadas
@@ -198,7 +205,11 @@ export function CustomizationBuilder({
             ) : null}
 
             {step === 2 ? (
-              <fieldset>
+              <fieldset
+                className="customization-builder__panel"
+                data-step="2"
+                data-step-direction={direction}
+              >
                 <legend>Definí los detalles de {product.name}.</legend>
                 <p>
                   Son decisiones iniciales. Materiales, dimensiones y viabilidad
@@ -254,7 +265,11 @@ export function CustomizationBuilder({
             ) : null}
 
             {step === 3 ? (
-              <fieldset>
+              <fieldset
+                className="customization-builder__panel"
+                data-step="3"
+                data-step-direction={direction}
+              >
                 <legend>Revisá la dirección antes de agregarla.</legend>
                 <p>
                   El carrito conservará este brief localmente para demostrar el
@@ -268,7 +283,13 @@ export function CustomizationBuilder({
                       <div><dt>Objetivo</dt><dd>{intent}</dd></div>
                       <div><dt>Historia</dt><dd>{story}</dd></div>
                     </dl>
-                    <button type="button" onClick={() => setStep(1)}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDirection("backward");
+                        setStep(1);
+                      }}
+                    >
                       Editar intención
                     </button>
                   </div>
@@ -282,7 +303,13 @@ export function CustomizationBuilder({
                         </div>
                       ))}
                     </dl>
-                    <button type="button" onClick={() => setStep(2)}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setDirection("backward");
+                        setStep(2);
+                      }}
+                    >
                       Editar detalles
                     </button>
                   </div>

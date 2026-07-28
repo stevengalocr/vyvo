@@ -74,7 +74,7 @@ export default function CustomizePage() {
     <>
       <section className="customize-hero customize-hero--refined">
         <div className="container customize-hero__grid">
-          <div>
+          <div data-reveal>
             <span className="eyebrow">Personalizar · VYVO You</span>
             <h1>Tu historia. Una forma que todavía no existe.</h1>
             <p>
@@ -95,7 +95,11 @@ export default function CustomizePage() {
               <li><Icon name="shield" /> Aprobación en cada etapa</li>
             </ul>
           </div>
-          <div className="customize-hero__visual">
+          <div
+            className="customize-hero__visual"
+            data-reveal
+            data-reveal-index="1"
+          >
             <Image
               src="/products/shift/concept-primary.png"
               alt="Render conceptual de VYVO SHIFT sobre una mesa de diseño."
@@ -125,10 +129,12 @@ export default function CustomizePage() {
             </p>
           </div>
           <div className="customize-path-grid">
-            {paths.map((path) => (
+            {paths.map((path, index) => (
               <article
                 className={`customize-path customize-path--refined accent-${path.accent}`}
                 key={path.code}
+                data-reveal
+                data-reveal-index={index}
               >
                 <div className="customize-path__visual">
                   <Image
@@ -169,8 +175,8 @@ export default function CustomizePage() {
             </p>
           </div>
           <ol>
-            {process.map((step) => (
-              <li key={step.number}>
+            {process.map((step, index) => (
+              <li key={step.number} data-reveal data-reveal-index={index}>
                 <span>{step.number}</span>
                 <div><strong>{step.title}</strong><p>{step.copy}</p></div>
               </li>

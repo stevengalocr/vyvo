@@ -150,6 +150,12 @@ async function verifyPrimaryJourneys(context) {
   const activePersonalizationNavigation = await page
     .locator('.desktop-nav a[aria-current="page"]')
     .textContent();
+  const customizationStepBefore = await page
+    .locator(".custom-builder__form fieldset")
+    .evaluate((fieldset) => ({
+      step: fieldset.getAttribute("data-step"),
+      direction: fieldset.getAttribute("data-step-direction"),
+    }));
 
   await page.getByLabel("La pieza es").selectOption({ label: "Para mí" });
   await page
@@ -159,6 +165,12 @@ async function verifyPrimaryJourneys(context) {
     .getByLabel("Historia esencial")
     .fill("Una pieza modular que represente movimiento y tecnología.");
   await page.getByRole("button", { name: "Continuar" }).click();
+  const customizationStepAfter = await page
+    .locator(".custom-builder__form fieldset")
+    .evaluate((fieldset) => ({
+      step: fieldset.getAttribute("data-step"),
+      direction: fieldset.getAttribute("data-step-direction"),
+    }));
 
   await page
     .getByLabel("Paleta principal")
@@ -265,6 +277,8 @@ async function verifyPrimaryJourneys(context) {
     personalizationDestination,
     activePersonalizationNavigation:
       activePersonalizationNavigation?.trim() ?? null,
+    customizationStepBefore,
+    customizationStepAfter,
     customizationConfirmationVisible,
     configurationInCart,
     configurationDetailInCart,
@@ -586,6 +600,9 @@ const failures = results.filter((result) => {
       result.customizationPathCount !== 3 ||
       !result.personalizationDestination.endsWith("/personalizar/vyvo-shift") ||
       result.activePersonalizationNavigation !== "Personalizar" ||
+      result.customizationStepBefore.step !== "1" ||
+      result.customizationStepAfter.step !== "2" ||
+      result.customizationStepAfter.direction !== "forward" ||
       !result.customizationConfirmationVisible ||
       !result.configurationInCart ||
       !result.configurationDetailInCart ||
