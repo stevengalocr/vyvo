@@ -21,6 +21,7 @@ const validCheckout = {
     country: "CR",
   },
   paymentMethod: "sinpe",
+  idempotencyKey: "424ef6ac-5eba-4f3d-8d95-6b9d672b040f",
   items: [
     {
       productId: "14d10531-d6fc-45a9-9c74-1ff15c657001",
@@ -75,4 +76,38 @@ test("database order function is transactional, scoped and service-only", () => 
   assert.match(sql, /account_status = 'active'/i);
   assert.match(sql, /grant execute.*service_role/is);
   assert.match(sql, /revoke all.*public/is);
+});
+
+test("public storefront status check exposes only an active boolean", () => {
+  const sql = readFileSync(
+    new URL(
+      "../supabase/migrations/202607290002_add_storefront_status_check.sql",
+      import.meta.url,
+    ),
+    "utf8",
+  );
+
+  assert.match(sql, /returns boolean/i);
+  assert.match(sql, /security definer/i);
+  assert.match(sql, /set search_path = ''/i);
+  assert.match(sql, /account_status = 'active'/i);
+  assert.match(sql, /plan_status = 'active'/i);
+  assert.match(sql, /grant execute.*anon/is);
+  assert.doesNotMatch(sql, /owner_email|theme_config|custom_domain/i);
+});
+
+test("order retries are serialized and return the original result", () => {
+  const sql = readFileSync(
+    new URL(
+      "../supabase/migrations/202607290003_add_storefront_order_idempotency.sql",
+      import.meta.url,
+    ),
+    "utf8",
+  );
+
+  assert.match(sql, /primary key \(business_id, idempotency_key\)/i);
+  assert.match(sql, /pg_advisory_xact_lock/i);
+  assert.match(sql, /create_storefront_order\(p_business_id, p_payload\)/i);
+  assert.match(sql, /grant execute.*service_role/is);
+  assert.match(sql, /revoke all.*anon/is);
 });

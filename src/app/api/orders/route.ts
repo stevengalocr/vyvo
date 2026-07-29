@@ -46,7 +46,13 @@ export async function POST(request: Request) {
 
   const origin = request.headers.get("origin");
   const host = request.headers.get("host");
-  if (!origin || !host || new URL(origin).host !== host) {
+  let originHost: string | null = null;
+  try {
+    originHost = origin ? new URL(origin).host : null;
+  } catch {
+    originHost = null;
+  }
+  if (!originHost || !host || originHost !== host) {
     return errorResponse("Origen de solicitud no permitido.", 403);
   }
 
@@ -85,10 +91,14 @@ export async function POST(request: Request) {
         : {}),
     })),
   };
-  const { data, error } = await supabase.rpc("create_storefront_order", {
-    p_business_id: config.businessId,
-    p_payload: payload,
-  });
+  const { data, error } = await supabase.rpc(
+    "create_storefront_order_idempotent",
+    {
+      p_business_id: config.businessId,
+      p_idempotency_key: parsed.data.idempotencyKey,
+      p_payload: payload,
+    },
+  );
 
   if (error) {
     const unavailable =

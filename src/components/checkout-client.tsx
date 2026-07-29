@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { formatMoney } from "@/lib/commerce/cart";
 import { useCart } from "./cart-provider";
 import { Icon } from "./icon";
@@ -43,6 +43,7 @@ export function CheckoutClient() {
   const [paymentMethod, setPaymentMethod] =
     useState<PaymentMethod>("sinpe");
   const [submitError, setSubmitError] = useState("");
+  const idempotencyKey = useRef<string | null>(null);
   const isLive = mode === "bilbildin";
 
   function updateDraft(field: keyof CheckoutDraft, value: string) {
@@ -68,6 +69,7 @@ export function CheckoutClient() {
     }
 
     try {
+      idempotencyKey.current ??= crypto.randomUUID();
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -85,6 +87,7 @@ export function CheckoutClient() {
             country: "CR",
           },
           paymentMethod,
+          idempotencyKey: idempotencyKey.current,
           items: lines.map((line) => ({
             productId: line.product.id,
             quantity: line.quantity,

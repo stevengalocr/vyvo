@@ -26,16 +26,15 @@ const readBilbildinCatalog = unstable_cache(
   async (): Promise<StorefrontProduct[]> => {
     const config = getPublicBilbildinConfig(serverEnv);
     const supabase = createPublicBilbildinClient();
-    const { data: business, error: businessError } = await supabase
-      .from("businesses")
-      .select("id, account_status")
-      .eq("id", config.businessId)
-      .maybeSingle();
+    const { data: businessIsActive, error: businessError } =
+      await supabase.rpc("is_storefront_business_active", {
+        p_business_id: config.businessId,
+      });
 
     if (businessError) {
       throw new Error("No fue posible validar la tienda VYVO en Bilbildin.");
     }
-    if (!business || business.account_status !== "active") {
+    if (businessIsActive !== true) {
       throw new Error("La tienda VYVO todavía no está activa en Bilbildin.");
     }
 

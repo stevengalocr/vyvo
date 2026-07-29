@@ -78,11 +78,10 @@ VYVO / Next.js 16 en Vercel
   |
   |-- carrito local versionado
   |
-  |-- POST /api/checkout
+  |-- POST /api/orders
   |     `-- cliente privado Supabase, solo servidor
   |
-  |-- /checkout/confirmacion/[orderId]
-  |-- /tracking/[orderId]
+  |-- /checkout/confirmacion?pedido=[referencia firmada]
   |
   `-- Supabase BILBILDIN
         |-- businesses
@@ -110,7 +109,7 @@ Variables públicas:
 NEXT_PUBLIC_SITE_URL=https://vyvocr.com
 NEXT_PUBLIC_SUPABASE_URL=https://wgicaiphzwppnshagxve.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
-NEXT_PUBLIC_BUSINESS_ID=
+NEXT_PUBLIC_VYVO_BUSINESS_ID=14d10531-d6fc-45a9-9c74-1ff15c657099
 ```
 
 Variables privadas:
@@ -280,18 +279,17 @@ error, el cliente conserva sus productos y recibe un mensaje recuperable.
 
 ## 11. Confirmación y tracking
 
-La confirmación dejará de recibir un identificador demostrativo. Usará el UUID
-real y mostrará:
+La confirmación usa una referencia HMAC compuesta por UUID y firma. El UUID
+solo nunca habilita la consulta. La página muestra:
 
 - número de pedido;
 - productos y total;
 - método y estado de pago;
 - explicación de coordinación por WhatsApp;
-- enlace al tracking.
+- estado inicial de tracking.
 
-La ruta `/tracking/[orderId]` será un Server Component dinámico. Consultará
-pedido, líneas y eventos con `orderId + business_id`, ordenará los eventos de
-forma cronológica y no permitirá modificaciones.
+El Server Component consulta pedido, líneas y eventos con `orderId +
+business_id`, sin exponer la clave privada ni permitir modificaciones.
 
 Un pedido desconocido o de otro negocio responderá como no encontrado, sin
 confirmar que ese UUID existe.

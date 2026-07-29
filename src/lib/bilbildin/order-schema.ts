@@ -40,6 +40,7 @@ export const checkoutRequestSchema = z
       })
       .strict(),
     paymentMethod: z.enum(["sinpe", "transfer", "cash"]),
+    idempotencyKey: z.uuid(),
     items: z
       .array(
         z

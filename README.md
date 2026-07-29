@@ -1,25 +1,22 @@
 # VYVO Web
 
-Tienda editorial de VYVO construida con Next.js. Incluye landing, catálogo,
-nueve fichas de producto, carrito persistente, checkout guiado, confirmación,
-personalización, Drops, Club y páginas informativas.
+Tienda VYVO construida con Next.js 16, React 19 y TypeScript. Incluye landing,
+catálogo, fichas, personalización, carrito, checkout y confirmación de pedido.
+La administración permanece en BilBildin.
 
-La prioridad actual es una experiencia web sólida. El catálogo funciona con un
-proveedor local de demostración y no necesita Supabase, inventario, ERP ni un
-servicio de pagos para navegar o compilar.
+## Modos de operación
 
-## Stack
+- `BILBILDIN_ENABLED=false`: catálogo y compra demostrativos, sin persistencia.
+- `BILBILDIN_ENABLED=true`: catálogo, precios, stock, clientes y pedidos reales
+  desde BilBildin.
 
-- Next.js 16 App Router
-- React 19 y TypeScript estricto
-- CSS propio con Sora e Inter locales
-- Datos versionados y proveedor de comercio mock
-- Zod para validar entradas
-- Vercel como destino de despliegue
+El modo real falla de forma segura si faltan variables, el negocio no está
+activo o BilBildin no devuelve productos visibles. Nunca mezcla datos demo con
+pedidos reales.
 
-## Desarrollo local
+## Desarrollo
 
-Requisito recomendado: Node.js 22 LTS.
+Requisito: Node.js `>=20.9.0`.
 
 ```bash
 npm install
@@ -29,102 +26,84 @@ npm run dev
 
 Abrí `http://localhost:3000`.
 
-## Modelo de tienda
+## Variables de entorno
 
-`src/data/storefront.ts` construye la versión comercial de los nueve productos.
-Cada ficha ya contiene los campos que necesitará una tienda real:
+Configuración recomendada:
 
-- canal y visibilidad;
-- etapa comercial;
-- modalidad estándar, bajo pedido o drop;
-- precio, moneda e impuestos;
-- variantes y SKU;
-- referencia de inventario externo;
-- disponibilidad y cantidad;
-- política de backorder;
-- entrega, clase de envío y plazo;
-- estado de compra.
-
-El inventario permanece `untracked` y sin cantidades. Los precios actuales se
-usan exclusivamente para probar el recorrido y siempre aparecen como
-demostrativos. La web nunca los convierte en una promesa comercial.
-
-El contrato está en `src/types/commerce.ts` y la interfaz `CommerceProvider`
-permite sustituir el proveedor mock por un motor de inventario, ERP, API propia
-o backend sin cambiar las páginas del catálogo.
-
-```text
-UI de VYVO
-    ↓
-CommerceProvider
-    ├── mock local (actual)
-    ├── motor de inventario (futuro)
-    └── servicio de catálogo/backend (futuro)
+```bash
+NEXT_PUBLIC_SITE_URL=https://vyvocr.com
+BILBILDIN_ENABLED=false
+NEXT_PUBLIC_SUPABASE_URL=https://wgicaiphzwppnshagxve.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+NEXT_PUBLIC_VYVO_BUSINESS_ID=14d10531-d6fc-45a9-9c74-1ff15c657099
+SUPABASE_SECRET_KEY=
 ```
 
-## Formularios en modo demostración
+También se aceptan temporalmente:
 
-La lista de interés valida origen, tamaño, formato, consentimiento y datos.
-Después responde en modo `preview` y explica claramente que el correo no se
-guarda. Esto permite probar toda la usabilidad sin crear persistencia falsa.
-
-## Recorrido de compra
-
-1. La landing conduce al catálogo.
-2. La ficha permite agregar el producto al carrito.
-3. El carrito persiste únicamente `slug`, variante y cantidad en
-   `localStorage` versionado.
-4. El checkout solicita contacto y dirección solo en memoria.
-5. La revisión muestra pedido, entrega y método de pago demo.
-6. La confirmación limpia el carrito y genera una referencia local.
-
-No se solicitan datos bancarios, no se guarda información personal y no se
-crea una orden real.
-
-## Arquitectura
-
-```text
-src/
-  app/                    rutas, metadata, API y estados globales
-  components/             componentes visuales e interacción
-  data/products.ts        contenido de los nueve personajes
-  data/storefront.ts      campos comerciales simulados
-  types/commerce.ts       contrato para motores futuros
-  types/product.ts        contrato editorial del producto
-public/
-  brand/                  marca web temporal
-  landing/                composición hero conceptual
-  products/{slug}/        renders conceptuales originales
+```bash
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
+NEXT_PUBLIC_BUSINESS_ID=
 ```
 
-La carpeta `supabase/` conserva un prototipo previo como referencia, pero no
-forma parte del runtime ni es necesaria para desarrollar, probar o desplegar
-esta versión.
+Las claves `secret` o `service_role` son exclusivamente de servidor y nunca
+deben usar el prefijo `NEXT_PUBLIC_`.
 
-## Rutas
+## Integración BilBildin
 
-- `/`
-- `/catalogo`
-- `/colecciones/origins`
-- `/producto/[slug]`
-- `/carrito`
-- `/checkout`
-- `/checkout/confirmacion`
-- `/personalizar`
-- `/drops`
-- `/club`
-- `/politicas`, `/privacidad`, `/terminos`, `/cuidados`
+- Proyecto Supabase: `wgicaiphzwppnshagxve`
+- Negocio VYVO: `14d10531-d6fc-45a9-9c74-1ff15c657099`
+- Estado observado: `active` (cambió externamente después del alta)
+- Plan: `starter`
+- Dominio: `vyvocr.com`
+- Moneda: CRC
+- Catálogo: 9 productos, stock inicial 0
+- Pagos: SINPE, transferencia y efectivo contra entrega
 
-Origins 007 no tiene producto, ficha ni redirección.
+El catálogo se consulta con clave pública, siempre filtrado por negocio y
+estado visible, con caché de 60 segundos. El costo nunca se selecciona en el
+proveedor público.
+
+Los pedidos se crean mediante
+`public.create_storefront_order_idempotent(uuid, uuid, jsonb)`, que serializa
+reintentos y delega la transacción a
+`public.create_storefront_order(uuid, jsonb)`. El flujo:
+
+- solo puede ejecutarla `service_role`;
+- exige un negocio activo;
+- bloquea y valida inventario;
+- recalcula precios y costos dentro de PostgreSQL;
+- crea cliente, pedido, líneas, movimientos y tracking en una transacción;
+- devuelve el pedido original cuando se repite la misma llave de idempotencia;
+- mantiene el pago pendiente para coordinación privada con VYVO.
+
+La confirmación usa una referencia HMAC firmada. Conocer o modificar un UUID no
+permite consultar pedidos ajenos.
+
+## Activación
+
+1. Mantener `BILBILDIN_ENABLED=false`.
+2. Agregar todas las variables en Vercel para Production y Preview.
+3. Revisar catálogo, precios y costos en BilBildin.
+4. Confirmar o asociar el usuario administrador `vyvocr@gmail.com`.
+5. Definir stock real; el negocio ya figura activo.
+6. Cambiar `BILBILDIN_ENABLED=true`.
+7. Redesplegar y ejecutar las pruebas reales de catálogo y pedido.
+
+No debe activarse el modo real mientras el negocio siga `pending` o todo el
+inventario permanezca en cero.
 
 ## Seguridad
 
-- CSP, protección de framing, `nosniff`, política de referencia y permisos.
-- No existen rutas, formularios ni componentes administrativos en este proyecto.
-- El formulario público limita el tamaño, exige JSON, valida el origen y usa
-  un honeypot.
-- No se aceptan credenciales, pagos, archivos privados ni datos de inventario.
-- No hay secretos requeridos en cliente.
+- CSP, anti-framing, `nosniff`, políticas de referencia y permisos.
+- Sin rutas administrativas en esta aplicación.
+- Cliente privilegiado marcado `server-only`.
+- Validación Zod estricta, límite de cuerpo y protección de origen.
+- El navegador no envía precios, costos, totales ni `business_id`.
+- Todas las lecturas privadas usan `order.id + business_id`.
+- Las referencias personales de configuraciones se guardan únicamente dentro
+  del pedido y no se publican en catálogo.
 
 ## Calidad
 
@@ -133,49 +112,15 @@ npm run check
 npm run verify:browser
 ```
 
-Las pruebas cubren los nueve productos, SKU y slugs únicos, ausencia de Origins
-007, configuración demo, variantes, carrito, totales y referencias de
-inventario externo.
+Las pruebas cubren configuración, catálogo CRC, aislamiento del seed, carrito,
+stock cero, validación de checkout, referencias firmadas y permisos esperados
+de la función transaccional.
 
-## Movimiento y verificación visual
+## Documentación
 
-La animación acompaña la exploración de producto sin cambiar la identidad de
-tienda infantil. El hero destaca un personaje por vez, las entradas de
-contenido ocurren una sola vez y los controles comunican sus cambios de estado
-con transiciones breves.
-
-El movimiento funciona como mejora progresiva: el contenido permanece visible
-si JavaScript no carga y `prefers-reduced-motion` elimina desplazamientos,
-profundidad y revelados pendientes. Los efectos de hover que mueven elementos
-solo se aplican a punteros precisos.
-
-`npm run verify:browser` recorre landing, catálogo, fichas, personalización,
-Drops, carrito y checkout en escritorio y móvil. También valida menús,
-enlaces, consola, respuestas fallidas, overflow horizontal, flujo completo de
-compra y la ausencia de revelados pendientes con movimiento reducido.
-
-## Vercel
-
-1. Importar el repositorio.
-2. Usar Node.js 22.
-3. Definir `NEXT_PUBLIC_SITE_URL` para Preview y Production.
-4. Mantener analytics desactivado hasta elegir proveedor y consentimiento.
-5. Sustituir el proveedor demo por servicios comerciales cuando sus datos sean
-   reales.
-
-## Activos pendientes
-
-- Reemplazar `public/brand/vyvo-mark-placeholder.svg` con el SVG maestro.
-- Crear el hero maestro con los nueve personajes; el actual contiene cinco.
-- Crear hero móvil, Open Graph, favicon e iconos definitivos.
-- Sustituir renders por fotografía real cuando existan prototipos.
-- Confirmar información legal, contactos y condiciones comerciales.
-
-## Decisiones actuales
-
-- El carrito y checkout están activos únicamente en modo `demo`.
-- Los precios son explícitamente demostrativos y no existe cantidad publicada.
-- El checkout no pide tarjeta ni persiste información personal.
-- La administración pertenecerá al futuro sistema conectado, no a esta web.
-- No hay prueba social sin evidencia.
-- La integración de inventario es externa por contrato y se añadirá después.
+- Handoff operativo: `docs/integraciones/VYVO.md`
+- Seed auditable: `scripts/bilbildin/seed-vyvo.sql`
+- Migración de pedidos:
+  `supabase/migrations/202607290001_create_vyvo_storefront_order.sql`
+- Diseño:
+  `docs/superpowers/specs/2026-07-29-vyvo-bilbildin-integration-design.md`

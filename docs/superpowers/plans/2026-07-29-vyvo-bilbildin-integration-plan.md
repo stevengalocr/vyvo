@@ -6,7 +6,7 @@
 
 **Architecture:** A server-only `StorefrontProvider` selects the current local demo catalog or a cached Bilbildin adapter. The cart remains browser-local, while a same-origin checkout route validates and recreates every order from trusted Bilbildin rows before writing customers, orders, stock movements, and tracking. Activation is fail-closed and controlled by `BILBILDIN_ENABLED`.
 
-**Tech Stack:** Next.js 16.2.11 App Router, React 19.2.8, TypeScript 5.9.2, Zod 4.1.12, `@supabase/supabase-js` 2.111.0, Supabase PostgreSQL, Vercel.
+**Tech Stack:** Next.js 16.2.11 App Router, React 19.2.8, TypeScript 5.9.2, Zod 4.1.12, `@supabase/supabase-js` 2.109.0, Supabase PostgreSQL, Vercel.
 
 ## Global Constraints
 
@@ -111,7 +111,7 @@ test("new Supabase keys take priority over legacy keys", () => {
   const config = getPrivateBilbildinConfig({
     BILBILDIN_ENABLED: "true",
     NEXT_PUBLIC_SUPABASE_URL: "https://wgicaiphzwppnshagxve.supabase.co",
-    NEXT_PUBLIC_BUSINESS_ID: "14d10531-d6fc-45a9-9c74-1ff15c657099",
+    NEXT_PUBLIC_VYVO_BUSINESS_ID: "14d10531-d6fc-45a9-9c74-1ff15c657099",
     SUPABASE_SECRET_KEY: "sb_secret_preferred",
     SUPABASE_SERVICE_ROLE_KEY: "legacy",
   });
@@ -126,8 +126,8 @@ Expected: FAIL because `src/lib/bilbildin/config.ts` does not exist.
 
 - [ ] **Step 3: Install the exact Supabase SDK**
 
-Run: `npm install @supabase/supabase-js@2.111.0 --save-exact`  
-Expected: dependency and lockfile both record `2.111.0`.
+Run: `npm install @supabase/supabase-js@2.109.0 --save-exact`
+Expected: dependency and lockfile both record `2.109.0`, the latest release compatible with Node 20.
 
 - [ ] **Step 4: Implement strict configuration parsing**
 
@@ -153,7 +153,8 @@ export function getPublicBilbildinConfig(env: RuntimeEnv = process.env) {
     publishableKey:
       env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
       env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    businessId: env.NEXT_PUBLIC_BUSINESS_ID,
+    businessId:
+      env.NEXT_PUBLIC_VYVO_BUSINESS_ID ?? env.NEXT_PUBLIC_BUSINESS_ID,
   });
   if (!result.success) {
     throw new Error("Configuración pública de Bilbildin incompleta.");
@@ -179,7 +180,7 @@ NEXT_PUBLIC_SITE_URL=https://vyvocr.com
 BILBILDIN_ENABLED=false
 NEXT_PUBLIC_SUPABASE_URL=https://wgicaiphzwppnshagxve.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
-NEXT_PUBLIC_BUSINESS_ID=
+NEXT_PUBLIC_VYVO_BUSINESS_ID=
 SUPABASE_SECRET_KEY=
 ```
 
@@ -499,7 +500,7 @@ git commit -m "Connect storefront pages to active catalog"
 **Interfaces:**
 - Consumes: `CheckoutRequest`
 - Produces: `createBilbildinOrder(input, idempotencyKey): Promise<{ orderId: string; orderNumber: string }>`
-- Produces: `POST /api/checkout`
+- Produces: `POST /api/orders`
 
 - [ ] **Step 1: Write failing order tests**
 
@@ -599,7 +600,7 @@ git commit -m "Add trusted Bilbildin checkout service"
 
 **Interfaces:**
 - Consumes: `useCart().mode`, `configuration.paymentMethods`
-- Consumes: `POST /api/checkout`
+- Consumes: `POST /api/orders`
 - Produces: recoverable checkout states `idle | submitting | price_changed | error | complete`
 
 - [ ] **Step 1: Extend browser assertions before implementation**
@@ -845,7 +846,7 @@ BILBILDIN_ENABLED=false
 NEXT_PUBLIC_SUPABASE_URL=https://wgicaiphzwppnshagxve.supabase.co
 ```
 
-Set `NEXT_PUBLIC_BUSINESS_ID` to the exact UUID returned and verified in Task 2.
+Set `NEXT_PUBLIC_VYVO_BUSINESS_ID` to the exact UUID returned and verified in Task 2.
 Do not add a private key until the Bilbildin team supplies/approves it.
 
 - [ ] **Step 3: Deploy production in demo mode**
