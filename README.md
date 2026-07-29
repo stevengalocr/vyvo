@@ -31,7 +31,7 @@ Abrí `http://localhost:3000`.
 Configuración recomendada:
 
 ```bash
-NEXT_PUBLIC_SITE_URL=https://vyvocr.com
+NEXT_PUBLIC_SITE_URL=https://vyvo-six.vercel.app
 BILBILDIN_ENABLED=false
 NEXT_PUBLIC_SUPABASE_URL=https://wgicaiphzwppnshagxve.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
@@ -56,7 +56,8 @@ deben usar el prefijo `NEXT_PUBLIC_`.
 - Negocio VYVO: `14d10531-d6fc-45a9-9c74-1ff15c657099`
 - Estado observado: `active` (cambió externamente después del alta)
 - Plan: `starter`
-- Dominio: `vyvocr.com`
+- Producción temporal: `https://vyvo-six.vercel.app`
+- Dominio objetivo: `vyvocr.com` (pendiente de compra y conexión DNS)
 - Moneda: CRC
 - Catálogo: 9 productos, stock inicial 0
 - Pagos: SINPE, transferencia y efectivo contra entrega

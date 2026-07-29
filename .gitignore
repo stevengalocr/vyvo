@@ -30,3 +30,7 @@ Thumbs.db
 # coverage
 /coverage
 *.tsbuildinfo
+
+.vercel
+.env.local
+.env.*.local

@@ -2,7 +2,9 @@
 
 Fecha de preparación: 2026-07-29  
 Repositorio de tienda: `stevengalocr/vyvo`  
-Dominio: `https://vyvocr.com`  
+Producción temporal: `https://vyvo-six.vercel.app`
+
+Dominio objetivo: `https://vyvocr.com` (pendiente de compra y conexión DNS)
 Proyecto Supabase BilBildin: `wgicaiphzwppnshagxve`
 
 ## Negocio
@@ -15,7 +17,7 @@ Proyecto Supabase BilBildin: `wgicaiphzwppnshagxve`
 | Plan | `starter` |
 | Estado de cuenta | `active` (observado después del alta inicial `pending`) |
 | Estado de plan | `active` |
-| Dominio | `vyvocr.com` |
+| Dominio objetivo | `vyvocr.com` (pendiente de compra y DNS) |
 | Moneda / país | CRC / Costa Rica |
 | WhatsApp operativo | `+506 7287 4779` |
 | Pagos | SINPE, transferencia, efectivo contra entrega |
@@ -81,7 +83,7 @@ con la misma llave se serializan y devuelven el pedido original.
 Requeridas:
 
 ```bash
-NEXT_PUBLIC_SITE_URL=https://vyvocr.com
+NEXT_PUBLIC_SITE_URL=https://vyvo-six.vercel.app
 NEXT_PUBLIC_SUPABASE_URL=https://wgicaiphzwppnshagxve.supabase.co
 NEXT_PUBLIC_VYVO_BUSINESS_ID=14d10531-d6fc-45a9-9c74-1ff15c657099
 BILBILDIN_ENABLED=false
@@ -110,6 +112,8 @@ Ninguna clave privada debe publicarse en Git, documentación o variables
 - [x] `account_status` figura `active` en la verificación de base de datos.
 - [ ] Confirmar que el admin muestra VYVO aislado de otros tenants.
 - [ ] Avisar al equipo VYVO para activar `BILBILDIN_ENABLED=true`.
+- [ ] Comprar `vyvocr.com`, asociarlo al proyecto Vercel `vyvo` y validar DNS/SSL.
+- [ ] Cambiar `NEXT_PUBLIC_SITE_URL` a `https://vyvocr.com` y redesplegar.
 - [ ] Habilitar protección de contraseñas filtradas en Supabase Auth.
 
 ## Pruebas posteriores a la activación
