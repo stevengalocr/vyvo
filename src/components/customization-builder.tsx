@@ -47,7 +47,7 @@ export function CustomizationBuilder({
       return;
     }
 
-    if (!variant?.price) return;
+    if (!variant?.price || !product.commerce.purchasable) return;
 
     const configurationId = `cfg-${crypto.randomUUID()}`;
     const shortName =
@@ -334,8 +334,16 @@ export function CustomizationBuilder({
                   Atrás
                 </button>
               ) : <span />}
-              <button className="button button--purple" type="submit">
-                {step < 3 ? "Continuar" : "Agregar configuración al carrito"}
+              <button
+                className="button button--purple"
+                type="submit"
+                disabled={step === 3 && !product.commerce.purchasable}
+              >
+                {step < 3
+                  ? "Continuar"
+                  : product.commerce.purchasable
+                    ? "Agregar configuración al carrito"
+                    : "Disponible pronto"}
                 <Icon name={step < 3 ? "arrow" : "cart"} />
               </button>
             </div>

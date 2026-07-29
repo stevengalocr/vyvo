@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "@/components/icon";
 import { ProductCard } from "@/components/product-card";
-import { storefrontProducts } from "@/data/storefront";
+import { getStorefrontCatalog } from "@/lib/bilbildin/provider";
 
 export const metadata: Metadata = {
   title: "Origins — El inicio del universo VYVO",
@@ -12,7 +12,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/colecciones/origins" },
 };
 
-export default function OriginsPage() {
+export default async function OriginsPage() {
+  const catalog = await getStorefrontCatalog();
+
   return (
     <>
       <section className="collection-hero">
@@ -59,12 +61,12 @@ export default function OriginsPage() {
       <section className="section origins-sequence" id="personajes">
         <div className="container">
           <div className="sequence-line" aria-hidden="true">
-            {storefrontProducts.map((product) => (
+            {catalog.map((product) => (
               <span key={product.slug}>{product.originsNumber}</span>
             ))}
           </div>
           <div className="product-grid">
-            {storefrontProducts.map((product) => (
+            {catalog.map((product) => (
               <ProductCard product={product} key={product.slug} />
             ))}
           </div>

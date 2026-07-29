@@ -48,7 +48,11 @@ export function ProductCard({
         <p>{product.descriptor}</p>
         {product.commerce.price ? (
           <div className="product-card__price">
-            <span>Precio demo</span>
+            <span>
+              {product.commerce.inventory.availableQuantity === null
+                ? "Precio demo"
+                : "Precio"}
+            </span>
             <strong>{formatMoney(product.commerce.price)}</strong>
           </div>
         ) : null}

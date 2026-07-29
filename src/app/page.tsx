@@ -5,7 +5,7 @@ import { Icon } from "@/components/icon";
 import { ProductCard } from "@/components/product-card";
 import { SectionHeading } from "@/components/section-heading";
 import { WaitlistForm } from "@/components/waitlist-form";
-import { storefrontProducts } from "@/data/storefront";
+import { getStorefrontCatalog } from "@/lib/bilbildin/provider";
 
 const intents = [
   {
@@ -68,10 +68,12 @@ const faqs = [
   ],
 ] as const;
 
-export default function HomePage() {
+export default async function HomePage() {
+  const catalog = await getStorefrontCatalog();
+
   return (
     <>
-      <HeroShowcase products={storefrontProducts} />
+      <HeroShowcase products={catalog} />
 
       <section className="purchase-path">
         <div className="container purchase-path__grid">
@@ -156,7 +158,7 @@ export default function HomePage() {
             </Link>
           </div>
           <div className="product-grid product-grid--preview">
-            {storefrontProducts.slice(0, 6).map((product, index) => (
+            {catalog.slice(0, 6).map((product, index) => (
               <ProductCard
                 key={product.slug}
                 product={product}

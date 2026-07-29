@@ -17,14 +17,17 @@ import {
   normalizeCartItems,
   resolveCartLines,
 } from "@/lib/commerce/cart";
+import type { BilbildinMode } from "@/lib/bilbildin/config";
 import type {
   CartItem,
   CartConfiguration,
   CartLine,
   CartTotals,
+  StorefrontProduct,
 } from "@/types/commerce";
 
 type CartContextValue = {
+  mode: BilbildinMode;
   hydrated: boolean;
   items: CartItem[];
   lines: CartLine[];
@@ -43,11 +46,11 @@ type CartContextValue = {
 
 const CartContext = createContext<CartContextValue | null>(null);
 
-function loadStoredCart() {
+function loadStoredCart(catalog: StorefrontProduct[]) {
   if (typeof window === "undefined") return [];
   try {
     const stored = localStorage.getItem(CART_STORAGE_KEY);
-    return normalizeCartItems(stored ? JSON.parse(stored) : []);
+    return normalizeCartItems(stored ? JSON.parse(stored) : [], catalog);
   } catch {
     return [];
   }
@@ -57,8 +60,16 @@ function subscribeToHydration() {
   return () => undefined;
 }
 
-export function CartProvider({ children }: { children: ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>(loadStoredCart);
+export function CartProvider({
+  catalog,
+  mode,
+  children,
+}: {
+  catalog: StorefrontProduct[];
+  mode: BilbildinMode;
+  children: ReactNode;
+}) {
+  const [items, setItems] = useState<CartItem[]>(() => loadStoredCart(catalog));
   const hydrated = useSyncExternalStore(
     subscribeToHydration,
     () => true,
@@ -88,7 +99,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
           return normalizeCartItems([
             ...current,
             { id, slug, variantId, quantity, configuration },
-          ]);
+          ], catalog);
         }
         return current.map((item) =>
           item.id === id
@@ -103,7 +114,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         );
       });
     },
-    [],
+    [catalog],
   );
 
   const updateQuantity = useCallback(
@@ -134,7 +145,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const clearCart = useCallback(() => setItems([]), []);
-  const lines = useMemo(() => resolveCartLines(items), [items]);
+  const lines = useMemo(() => resolveCartLines(items, catalog), [catalog, items]);
   const totals = useMemo(() => calculateCartTotals(lines), [lines]);
   const itemCount = useMemo(
     () => items.reduce((total, item) => total + item.quantity, 0),
@@ -143,6 +154,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({
+      mode,
       hydrated,
       items,
       lines,
@@ -160,6 +172,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       itemCount,
       items,
       lines,
+      mode,
       removeItem,
       totals,
       updateQuantity,

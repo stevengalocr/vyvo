@@ -7,6 +7,8 @@ import { Footer } from "@/components/footer";
 import { Header } from "@/components/header";
 import { MotionController } from "@/components/motion-controller";
 import { siteConfig } from "@/lib/site";
+import { getStorefrontCatalog } from "@/lib/bilbildin/provider";
+import { getBilbildinMode } from "@/lib/bilbildin/config";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
@@ -40,13 +42,16 @@ export const viewport: Viewport = {
   colorScheme: "light",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  const catalog = await getStorefrontCatalog();
+  const commerceMode = getBilbildinMode(process.env);
+
   return (
     <html lang="es-CR" data-scroll-behavior="smooth">
       <body>
-        <CartProvider>
+        <CartProvider catalog={catalog} mode={commerceMode}>
           <a href="#contenido" className="skip-link">
             Saltar al contenido
           </a>

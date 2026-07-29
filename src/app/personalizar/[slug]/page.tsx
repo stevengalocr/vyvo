@@ -5,7 +5,7 @@ import {
   customizationProfiles,
   getCustomizationProfile,
 } from "@/data/customization";
-import { getStorefrontProduct } from "@/data/storefront";
+import { getStorefrontProduct } from "@/lib/bilbildin/provider";
 
 type CustomizationPageProps = {
   params: Promise<{ slug: string }>;
@@ -19,7 +19,7 @@ export async function generateMetadata({
   params,
 }: CustomizationPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = getStorefrontProduct(slug);
+  const product = await getStorefrontProduct(slug);
   const profile = getCustomizationProfile(slug);
   if (!product || !profile) return {};
 
@@ -35,7 +35,7 @@ export default async function CustomizationPage({
   params,
 }: CustomizationPageProps) {
   const { slug } = await params;
-  const product = getStorefrontProduct(slug);
+  const product = await getStorefrontProduct(slug);
   const profile = getCustomizationProfile(slug);
 
   if (!product || !profile || !product.customization) notFound();

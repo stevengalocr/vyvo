@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Icon } from "@/components/icon";
 import { ProductPurchasePanel } from "@/components/product-purchase-panel";
 import { WaitlistForm } from "@/components/waitlist-form";
-import { getStorefrontProduct } from "@/data/storefront";
+import { getStorefrontProduct } from "@/lib/bilbildin/provider";
 
 export const metadata: Metadata = {
   title: "Drops",
@@ -32,8 +32,8 @@ const rules = [
   },
 ] as const;
 
-export default function DropsPage() {
-  const abyss = getStorefrontProduct("vyvo-abyss");
+export default async function DropsPage() {
+  const abyss = await getStorefrontProduct("vyvo-abyss");
 
   return (
     <>

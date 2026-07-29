@@ -6,11 +6,14 @@ import { Icon } from "@/components/icon";
 import { ProductCard } from "@/components/product-card";
 import { ProductPurchasePanel } from "@/components/product-purchase-panel";
 import {
-  getStorefrontProduct,
   salesModelLabel,
   storefrontProducts,
   storefrontStageLabel,
 } from "@/data/storefront";
+import {
+  getStorefrontCatalog,
+  getStorefrontProduct,
+} from "@/lib/bilbildin/provider";
 import { formatMoney } from "@/lib/commerce/cart";
 
 type ProductPageProps = {
@@ -25,7 +28,7 @@ export async function generateMetadata({
   params,
 }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const product = getStorefrontProduct(slug);
+  const product = await getStorefrontProduct(slug);
   if (!product) return {};
   return {
     title: `${product.name} — Origins ${product.originsNumber}`,
@@ -39,10 +42,11 @@ export async function generateMetadata({
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
-  const product = getStorefrontProduct(slug);
+  const product = await getStorefrontProduct(slug);
   if (!product) notFound();
 
-  const related = storefrontProducts
+  const catalog = await getStorefrontCatalog();
+  const related = catalog
     .filter(
       (candidate) =>
         candidate.slug !== product.slug &&

@@ -1,6 +1,6 @@
 import {
-  getStorefrontProduct,
   storeConfiguration,
+  storefrontProducts,
 } from "@/data/storefront";
 import type {
   CartItem,
@@ -8,6 +8,7 @@ import type {
   CartLine,
   CartTotals,
   Money,
+  StorefrontProduct,
 } from "@/types/commerce";
 
 export const CART_STORAGE_KEY = "vyvo:cart:v1";
@@ -47,22 +48,31 @@ function normalizeConfiguration(value: unknown): CartConfiguration | undefined {
   return { id: raw.id, label: raw.label, details };
 }
 
-function money(amountMinor: number): Money {
+function findProduct(catalog: StorefrontProduct[], slug: string) {
+  return catalog.find((product) => product.slug === slug);
+}
+
+function money(amountMinor: number, currency: string): Money {
   return {
     amountMinor,
-    currency: storeConfiguration.defaultCurrency,
+    currency,
   };
 }
 
 export function formatMoney(value: Money) {
+  const fractionDigits = value.currency === "CRC" ? 0 : 2;
   return new Intl.NumberFormat("es-CR", {
     style: "currency",
     currency: value.currency,
-    minimumFractionDigits: 2,
+    minimumFractionDigits: fractionDigits,
+    maximumFractionDigits: fractionDigits,
   }).format(value.amountMinor / 100);
 }
 
-export function normalizeCartItems(value: unknown): CartItem[] {
+export function normalizeCartItems(
+  value: unknown,
+  catalog: StorefrontProduct[] = storefrontProducts,
+): CartItem[] {
   if (!Array.isArray(value)) return [];
 
   return value.flatMap((candidate) => {
@@ -77,11 +87,19 @@ export function normalizeCartItems(value: unknown): CartItem[] {
       return [];
     }
 
-    const product = getStorefrontProduct(raw.slug);
+    const product = findProduct(catalog, raw.slug);
     const variant = product?.commerce.variants.find(
       (item) => item.id === raw.variantId,
     );
-    if (!product || !variant || !variant.enabled || !variant.price) return [];
+    if (
+      !product ||
+      !variant ||
+      !variant.enabled ||
+      !variant.purchasable ||
+      !variant.price
+    ) {
+      return [];
+    }
     const configuration = normalizeConfiguration(raw.configuration);
 
     return [
@@ -99,9 +117,12 @@ export function normalizeCartItems(value: unknown): CartItem[] {
   });
 }
 
-export function resolveCartLines(items: CartItem[]): CartLine[] {
+export function resolveCartLines(
+  items: CartItem[],
+  catalog: StorefrontProduct[] = storefrontProducts,
+): CartLine[] {
   return items.flatMap((item) => {
-    const product = getStorefrontProduct(item.slug);
+    const product = findProduct(catalog, item.slug);
     const variant = product?.commerce.variants.find(
       (candidate) => candidate.id === item.variantId,
     );
@@ -113,26 +134,33 @@ export function resolveCartLines(items: CartItem[]): CartLine[] {
         product,
         variant,
         unitPrice: variant.price,
-        lineTotal: money(variant.price.amountMinor * item.quantity),
+        lineTotal: money(
+          variant.price.amountMinor * item.quantity,
+          variant.price.currency,
+        ),
       },
     ];
   });
 }
 
 export function calculateCartTotals(lines: CartLine[]): CartTotals {
+  const currency =
+    lines[0]?.unitPrice.currency ?? storeConfiguration.defaultCurrency;
   const subtotalMinor = lines.reduce(
     (total, line) => total + line.lineTotal.amountMinor,
     0,
   );
   const shippingMinor =
-    subtotalMinor === 0 ||
-    subtotalMinor >= storeConfiguration.shipping.freeFromAmountMinor
+    currency === "CRC"
       ? 0
-      : storeConfiguration.shipping.standardAmountMinor;
+      : subtotalMinor === 0 ||
+          subtotalMinor >= storeConfiguration.shipping.freeFromAmountMinor
+        ? 0
+        : storeConfiguration.shipping.standardAmountMinor;
 
   return {
-    subtotal: money(subtotalMinor),
-    shipping: money(shippingMinor),
-    total: money(subtotalMinor + shippingMinor),
+    subtotal: money(subtotalMinor, currency),
+    shipping: money(shippingMinor, currency),
+    total: money(subtotalMinor + shippingMinor, currency),
   };
 }

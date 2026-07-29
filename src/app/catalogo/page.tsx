@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Icon } from "@/components/icon";
 import { ProductFilters } from "@/components/product-filters";
-import { storefrontProducts } from "@/data/storefront";
+import { getStorefrontCatalog } from "@/lib/bilbildin/provider";
 
 export const metadata: Metadata = {
   title: "Catálogo",
@@ -11,7 +11,9 @@ export const metadata: Metadata = {
   alternates: { canonical: "/catalogo" },
 };
 
-export default function CatalogPage() {
+export default async function CatalogPage() {
+  const catalog = await getStorefrontCatalog();
+
   return (
     <>
       <header className="page-hero">
@@ -39,7 +41,7 @@ export default function CatalogPage() {
       </header>
       <section className="catalog-section">
         <div className="container">
-          <ProductFilters products={storefrontProducts} />
+          <ProductFilters products={catalog} />
         </div>
       </section>
       <section className="catalog-next">

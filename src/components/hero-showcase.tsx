@@ -7,21 +7,21 @@ import { formatMoney } from "@/lib/commerce/cart";
 import type { StorefrontProduct } from "@/types/commerce";
 import { Icon } from "./icon";
 
-const FAMILY_INDEX = 9;
-
 export function HeroShowcase({ products }: { products: StorefrontProduct[] }) {
+  const familyIndex = products.length;
+  const slideCount = products.length + 1;
   const [active, setActive] = useState(0);
   const [paused, setPaused] = useState(false);
   const [visible, setVisible] = useState(true);
   const heroRef = useRef<HTMLElement>(null);
 
-  const focusProduct = active === FAMILY_INDEX ? null : products[active];
+  const focusProduct = active === familyIndex ? null : products[active];
   const move = useCallback(
     (direction: number) => {
       setPaused(true);
-      setActive((current) => (current + direction + 10) % 10);
+      setActive((current) => (current + direction + slideCount) % slideCount);
     },
-    [],
+    [slideCount],
   );
 
   useEffect(() => {
@@ -32,11 +32,11 @@ export function HeroShowcase({ products }: { products: StorefrontProduct[] }) {
 
     const timer = window.setInterval(() => {
       if (!paused && visible && !document.hidden) {
-        setActive((current) => (current + 1) % 10);
+        setActive((current) => (current + 1) % slideCount);
       }
     }, 4800);
     return () => window.clearInterval(timer);
-  }, [paused, visible]);
+  }, [paused, slideCount, visible]);
 
   useEffect(() => {
     const node = heroRef.current;
@@ -124,7 +124,10 @@ export function HeroShowcase({ products }: { products: StorefrontProduct[] }) {
                   <p>{focusProduct.descriptor}</p>
                   {focusProduct.commerce.price ? (
                     <small>
-                      Demo · {formatMoney(focusProduct.commerce.price)}
+                      {focusProduct.commerce.inventory.availableQuantity === null
+                        ? "Demo · "
+                        : ""}
+                      {formatMoney(focusProduct.commerce.price)}
                     </small>
                   ) : null}
                 </div>
@@ -167,10 +170,10 @@ export function HeroShowcase({ products }: { products: StorefrontProduct[] }) {
           <button
             type="button"
             role="tab"
-            aria-selected={active === FAMILY_INDEX}
-            className={active === FAMILY_INDEX ? "is-active" : ""}
+            aria-selected={active === familyIndex}
+            className={active === familyIndex ? "is-active" : ""}
             onClick={() => {
-              setActive(FAMILY_INDEX);
+              setActive(familyIndex);
               setPaused(true);
             }}
           >

@@ -12,17 +12,19 @@ export function ProductPurchasePanel({
 }: {
   product: StorefrontProduct;
 }) {
-  const { addItem } = useCart();
+  const { addItem, mode } = useCart();
   const [added, setAdded] = useState(false);
   const variant = product.commerce.variants[0];
 
   if (!variant?.price) return null;
+  const isLive = mode === "bilbildin";
+  const unavailable = isLive && !product.commerce.purchasable;
 
   if (product.customization) {
     return (
       <div className="purchase-panel" data-purchase-state="configure">
         <div className="purchase-panel__price">
-          <span>Precio demostrativo base</span>
+          <span>{isLive ? "Precio base" : "Precio demostrativo base"}</span>
           <strong>{formatMoney(variant.price)}</strong>
         </div>
         <p>
@@ -34,7 +36,8 @@ export function ProductPurchasePanel({
             className="button button--purple"
             href={`/personalizar/${product.slug}`}
           >
-            Configurar {product.name} <Icon name="arrow" />
+            {unavailable ? "Explorar configuración" : `Configurar ${product.name}`}{" "}
+            <Icon name="arrow" />
           </Link>
         </div>
         <div className="purchase-panel__trust">
@@ -51,24 +54,31 @@ export function ProductPurchasePanel({
       data-purchase-state={added ? "added" : "idle"}
     >
       <div className="purchase-panel__price">
-        <span>Precio demostrativo</span>
+        <span>{isLive ? "Precio" : "Precio demostrativo"}</span>
         <strong>{formatMoney(variant.price)}</strong>
       </div>
       <p>
-        Sirve para probar el recorrido de compra. No representa una oferta ni
-        generará un cobro real.
+        {isLive
+          ? unavailable
+            ? "Esta pieza está visible, pero todavía no tiene inventario disponible."
+            : "La disponibilidad y el precio se validarán nuevamente al confirmar el pedido."
+          : "Sirve para probar el recorrido de compra. No representa una oferta ni generará un cobro real."}
       </p>
       <div className="purchase-panel__actions">
         <button
           className="button button--purple"
           type="button"
-          disabled={added}
+          disabled={added || unavailable}
           onClick={() => {
             addItem(product.slug, variant.id);
             setAdded(true);
           }}
         >
-          {added ? "Agregado al carrito" : "Agregar al carrito"}
+          {unavailable
+            ? "Disponible pronto"
+            : added
+              ? "Agregado al carrito"
+              : "Agregar al carrito"}
           <Icon name={added ? "check" : "cart"} />
         </button>
         {added ? (
@@ -78,8 +88,14 @@ export function ProductPurchasePanel({
         ) : null}
       </div>
       <div className="purchase-panel__trust">
-        <span><Icon name="shield" size={16} /> Sin cobro real</span>
-        <span><Icon name="package" size={16} /> Entrega simulada</span>
+        <span>
+          <Icon name="shield" size={16} />{" "}
+          {isLive ? "Pedido protegido" : "Sin cobro real"}
+        </span>
+        <span>
+          <Icon name="package" size={16} />{" "}
+          {isLive ? "Entrega por coordinar" : "Entrega simulada"}
+        </span>
       </div>
     </div>
   );
