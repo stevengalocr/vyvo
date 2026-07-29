@@ -11,7 +11,7 @@
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test tests/products.test.ts tests/motion.test.ts tests/bilbildin-config.test.ts tests/bilbildin-seed.test.ts",
+    "test": "tsx --test tests/products.test.ts tests/motion.test.ts tests/bilbildin-config.test.ts tests/bilbildin-seed.test.ts tests/bilbildin-catalog.test.ts",
     "verify:browser": "node scripts/verify-browser.mjs",
     "check": "npm run lint && npm run typecheck && npm run test && npm run build"
   },
