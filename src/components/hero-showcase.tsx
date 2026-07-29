@@ -40,7 +40,7 @@ export function HeroShowcase({
   const [showcase, setShowcase] = useState(createHeroShowcaseState);
   const [visible, setVisible] = useState(true);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-  const [stageImageFailed, setStageImageFailed] = useState(false);
+  const [failedStageSlug, setFailedStageSlug] = useState<string | null>(null);
   const [announcement, setAnnouncement] = useState("");
   const heroRef = useRef<HTMLElement>(null);
   const productTabRefs = useRef<Array<HTMLButtonElement | null>>([]);
@@ -50,6 +50,7 @@ export function HeroShowcase({
     showcase.selectedIndex === null
       ? null
       : (products[showcase.selectedIndex] ?? null);
+  const stageImageFailed = failedStageSlug === selectedProduct?.slug;
   const stageAssetSlug = selectedProduct?.slug.replace(/^vyvo-/, "");
   const stageSource = selectedProduct
     ? stageImageFailed
@@ -105,10 +106,6 @@ export function HeroShowcase({
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
-
-  useEffect(() => {
-    setStageImageFailed(false);
-  }, [selectedProduct?.slug]);
 
   const selectProduct = useCallback(
     (index: number) => {
@@ -207,7 +204,16 @@ export function HeroShowcase({
         </div>
 
         <div className="hero__visual">
-          <div className="hero__image-wrap hero__stage">
+          <div
+            className="hero__image-wrap hero__stage"
+            id="hero-character-stage"
+            role="tabpanel"
+            aria-label={
+              selectedProduct
+                ? `${selectedProduct.name}, personaje seleccionado`
+                : "Familia VYVO"
+            }
+          >
             <span className="concept-label">
               {selectedProduct ? "Personaje seleccionado" : "Familia Origins"}
             </span>
@@ -235,7 +241,7 @@ export function HeroShowcase({
                 className="hero__image"
                 onError={
                   selectedProduct && !stageImageFailed
-                    ? () => setStageImageFailed(true)
+                    ? () => setFailedStageSlug(selectedProduct.slug)
                     : undefined
                 }
               />
@@ -377,7 +383,11 @@ export function HeroShowcase({
         </button>
       </div>
 
-      <span className="sr-only" id="hero-character-stage" aria-live="polite">
+      <span
+        className="sr-only"
+        id="hero-character-announcement"
+        aria-live="polite"
+      >
         {announcement}
       </span>
     </section>
