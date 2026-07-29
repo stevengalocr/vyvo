@@ -19,6 +19,8 @@ type CheckoutDraft = {
   postalCode: string;
 };
 
+type PaymentMethod = "sinpe" | "transfer" | "cash";
+
 const emptyDraft: CheckoutDraft = {
   email: "",
   firstName: "",
@@ -34,16 +36,20 @@ const steps = ["Contacto", "Entrega", "Revisión"] as const;
 
 export function CheckoutClient() {
   const router = useRouter();
-  const { hydrated, lines, totals, itemCount, clearCart } = useCart();
+  const { hydrated, lines, totals, itemCount, clearCart, mode } = useCart();
   const [step, setStep] = useState(1);
   const [draft, setDraft] = useState<CheckoutDraft>(emptyDraft);
   const [finishing, setFinishing] = useState(false);
+  const [paymentMethod, setPaymentMethod] =
+    useState<PaymentMethod>("sinpe");
+  const [submitError, setSubmitError] = useState("");
+  const isLive = mode === "bilbildin";
 
   function updateDraft(field: keyof CheckoutDraft, value: string) {
     setDraft((current) => ({ ...current, [field]: value }));
   }
 
-  function onSubmit(event: FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (step < 3) {
       setStep((current) => current + 1);
@@ -52,9 +58,66 @@ export function CheckoutClient() {
     }
 
     setFinishing(true);
-    const orderId = `VYVO-DEMO-${Date.now().toString().slice(-6)}`;
-    clearCart();
-    router.push(`/checkout/confirmacion?pedido=${orderId}`);
+    setSubmitError("");
+
+    if (!isLive) {
+      const orderId = `VYVO-DEMO-${Date.now().toString().slice(-6)}`;
+      clearCart();
+      router.push(`/checkout/confirmacion?pedido=${orderId}`);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customer: {
+            name: `${draft.firstName} ${draft.lastName}`.trim(),
+            email: draft.email,
+            phone: draft.phone,
+          },
+          shippingAddress: {
+            address: draft.address,
+            city: draft.city,
+            province: draft.province,
+            postalCode: draft.postalCode,
+            country: "CR",
+          },
+          paymentMethod,
+          items: lines.map((line) => ({
+            productId: line.product.id,
+            quantity: line.quantity,
+            ...(line.configuration
+              ? { configuration: line.configuration }
+              : {}),
+          })),
+          website: "",
+        }),
+      });
+      const result = (await response.json()) as {
+        reference?: string;
+        error?: string;
+      };
+
+      if (!response.ok || !result.reference) {
+        throw new Error(
+          result.error ?? "No fue posible confirmar el pedido.",
+        );
+      }
+
+      clearCart();
+      router.push(
+        `/checkout/confirmacion?pedido=${encodeURIComponent(result.reference)}`,
+      );
+    } catch (error) {
+      setSubmitError(
+        error instanceof Error
+          ? error.message
+          : "No fue posible confirmar el pedido.",
+      );
+      setFinishing(false);
+    }
   }
 
   if (!hydrated) {
@@ -86,9 +149,15 @@ export function CheckoutClient() {
           <Icon name="chevron" /> Volver al carrito
         </Link>
         <div className="checkout-heading">
-          <span className="eyebrow">Checkout demostrativo</span>
+          <span className="eyebrow">
+            {isLive ? "Checkout VYVO" : "Checkout demostrativo"}
+          </span>
           <h1>Terminemos el recorrido.</h1>
-          <p>No se guardarán datos ni se procesará un pago real.</p>
+          <p>
+            {isLive
+              ? "Confirmá tus datos. VYVO te contactará para coordinar pago y entrega."
+              : "No se guardarán datos ni se procesará un pago real."}
+          </p>
         </div>
 
         <ol className="checkout-steps" aria-label="Progreso del checkout">
@@ -171,7 +240,11 @@ export function CheckoutClient() {
           {step === 2 ? (
             <fieldset>
               <legend>¿Dónde llegaría?</legend>
-              <p>La entrega es simulada y está limitada a Costa Rica.</p>
+              <p>
+                {isLive
+                  ? "La entrega se coordina dentro de Costa Rica."
+                  : "La entrega es simulada y está limitada a Costa Rica."}
+              </p>
               <div className="form-grid">
                 <label className="field field--full">
                   País
@@ -240,8 +313,14 @@ export function CheckoutClient() {
               <div className="shipping-option">
                 <Icon name="package" />
                 <div>
-                  <strong>Envío estándar demo</strong>
-                  <span>Entrega estimada de 3 a 7 días</span>
+                  <strong>
+                    {isLive ? "Entrega por coordinar" : "Envío estándar demo"}
+                  </strong>
+                  <span>
+                    {isLive
+                      ? "VYVO confirmará plazo y condiciones"
+                      : "Entrega estimada de 3 a 7 días"}
+                  </span>
                 </div>
                 <b>
                   {totals.shipping.amountMinor
@@ -255,7 +334,11 @@ export function CheckoutClient() {
           {step === 3 ? (
             <fieldset>
               <legend>Revisá antes de finalizar.</legend>
-              <p>Esta pantalla valida la experiencia; no crea una orden comercial.</p>
+              <p>
+                {isLive
+                  ? "Revisá los datos antes de enviar tu pedido a VYVO."
+                  : "Esta pantalla valida la experiencia; no crea una orden comercial."}
+              </p>
               <div className="review-block">
                 <div>
                   <span>Contacto</span>
@@ -268,20 +351,45 @@ export function CheckoutClient() {
                   <button type="button" onClick={() => setStep(2)}>Editar</button>
                 </div>
               </div>
+              {isLive ? (
+                <label className="field field--full">
+                  Forma de pago
+                  <select
+                    value={paymentMethod}
+                    onChange={(event) =>
+                      setPaymentMethod(event.target.value as PaymentMethod)
+                    }
+                  >
+                    <option value="sinpe">SINPE Móvil</option>
+                    <option value="transfer">Transferencia bancaria</option>
+                    <option value="cash">Efectivo contra entrega</option>
+                  </select>
+                </label>
+              ) : null}
               <div className="payment-demo">
                 <Icon name="shield" size={26} />
                 <div>
-                  <strong>Pago seguro · modo demostración</strong>
+                  <strong>
+                    {isLive
+                      ? "Pago coordinado directamente con VYVO"
+                      : "Pago seguro · modo demostración"}
+                  </strong>
                   <p>
-                    El proveedor de pagos se conectará después. No solicitamos
-                    números de tarjeta en esta versión.
+                    {isLive
+                      ? "No solicitamos datos bancarios en la web. VYVO se pondrá en contacto al recibir el pedido."
+                      : "El proveedor de pagos se conectará después. No solicitamos números de tarjeta en esta versión."}
                   </p>
                 </div>
-                <span>DEMO</span>
+                <span>{isLive ? "CRC" : "DEMO"}</span>
               </div>
             </fieldset>
           ) : null}
 
+          {submitError ? (
+            <p role="alert" className="form-feedback form-feedback--error">
+              {submitError}
+            </p>
+          ) : null}
           <div className="checkout-actions">
             {step > 1 ? (
               <button
@@ -297,7 +405,9 @@ export function CheckoutClient() {
                 ? "Continuar"
                 : finishing
                   ? "Finalizando…"
-                  : "Finalizar pedido de prueba"}
+                  : isLive
+                    ? "Confirmar pedido"
+                    : "Finalizar pedido de prueba"}
               {!finishing ? <Icon name="arrow" /> : null}
             </button>
           </div>
@@ -326,8 +436,20 @@ export function CheckoutClient() {
         </div>
         <dl>
           <div><dt>Subtotal</dt><dd>{formatMoney(totals.subtotal)}</dd></div>
-          <div><dt>Envío demo</dt><dd>{totals.shipping.amountMinor ? formatMoney(totals.shipping) : "Incluido"}</dd></div>
-          <div><dt>Total demo</dt><dd>{formatMoney(totals.total)}</dd></div>
+          <div>
+            <dt>{isLive ? "Entrega" : "Envío demo"}</dt>
+            <dd>
+              {isLive
+                ? "Por coordinar"
+                : totals.shipping.amountMinor
+                  ? formatMoney(totals.shipping)
+                  : "Incluido"}
+            </dd>
+          </div>
+          <div>
+            <dt>{isLive ? "Total de productos" : "Total demo"}</dt>
+            <dd>{formatMoney(totals.total)}</dd>
+          </div>
         </dl>
       </aside>
     </div>

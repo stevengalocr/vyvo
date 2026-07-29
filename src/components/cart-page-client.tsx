@@ -14,7 +14,9 @@ export function CartPageClient() {
     itemCount,
     updateQuantity,
     removeItem,
+    mode,
   } = useCart();
+  const isLive = mode === "bilbildin";
 
   if (!hydrated) {
     return (
@@ -33,7 +35,7 @@ export function CartPageClient() {
         <h1>El carrito está esperando una señal.</h1>
         <p>
           Explorá Origins y agregá productos para recorrer la experiencia de
-          compra demostrativa.
+          {isLive ? "compra." : "compra demostrativa."}
         </p>
         <Link href="/catalogo" className="button button--purple">
           Explorar catálogo <Icon name="arrow" />
@@ -47,7 +49,9 @@ export function CartPageClient() {
       <section className="cart-main" aria-labelledby="cart-title">
         <div className="cart-heading">
           <div>
-            <span className="eyebrow">Compra demostrativa</span>
+            <span className="eyebrow">
+              {isLive ? "Compra VYVO" : "Compra demostrativa"}
+            </span>
             <h1 id="cart-title">Tu carrito.</h1>
           </div>
           <span>{itemCount} {itemCount === 1 ? "pieza" : "piezas"}</span>
@@ -132,29 +136,43 @@ export function CartPageClient() {
       </section>
 
       <aside className="order-summary" aria-labelledby="summary-title">
-        <span className="demo-badge">Simulación · sin cobro</span>
+        <span className="demo-badge">
+          {isLive ? "Pedido seguro · CRC" : "Simulación · sin cobro"}
+        </span>
         <h2 id="summary-title">Resumen</h2>
         <dl>
           <div><dt>Subtotal</dt><dd>{formatMoney(totals.subtotal)}</dd></div>
           <div>
-            <dt>Envío demo</dt>
+            <dt>{isLive ? "Entrega" : "Envío demo"}</dt>
             <dd>
-              {totals.shipping.amountMinor
-                ? formatMoney(totals.shipping)
-                : "Incluido"}
+              {isLive
+                ? "Por coordinar"
+                : totals.shipping.amountMinor
+                  ? formatMoney(totals.shipping)
+                  : "Incluido"}
             </dd>
           </div>
           <div className="order-summary__total">
-            <dt>Total demo</dt><dd>{formatMoney(totals.total)}</dd>
+            <dt>{isLive ? "Total de productos" : "Total demo"}</dt>
+            <dd>{formatMoney(totals.total)}</dd>
           </div>
         </dl>
         <Link href="/checkout" className="button button--purple">
           Continuar al checkout <Icon name="arrow" />
         </Link>
         <ul className="summary-trust">
-          <li><Icon name="shield" /> No se procesará ningún pago</li>
-          <li><Icon name="lock" /> Tus datos no se almacenan</li>
-          <li><Icon name="package" /> Entrega y stock son simulados</li>
+          <li>
+            <Icon name="shield" />{" "}
+            {isLive ? "Precio validado al confirmar" : "No se procesará ningún pago"}
+          </li>
+          <li>
+            <Icon name="lock" />{" "}
+            {isLive ? "Datos enviados de forma segura" : "Tus datos no se almacenan"}
+          </li>
+          <li>
+            <Icon name="package" />{" "}
+            {isLive ? "Pago y entrega por coordinar" : "Entrega y stock son simulados"}
+          </li>
         </ul>
       </aside>
     </div>
