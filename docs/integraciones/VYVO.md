@@ -133,6 +133,10 @@ Ninguna clave privada debe publicarse en Git, documentación o variables
 - rechazo de precio, tenant o referencia manipulados.
 
 La producción conectada se validó con los nueve productos reales y precios en
-CRC. No se ejecutó una compra real porque el stock actual es cero; esa prueba
-debe realizarse después de cargar inventario y confirmar el acceso
-administrativo.
+CRC. Landing, catálogo, ficha, personalización, Drops, carrito y checkout no
+presentan lenguaje demostrativo en producción, errores de consola ni
+desbordamiento horizontal. Las fichas y configuraciones deshabilitan su acción
+final mientras BilBildin reporte stock cero.
+
+No se ejecutó una compra real porque el stock actual es cero; esa prueba debe
+realizarse después de cargar inventario en BilBildin.

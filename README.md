@@ -83,18 +83,18 @@ reintentos y delega la transacción a
 La confirmación usa una referencia HMAC firmada. Conocer o modificar un UUID no
 permite consultar pedidos ajenos.
 
-## Activación
+## Estado de activación
 
-1. Mantener `BILBILDIN_ENABLED=false`.
-2. Agregar todas las variables en Vercel para Production y Preview.
-3. Revisar catálogo, precios y costos en BilBildin.
-4. Confirmar o asociar el usuario administrador `vyvocr@gmail.com`.
-5. Definir stock real; el negocio ya figura activo.
-6. Cambiar `BILBILDIN_ENABLED=true`.
-7. Redesplegar y ejecutar las pruebas reales de catálogo y pedido.
+- [x] Negocio y plan aprobados en BilBildin.
+- [x] Variables de Supabase y Business ID verificadas en Vercel Production.
+- [x] `BILBILDIN_ENABLED=true` en Production.
+- [x] Catálogo real validado: nueve productos visibles y precios en CRC.
+- [x] Preview y desarrollo conservan el modo demo.
+- [ ] Cargar inventario real en BilBildin.
+- [ ] Ejecutar un pedido transaccional controlado después de cargar stock.
 
-No debe activarse el modo real mientras el negocio siga `pending` o todo el
-inventario permanezca en cero.
+Con inventario cero la producción permanece conectada, pero falla de forma
+segura: muestra el catálogo real y deshabilita todas las acciones de compra.
 
 ## Seguridad
 
@@ -114,9 +114,9 @@ npm run check
 npm run verify:browser
 ```
 
-Las pruebas cubren configuración, catálogo CRC, aislamiento del seed, carrito,
-stock cero, validación de checkout, referencias firmadas y permisos esperados
-de la función transaccional.
+Las 23 pruebas cubren configuración, catálogo CRC, aislamiento del seed,
+carrito, stock cero, copy por modo, validación de checkout, referencias firmadas
+y permisos esperados de la función transaccional.
 
 ## Documentación
 
