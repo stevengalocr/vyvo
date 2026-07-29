@@ -842,7 +842,7 @@ img {
 .hero {
   position: relative;
   min-height: 100svh;
-  overflow: hidden;
+  overflow: clip;
   padding: 94px 0 22px;
   background: var(--vyvo-white);
 }

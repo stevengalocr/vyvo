@@ -41,7 +41,6 @@ export function HeroShowcase({
   const [visible, setVisible] = useState(true);
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [failedStageSlug, setFailedStageSlug] = useState<string | null>(null);
-  const [announcement, setAnnouncement] = useState("");
   const heroRef = useRef<HTMLElement>(null);
   const productTabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
@@ -59,6 +58,9 @@ export function HeroShowcase({
     : "/landing/hero-family-concept-v1.png";
   const stageAccent =
     selectedProduct?.accent ?? focusProduct?.accent ?? "purple";
+  const announcement = selectedProduct
+    ? `${selectedProduct.name} seleccionado como protagonista.`
+    : "Familia VYVO seleccionada.";
 
   useEffect(() => {
     const media = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -115,14 +117,12 @@ export function HeroShowcase({
       setShowcase((current) =>
         selectHeroProduct(current, index, products.length),
       );
-      setAnnouncement(`${product.name} seleccionado como protagonista.`);
     },
     [products],
   );
 
   const selectFamily = useCallback(() => {
     setShowcase((current) => clearHeroSelection(current));
-    setAnnouncement("Familia VYVO seleccionada.");
   }, []);
 
   const move = useCallback(
@@ -387,6 +387,7 @@ export function HeroShowcase({
         className="sr-only"
         id="hero-character-announcement"
         aria-live="polite"
+        aria-atomic="true"
       >
         {announcement}
       </span>
