@@ -7,6 +7,10 @@ Producción temporal: `https://vyvo-six.vercel.app`
 Dominio objetivo: `https://vyvocr.com` (pendiente de compra y conexión DNS)
 Proyecto Supabase BilBildin: `wgicaiphzwppnshagxve`
 
+Estado de integración: negocio aprobado y producción conectada a BilBildin el
+2026-07-29. El catálogo real está activo; las compras permanecen bloqueadas de
+forma segura mientras el inventario sea cero.
+
 ## Negocio
 
 | Campo | Valor |
@@ -15,7 +19,7 @@ Proyecto Supabase BilBildin: `wgicaiphzwppnshagxve`
 | Nombre | VYVO |
 | Correo propietario | `vyvocr@gmail.com` |
 | Plan | `starter` |
-| Estado de cuenta | `active` (observado después del alta inicial `pending`) |
+| Estado de cuenta | `active` y aprobado |
 | Estado de plan | `active` |
 | Dominio objetivo | `vyvocr.com` (pendiente de compra y DNS) |
 | Moneda / país | CRC / Costa Rica |
@@ -86,7 +90,7 @@ Requeridas:
 NEXT_PUBLIC_SITE_URL=https://vyvo-six.vercel.app
 NEXT_PUBLIC_SUPABASE_URL=https://wgicaiphzwppnshagxve.supabase.co
 NEXT_PUBLIC_VYVO_BUSINESS_ID=14d10531-d6fc-45a9-9c74-1ff15c657099
-BILBILDIN_ENABLED=false
+BILBILDIN_ENABLED=true
 ```
 
 Usar uno de cada par, prefiriendo los nombres nuevos:
@@ -104,14 +108,14 @@ Ninguna clave privada debe publicarse en Git, documentación o variables
 
 ## Checklist para el equipo BilBildin
 
-- [ ] Revisar el negocio y sus nueve productos.
+- [x] Aprobar el negocio y revisar sus nueve productos.
 - [ ] Confirmar precios/costos preliminares.
 - [ ] Crear o asociar el administrador `vyvocr@gmail.com`.
 - [ ] Definir fecha/ciclo del plan si corresponde.
 - [ ] Cargar stock real en los productos habilitados.
 - [x] `account_status` figura `active` en la verificación de base de datos.
 - [ ] Confirmar que el admin muestra VYVO aislado de otros tenants.
-- [ ] Avisar al equipo VYVO para activar `BILBILDIN_ENABLED=true`.
+- [x] Activar `BILBILDIN_ENABLED=true` en producción.
 - [ ] Comprar `vyvocr.com`, asociarlo al proyecto Vercel `vyvo` y validar DNS/SSL.
 - [ ] Cambiar `NEXT_PUBLIC_SITE_URL` a `https://vyvocr.com` y redesplegar.
 - [ ] Habilitar protección de contraseñas filtradas en Supabase Auth.
@@ -128,5 +132,7 @@ Ninguna clave privada debe publicarse en Git, documentación o variables
 - confirmación accesible solo con referencia firmada;
 - rechazo de precio, tenant o referencia manipulados.
 
-No se ejecutó una compra real porque el stock inicial es cero. Esa prueba debe
-realizarse después de cargar inventario y confirmar el acceso administrativo.
+La producción conectada se validó con los nueve productos reales y precios en
+CRC. No se ejecutó una compra real porque el stock actual es cero; esa prueba
+debe realizarse después de cargar inventario y confirmar el acceso
+administrativo.

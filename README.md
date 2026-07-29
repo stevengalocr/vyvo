@@ -54,12 +54,13 @@ deben usar el prefijo `NEXT_PUBLIC_`.
 
 - Proyecto Supabase: `wgicaiphzwppnshagxve`
 - Negocio VYVO: `14d10531-d6fc-45a9-9c74-1ff15c657099`
-- Estado observado: `active` (cambió externamente después del alta)
+- Estado observado y aprobado: `active`
 - Plan: `starter`
+- Producción: `BILBILDIN_ENABLED=true`
 - Producción temporal: `https://vyvo-six.vercel.app`
 - Dominio objetivo: `vyvocr.com` (pendiente de compra y conexión DNS)
 - Moneda: CRC
-- Catálogo: 9 productos, stock inicial 0
+- Catálogo conectado: 9 productos visibles en CRC, stock actual 0
 - Pagos: SINPE, transferencia y efectivo contra entrega
 
 El catálogo se consulta con clave pública, siempre filtrado por negocio y
