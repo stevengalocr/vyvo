@@ -3,11 +3,23 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
+import type { BilbildinMode } from "@/lib/bilbildin/config";
 import { formatMoney } from "@/lib/commerce/cart";
+import { getCommerceExperience } from "@/lib/commerce/experience";
 import type { StorefrontProduct } from "@/types/commerce";
 import { Icon } from "./icon";
 
-export function HeroShowcase({ products }: { products: StorefrontProduct[] }) {
+export function HeroShowcase({
+  products,
+  mode,
+}: {
+  products: StorefrontProduct[];
+  mode: BilbildinMode;
+}) {
+  const experience = getCommerceExperience(mode);
+  const hasPurchasableProduct = products.some(
+    (product) => product.commerce.purchasable,
+  );
   const familyIndex = products.length;
   const slideCount = products.length + 1;
   const [active, setActive] = useState(0);
@@ -79,14 +91,16 @@ export function HeroShowcase({ products }: { products: StorefrontProduct[] }) {
           </p>
           <div className="hero__actions">
             <Link className="button button--purple" href="/catalogo">
-              Comprar Origins <Icon name="arrow" />
+              {hasPurchasableProduct ? "Comprar Origins" : "Explorar Origins"}{" "}
+              <Icon name="arrow" />
             </Link>
             <Link className="button button--ghost" href="/personalizar">
               Crear mi figura
             </Link>
           </div>
           <p className="hero__trust">
-            Compra demo <i /> Sin cobro real <i /> Flujo completo
+            {experience.hero.trust[0]} <i /> {experience.hero.trust[1]} <i />{" "}
+            {experience.hero.trust[2]}
           </p>
         </div>
 
@@ -124,9 +138,7 @@ export function HeroShowcase({ products }: { products: StorefrontProduct[] }) {
                   <p>{focusProduct.descriptor}</p>
                   {focusProduct.commerce.price ? (
                     <small>
-                      {focusProduct.commerce.inventory.availableQuantity === null
-                        ? "Demo · "
-                        : ""}
+                      {experience.hero.pricePrefix}
                       {formatMoney(focusProduct.commerce.price)}
                     </small>
                   ) : null}

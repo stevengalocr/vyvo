@@ -5,7 +5,9 @@ import { Icon } from "@/components/icon";
 import { ProductCard } from "@/components/product-card";
 import { SectionHeading } from "@/components/section-heading";
 import { WaitlistForm } from "@/components/waitlist-form";
+import { getBilbildinMode } from "@/lib/bilbildin/config";
 import { getStorefrontCatalog } from "@/lib/bilbildin/provider";
+import { getCommerceExperience } from "@/lib/commerce/experience";
 
 const intents = [
   {
@@ -38,18 +40,14 @@ const lines = [
   { code: "04", name: "One", copy: "Piezas únicas de mayor escala.", accent: "green" },
 ] as const;
 
-const process = [
+const productionSteps = [
   ["01", "Diseño", "Definimos forma, intención y límites antes de producir."],
   ["02", "Impresión", "Cada componente parte de un archivo y perfil controlados."],
   ["03", "Acabado", "Lijado, ajuste y ensamblaje hechos por manos humanas."],
   ["04", "Control", "Revisamos presencia, movimiento, piezas y empaque."],
 ] as const;
 
-const faqs = [
-  [
-    "¿Ya puedo recorrer una compra de Origins?",
-    "Sí. El catálogo, carrito y checkout funcionan en modo demostración. Los precios, el envío y la confirmación están identificados como simulados; no se genera ningún cobro ni pedido real.",
-  ],
+const generalFaqs = [
   [
     "¿Qué significa personalizar una figura?",
     "Depende de la línea. SHIFT trabaja con módulos; ARENA con disciplina, uniforme y número; NEXO parte de rasgos de una mascota. Cada flujo tiene límites y una aprobación propia.",
@@ -70,10 +68,16 @@ const faqs = [
 
 export default async function HomePage() {
   const catalog = await getStorefrontCatalog();
+  const mode = getBilbildinMode(process.env);
+  const experience = getCommerceExperience(mode);
+  const faqs = [
+    ["¿Ya puedo recorrer una compra de Origins?", experience.home.purchaseFaq],
+    ...generalFaqs,
+  ];
 
   return (
     <>
-      <HeroShowcase products={catalog} />
+      <HeroShowcase products={catalog} mode={mode} />
 
       <section className="purchase-path">
         <div className="container purchase-path__grid">
@@ -83,11 +87,11 @@ export default async function HomePage() {
           </div>
           <div>
             <span>02</span>
-            <p><strong>Armá tu carrito</strong>Probá cantidades y revisá el resumen.</p>
+            <p><strong>Armá tu carrito</strong>{experience.home.cartStep}</p>
           </div>
           <div>
             <span>03</span>
-            <p><strong>Completá el checkout</strong>Sin cobro ni almacenamiento de datos.</p>
+            <p><strong>Completá el checkout</strong>{experience.home.checkoutStep}</p>
           </div>
         </div>
       </section>
@@ -322,7 +326,7 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="process-grid">
-            {process.map(([number, title, copy]) => (
+            {productionSteps.map(([number, title, copy]) => (
               <article key={number} data-reveal data-reveal-index={Number(number) - 1}>
                 <span>{number}</span>
                 <h3>{title}</h3>

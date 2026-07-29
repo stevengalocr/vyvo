@@ -14,7 +14,9 @@ import {
   getStorefrontCatalog,
   getStorefrontProduct,
 } from "@/lib/bilbildin/provider";
+import { getBilbildinMode } from "@/lib/bilbildin/config";
 import { formatMoney } from "@/lib/commerce/cart";
+import { getCommerceExperience } from "@/lib/commerce/experience";
 
 type ProductPageProps = {
   params: Promise<{ slug: string }>;
@@ -45,6 +47,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const product = await getStorefrontProduct(slug);
   if (!product) notFound();
 
+  const experience = getCommerceExperience(getBilbildinMode(process.env));
   const catalog = await getStorefrontCatalog();
   const related = catalog
     .filter(
@@ -93,10 +96,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <span />
               <div>
                 <strong>{storefrontStageLabel(product.commerce.stage)}</strong>
-                <p>
-                  Precio, disponibilidad y entrega están preparados como campos,
-                  pendientes de sus fuentes reales.
-                </p>
+                <p>{experience.product.sourceStatus}</p>
               </div>
             </div>
             <dl className="pdp-commerce-summary" aria-label="Estado de la tienda">
@@ -108,13 +108,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 <dt>Precio</dt>
                 <dd>
                   {product.commerce.price
-                    ? `${formatMoney(product.commerce.price)} · demo`
+                    ? `${formatMoney(product.commerce.price)}${experience.product.priceSuffix}`
                     : "Por confirmar"}
                 </dd>
               </div>
               <div>
                 <dt>Disponibilidad</dt>
-                <dd>Sincronización pendiente</dd>
+                <dd>
+                  {product.commerce.purchasable
+                    ? experience.product.availableStatus
+                    : experience.product.unavailableStatus}
+                </dd>
               </div>
               <div>
                 <dt>SKU</dt>
@@ -126,7 +130,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <ProductPurchasePanel product={product} />
             <p className="pdp-security">
               <Icon name="shield" size={16} />
-              La demostración no solicita datos bancarios ni crea pedidos reales.
+              {experience.product.security}
             </p>
           </div>
         </div>
@@ -149,7 +153,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
             <div>
               <dt>Disponibilidad</dt>
-              <dd>Fuente externa pendiente de conexión</dd>
+              <dd>
+                {product.commerce.purchasable
+                  ? experience.product.availableDetails
+                  : experience.product.unavailableDetails}
+              </dd>
             </div>
             <div>
               <dt>Empaque objetivo</dt>

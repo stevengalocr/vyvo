@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
 import { CartPageClient } from "@/components/cart-page-client";
+import { getBilbildinMode } from "@/lib/bilbildin/config";
+import { getCommerceExperience } from "@/lib/commerce/experience";
 
-export const metadata: Metadata = {
-  title: "Carrito",
-  description: "Revisá tu selección VYVO antes de continuar al checkout demostrativo.",
-  robots: { index: false, follow: false },
-};
+export function generateMetadata(): Metadata {
+  const experience = getCommerceExperience(getBilbildinMode(process.env));
+  return {
+    title: "Carrito",
+    description: experience.metadata.cartDescription,
+    robots: { index: false, follow: false },
+  };
+}
 
 export default function CartPage() {
   return (

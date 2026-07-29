@@ -1,5 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { getProductBySlug } from "@/data/products";
+import { getBilbildinMode } from "@/lib/bilbildin/config";
+import { getCommerceExperience } from "@/lib/commerce/experience";
 import { waitlistSchema } from "@/lib/validation";
 
 const MAX_BODY_BYTES = 5_000;
@@ -15,6 +17,7 @@ function sameOrigin(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const experience = getCommerceExperience(getBilbildinMode(process.env));
   if (!sameOrigin(request)) {
     return NextResponse.json({ message: "Origen no permitido." }, { status: 403 });
   }
@@ -57,8 +60,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json(
     {
       mode: "preview",
-      message:
-        "Modo demostración: validamos el flujo, pero todavía no guardamos tu correo.",
+      message: experience.waitlistResponse,
     },
     { status: 202 },
   );

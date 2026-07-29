@@ -5,7 +5,9 @@ import {
   customizationProfiles,
   getCustomizationProfile,
 } from "@/data/customization";
+import { getBilbildinMode } from "@/lib/bilbildin/config";
 import { getStorefrontProduct } from "@/lib/bilbildin/provider";
+import { getCommerceExperience } from "@/lib/commerce/experience";
 
 type CustomizationPageProps = {
   params: Promise<{ slug: string }>;
@@ -22,10 +24,11 @@ export async function generateMetadata({
   const product = await getStorefrontProduct(slug);
   const profile = getCustomizationProfile(slug);
   if (!product || !profile) return {};
+  const experience = getCommerceExperience(getBilbildinMode(process.env));
 
   return {
     title: profile.title,
-    description: `Prepará una configuración demostrativa de ${product.name} y revisala en el carrito VYVO.`,
+    description: `${experience.customization.metadataPrefix} ${product.name} y revisala en el carrito VYVO.`,
     alternates: { canonical: `/personalizar/${slug}` },
     robots: { index: false, follow: true },
   };

@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Icon } from "@/components/icon";
 import { ProductFilters } from "@/components/product-filters";
+import { getBilbildinMode } from "@/lib/bilbildin/config";
 import { getStorefrontCatalog } from "@/lib/bilbildin/provider";
+import { getCommerceExperience } from "@/lib/commerce/experience";
 
 export const metadata: Metadata = {
   title: "Catálogo",
@@ -13,6 +15,7 @@ export const metadata: Metadata = {
 
 export default async function CatalogPage() {
   const catalog = await getStorefrontCatalog();
+  const experience = getCommerceExperience(getBilbildinMode(process.env));
 
   return (
     <>
@@ -28,13 +31,12 @@ export default async function CatalogPage() {
           </div>
           <div className="catalog-hero__aside" data-reveal data-reveal-index="1">
             <p>
-              Explorá toda la colección, compará caminos y recorré una compra
-              demostrativa clara de principio a fin.
+              {experience.catalog.intro}
             </p>
             <ul>
               <li><Icon name="check" /> 9 personajes originales</li>
               <li><Icon name="check" /> Opciones personalizables</li>
-              <li><Icon name="shield" /> Checkout sin cobro real</li>
+              <li><Icon name="shield" /> {experience.catalog.checkoutBenefit}</li>
             </ul>
           </div>
         </div>

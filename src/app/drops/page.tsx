@@ -4,7 +4,9 @@ import Link from "next/link";
 import { Icon } from "@/components/icon";
 import { ProductPurchasePanel } from "@/components/product-purchase-panel";
 import { WaitlistForm } from "@/components/waitlist-form";
+import { getBilbildinMode } from "@/lib/bilbildin/config";
 import { getStorefrontProduct } from "@/lib/bilbildin/provider";
+import { getCommerceExperience } from "@/lib/commerce/experience";
 
 export const metadata: Metadata = {
   title: "Drops",
@@ -34,6 +36,8 @@ const rules = [
 
 export default async function DropsPage() {
   const abyss = await getStorefrontProduct("vyvo-abyss");
+  const experience = getCommerceExperience(getBilbildinMode(process.env));
+  const canPurchase = abyss?.commerce.purchasable === true;
 
   return (
     <>
@@ -66,14 +70,14 @@ export default async function DropsPage() {
             </p>
             <div className="hero__actions">
               <a href="#comprar" className="button button--light">
-                Recorrer compra demo <Icon name="arrow" />
+                {experience.drops.primaryAction} <Icon name="arrow" />
               </a>
               <a href="#alerta" className="button button--ghost-light">
                 Seguir el lanzamiento
               </a>
             </div>
             <p className="drops-hero__micro">
-              La edición, el precio final y la fecha permanecen por confirmar.
+              {experience.drops.microcopy}
             </p>
           </div>
         </div>
@@ -100,17 +104,21 @@ export default async function DropsPage() {
         <section className="section drop-purchase" id="comprar">
           <div className="container drop-purchase__grid">
             <div data-reveal>
-              <span className="eyebrow">Probá el recorrido</span>
-              <h2>Sentí cómo sería entrar al primer drop.</h2>
+              <span className="eyebrow">{experience.drops.purchaseEyebrow}</span>
+              <h2>
+                {canPurchase
+                  ? experience.drops.availableTitle
+                  : experience.drops.unavailableTitle}
+              </h2>
               <p>
-                Agregá ABYSS al carrito y completá el checkout demostrativo. No
-                se reserva inventario, no se procesa un pago y no se crea una
-                orden real.
+                {canPurchase
+                  ? experience.drops.availableCopy
+                  : experience.drops.unavailableCopy}
               </p>
               <ul className="check-list">
-                <li><Icon name="check" /> Total y envío claramente simulados</li>
-                <li><Icon name="check" /> Sin números de tarjeta</li>
-                <li><Icon name="check" /> Confirmación de prueba</li>
+                {experience.drops.benefits.map((benefit) => (
+                  <li key={benefit}><Icon name="check" /> {benefit}</li>
+                ))}
               </ul>
             </div>
             <ProductPurchasePanel product={abyss} />

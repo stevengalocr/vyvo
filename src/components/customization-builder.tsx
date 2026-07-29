@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import type { CustomizationProfile } from "@/data/customization";
+import { getCommerceExperience } from "@/lib/commerce/experience";
 import type { StorefrontProduct } from "@/types/commerce";
 import { useCart } from "./cart-provider";
 import { Icon } from "./icon";
@@ -17,7 +18,8 @@ export function CustomizationBuilder({
   product: StorefrontProduct;
   profile: CustomizationProfile;
 }) {
-  const { addItem } = useCart();
+  const { addItem, mode } = useCart();
+  const experience = getCommerceExperience(mode);
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState<"forward" | "backward">("forward");
   const [completed, setCompleted] = useState(false);
@@ -80,8 +82,7 @@ export function CustomizationBuilder({
           <span className="eyebrow">Configuración preparada</span>
           <h1>Tu {product.name} ya tiene una dirección clara.</h1>
           <p>
-            Guardamos esta configuración únicamente en el carrito de este
-            navegador. No se envió información ni se creó una orden real.
+            {experience.customization.success}
           </p>
           <dl>
             <div><dt>Referencia local</dt><dd>{reference}</dd></div>
@@ -272,8 +273,7 @@ export function CustomizationBuilder({
               >
                 <legend>Revisá la dirección antes de agregarla.</legend>
                 <p>
-                  El carrito conservará este brief localmente para demostrar el
-                  recorrido completo.
+                  {experience.customization.review}
                 </p>
                 <div className="custom-builder__review">
                   <div>
@@ -317,8 +317,7 @@ export function CustomizationBuilder({
                 <label className="consent-check custom-builder__consent">
                   <input type="checkbox" required />
                   <span>
-                    Entiendo que es una configuración demostrativa, no una
-                    cotización ni una orden de producción.
+                    {experience.customization.consent}
                   </span>
                 </label>
               </fieldset>

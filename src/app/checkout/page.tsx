@@ -1,11 +1,16 @@
 import type { Metadata } from "next";
 import { CheckoutClient } from "@/components/checkout-client";
+import { getBilbildinMode } from "@/lib/bilbildin/config";
+import { getCommerceExperience } from "@/lib/commerce/experience";
 
-export const metadata: Metadata = {
-  title: "Checkout demostrativo",
-  description: "Completá el recorrido de compra VYVO sin procesar un pago real.",
-  robots: { index: false, follow: false },
-};
+export function generateMetadata(): Metadata {
+  const experience = getCommerceExperience(getBilbildinMode(process.env));
+  return {
+    title: experience.metadata.checkoutTitle,
+    description: experience.metadata.checkoutDescription,
+    robots: { index: false, follow: false },
+  };
+}
 
 export default function CheckoutPage() {
   return (

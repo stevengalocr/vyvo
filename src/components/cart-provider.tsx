@@ -81,7 +81,7 @@ export function CartProvider({
     try {
       localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(items));
     } catch {
-      // La compra demo sigue funcionando en memoria si Storage está bloqueado.
+      // El carrito sigue funcionando en memoria si Storage está bloqueado.
     }
   }, [hydrated, items]);
 
