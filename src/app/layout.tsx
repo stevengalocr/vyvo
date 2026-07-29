@@ -42,6 +42,8 @@ export const viewport: Viewport = {
   colorScheme: "light",
 };
 
+export const revalidate = 60;
+
 export default async function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {

@@ -29,3 +29,25 @@ test("demo commerce clearly states that it does not create a real order", () => 
   assert.match(copy, /demostrativ[oa]/i);
   assert.match(copy, /no (?:se )?crea (?:ningún )?pedido real/i);
 });
+
+test("connected cart and checkout explain the real data flow without demo copy", () => {
+  const experience = getCommerceExperience("bilbildin") as ReturnType<
+    typeof getCommerceExperience
+  > & {
+    cart: { emptyDescription: string };
+    checkout: { contactPrivacy: string };
+  };
+
+  assert.equal(
+    experience.cart.emptyDescription,
+    "Explorá el catálogo y agregá productos para recorrer la experiencia de compra.",
+  );
+  assert.equal(
+    experience.checkout.contactPrivacy,
+    "Usaremos estos datos únicamente para coordinar tu pedido.",
+  );
+  assert.doesNotMatch(
+    `${experience.cart.emptyDescription} ${experience.checkout.contactPrivacy}`,
+    /simulaci[oó]n|decompra/i,
+  );
+});

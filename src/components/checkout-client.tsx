@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState, type FormEvent } from "react";
 import { formatMoney } from "@/lib/commerce/cart";
+import { getCommerceExperience } from "@/lib/commerce/experience";
 import { useCart } from "./cart-provider";
 import { Icon } from "./icon";
 
@@ -45,6 +46,7 @@ export function CheckoutClient() {
   const [submitError, setSubmitError] = useState("");
   const idempotencyKey = useRef<string | null>(null);
   const isLive = mode === "bilbildin";
+  const experience = getCommerceExperience(mode);
 
   function updateDraft(field: keyof CheckoutDraft, value: string) {
     setDraft((current) => ({ ...current, [field]: value }));
@@ -189,7 +191,7 @@ export function CheckoutClient() {
           {step === 1 ? (
             <fieldset>
               <legend>¿Quién recibe la señal?</legend>
-              <p>Usaremos estos datos únicamente durante esta simulación.</p>
+              <p>{experience.checkout.contactPrivacy}</p>
               <div className="form-grid">
                 <label className="field field--full">
                   Correo electrónico

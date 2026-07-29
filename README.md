@@ -60,7 +60,10 @@ deben usar el prefijo `NEXT_PUBLIC_`.
 - Producción temporal: `https://vyvo-six.vercel.app`
 - Dominio objetivo: `vyvocr.com` (pendiente de compra y conexión DNS)
 - Moneda: CRC
-- Catálogo conectado: 9 productos visibles en CRC, stock actual 0
+- Catálogo conectado: 9 productos visibles en CRC, stock 10 por producto
+- Inventario total: 90 unidades, con movimientos de reposición auditados
+- Administrador asociado: `vyvocr@gmail.com`, correo confirmado
+- Configuración BilBildin: identidad VYVO y URL `https://vyvocr.com`
 - Pagos: SINPE, transferencia y efectivo contra entrega
 
 El catálogo se consulta con clave pública, siempre filtrado por negocio y
@@ -90,11 +93,12 @@ permite consultar pedidos ajenos.
 - [x] `BILBILDIN_ENABLED=true` en Production.
 - [x] Catálogo real validado: nueve productos visibles y precios en CRC.
 - [x] Preview y desarrollo conservan el modo demo.
-- [ ] Cargar inventario real en BilBildin.
-- [ ] Ejecutar un pedido transaccional controlado después de cargar stock.
+- [x] Inventario cargado: diez unidades por producto, 90 en total.
+- [ ] Ejecutar un pedido transaccional controlado con datos acordados.
 
-Con inventario cero la producción permanece conectada, pero falla de forma
-segura: muestra el catálogo real y deshabilita todas las acciones de compra.
+La producción ya recibe catálogo, precios y stock desde BilBildin. Las acciones
+de compra están habilitadas; el pago permanece pendiente para coordinación
+privada con VYVO.
 
 ## Seguridad
 
@@ -114,7 +118,7 @@ npm run check
 npm run verify:browser
 ```
 
-Las 23 pruebas cubren configuración, catálogo CRC, aislamiento del seed,
+Las 24 pruebas cubren configuración, catálogo CRC, aislamiento del seed,
 carrito, stock cero, copy por modo, validación de checkout, referencias firmadas
 y permisos esperados de la función transaccional.
 

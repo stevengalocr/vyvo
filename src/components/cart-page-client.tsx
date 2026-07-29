@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { formatMoney, MAX_ITEM_QUANTITY } from "@/lib/commerce/cart";
+import { getCommerceExperience } from "@/lib/commerce/experience";
 import { useCart } from "./cart-provider";
 import { Icon } from "./icon";
 
@@ -17,6 +18,7 @@ export function CartPageClient() {
     mode,
   } = useCart();
   const isLive = mode === "bilbildin";
+  const experience = getCommerceExperience(mode);
 
   if (!hydrated) {
     return (
@@ -33,10 +35,7 @@ export function CartPageClient() {
         <span className="empty-cart__icon"><Icon name="cart" size={32} /></span>
         <span className="eyebrow">Tu selección</span>
         <h1>El carrito está esperando una señal.</h1>
-        <p>
-          Explorá Origins y agregá productos para recorrer la experiencia de
-          {isLive ? "compra." : "compra demostrativa."}
-        </p>
+        <p>{experience.cart.emptyDescription}</p>
         <Link href="/catalogo" className="button button--purple">
           Explorar catálogo <Icon name="arrow" />
         </Link>

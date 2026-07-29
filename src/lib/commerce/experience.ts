@@ -15,6 +15,12 @@ export type CommerceExperience = {
     intro: string;
     checkoutBenefit: string;
   };
+  cart: {
+    emptyDescription: string;
+  };
+  checkout: {
+    contactPrivacy: string;
+  };
   drops: {
     primaryAction: string;
     purchaseEyebrow: string;
@@ -64,6 +70,14 @@ const connectedExperience: CommerceExperience = {
     intro:
       "Explorá la colección con precios en CRC e inventario administrado desde BilBildin.",
     checkoutBenefit: "Pedido protegido por BilBildin",
+  },
+  cart: {
+    emptyDescription:
+      "Explorá el catálogo y agregá productos para recorrer la experiencia de compra.",
+  },
+  checkout: {
+    contactPrivacy:
+      "Usaremos estos datos únicamente para coordinar tu pedido.",
   },
   drops: {
     primaryAction: "Ver disponibilidad",
@@ -128,6 +142,14 @@ const demoExperience: CommerceExperience = {
     intro:
       "Explorá toda la colección, compará caminos y recorré una compra demostrativa clara de principio a fin.",
     checkoutBenefit: "Checkout sin cobro real",
+  },
+  cart: {
+    emptyDescription:
+      "Explorá el catálogo y agregá productos para recorrer la experiencia de compra demostrativa.",
+  },
+  checkout: {
+    contactPrivacy:
+      "Usaremos estos datos únicamente durante esta simulación.",
   },
   drops: {
     primaryAction: "Recorrer compra demostrativa",
