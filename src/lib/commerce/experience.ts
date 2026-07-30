@@ -64,12 +64,12 @@ const connectedExperience: CommerceExperience = {
     cartStep: "Revisá disponibilidad y prepará tu selección.",
     checkoutStep: "Pedido protegido y pago por coordinar.",
     purchaseFaq:
-      "Sí. El catálogo y los precios ya están conectados a BilBildin. Cuando exista inventario podés completar el pedido; VYVO coordina directamente el pago y la entrega.",
+      "Sí. Las piezas disponibles muestran su precio en CRC y pueden agregarse al carrito. VYVO coordina directamente el pago y la entrega después de recibir el pedido.",
   },
   catalog: {
     intro:
-      "Explorá la colección con precios en CRC e inventario administrado desde BilBildin.",
-    checkoutBenefit: "Pedido protegido por BilBildin",
+      "Explorá la colección, compará cada pieza y elegí la que mejor conecta con tu historia.",
+    checkoutBenefit: "Pedido protegido y disponibilidad verificada",
   },
   cart: {
     emptyDescription:
@@ -87,21 +87,21 @@ const connectedExperience: CommerceExperience = {
     availableCopy:
       "Agregá ABYSS al carrito y confirmá tu pedido. VYVO coordina directamente el pago y la entrega.",
     unavailableCopy:
-      "El producto y su precio ya están conectados a BilBildin. La compra se habilitará cuando exista inventario confirmado.",
+      "ABYSS está agotado por el momento. Explorá el catálogo para descubrir otras piezas disponibles.",
     microcopy:
-      "El inventario y la fecha de lanzamiento se administran desde BilBildin.",
+      "El precio y la disponibilidad se verifican nuevamente al confirmar el pedido.",
     benefits: [
       "Precio confirmado en CRC",
-      "Inventario controlado por BilBildin",
+      "Disponibilidad verificada",
       "Pago coordinado directamente con VYVO",
     ],
   },
   product: {
-    sourceStatus: "Precio y disponibilidad sincronizados desde BilBildin.",
+    sourceStatus: "Precio y disponibilidad verificados para tu pedido.",
     availableStatus: "Disponible para pedido",
-    unavailableStatus: "Sin inventario disponible",
-    availableDetails: "Inventario administrado por BilBildin",
-    unavailableDetails: "La compra se habilitará al cargar inventario",
+    unavailableStatus: "Agotado por el momento",
+    availableDetails: "Disponibilidad confirmada",
+    unavailableDetails: "Este producto no puede agregarse al carrito ahora",
     security:
       "El pedido se registra de forma segura. VYVO coordina directamente el pago y la entrega.",
     priceSuffix: "",

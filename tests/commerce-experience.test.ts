@@ -18,7 +18,8 @@ test("connected commerce never describes the purchase as a simulation", () => {
     copy,
     /\bdemo(?:strativ[oa])?\b|\bsimulad[oa]s?\b|sin cobro real/i,
   );
-  assert.match(copy, /BilBildin/);
+  assert.doesNotMatch(copy, /BilBildin/i);
+  assert.doesNotMatch(copy, /cuando exista inventario/i);
   assert.match(copy, /CRC/);
   assert.match(copy, /pedido/i);
 });

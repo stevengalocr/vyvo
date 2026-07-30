@@ -27,6 +27,25 @@ function asSalesModel(value: unknown): SalesModel {
     : "standard";
 }
 
+function asLeadTimeDays(value: unknown) {
+  if (!value || typeof value !== "object") return null;
+
+  const { min, max } = value as { min?: unknown; max?: unknown };
+  if (
+    typeof min !== "number" ||
+    typeof max !== "number" ||
+    !Number.isInteger(min) ||
+    !Number.isInteger(max) ||
+    min < 0 ||
+    max < min ||
+    max > 365
+  ) {
+    return null;
+  }
+
+  return { min, max };
+}
+
 function sameOriginImage(value: string | undefined, fallback: string) {
   if (!value) return fallback;
 
@@ -106,10 +125,7 @@ export function mapBilbildinProduct(
       fulfillment: {
         method: "shipping",
         shippingClass: row.category,
-        leadTimeDays:
-          salesModel === "made_to_order"
-            ? { min: 5, max: 12 }
-            : { min: 3, max: 7 },
+        leadTimeDays: asLeadTimeDays(attributes.lead_time_days),
       },
       variants: [
         {
