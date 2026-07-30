@@ -224,36 +224,19 @@ async function verifyPrimaryJourneys(context) {
   const dropMotionHooks = {
     depthLayers: await page.locator(".drops-hero__depth").count(),
     purchaseAnchor: await page.locator("#comprar").count(),
-    alertAnchor: await page.locator("#alerta").count(),
   };
   const dropPurchaseVisible = await page
     .getByRole("button", { name: "Agregar al carrito" })
     .isVisible();
-  await page.getByRole("link", { name: "Seguir el lanzamiento" }).click();
-  const dropAlertAnchorReached = page.url().endsWith("/drops#alerta");
-  await page.getByLabel("Correo electrónico").fill("alerta@vyvo.demo");
-  await page
-    .getByLabel(
-      "Acepto recibir novedades de VYVO. Puedo retirar mi consentimiento cuando quiera.",
-    )
-    .check();
-  const waitlistSubmitStateBefore = await page
-    .locator("#alerta .waitlist-form")
-    .getAttribute("data-submit-state");
-  const waitlistResponsePromise = page.waitForResponse(
-    (response) =>
-      response.url().endsWith("/api/waitlist") &&
-      response.request().method() === "POST",
-  );
-  await page.getByRole("button", { name: "Unirme" }).click();
-  const waitlistResponse = await waitlistResponsePromise;
-  await page.getByText("El flujo está listo.").waitFor();
-  const waitlistPreviewVisible = await page
-    .getByText("El flujo está listo.")
-    .isVisible();
+  const dropWaitlistCount = await page.locator(".waitlist-form, #alerta").count();
 
   await page.goto(baseUrl, { waitUntil: "networkidle" });
   const clubSectionCount = await page.getByText("VYVO Club · Próximamente").count();
+  const homeWaitlistCount = await page.locator(".waitlist-form").count();
+  const homeMainCopy = await page.locator("main").innerText();
+  const publicEngineMentioned = /BilBildin/i.test(homeMainCopy);
+  const staleLaunchClaimPresent =
+    /Próximo drop|cuando exista inventario/i.test(homeMainCopy);
   const selectedBefore = await page
     .locator('.hero-chips [aria-selected="true"]')
     .textContent();
@@ -296,11 +279,11 @@ async function verifyPrimaryJourneys(context) {
     dropStatusCount,
     dropMotionHooks,
     dropPurchaseVisible,
-    dropAlertAnchorReached,
-    waitlistStatus: waitlistResponse.status(),
-    waitlistPreviewVisible,
-    waitlistSubmitStateBefore,
+    dropWaitlistCount,
     clubSectionCount,
+    homeWaitlistCount,
+    publicEngineMentioned,
+    staleLaunchClaimPresent,
     heroCarouselChanged: selectedBefore !== selectedAfter,
     heroMotion,
     landingMotion,
@@ -642,13 +625,12 @@ const failures = results.filter((result) => {
       result.dropStatusCount !== 3 ||
       result.dropMotionHooks.depthLayers !== 1 ||
       result.dropMotionHooks.purchaseAnchor !== 1 ||
-      result.dropMotionHooks.alertAnchor !== 1 ||
       !result.dropPurchaseVisible ||
-      !result.dropAlertAnchorReached ||
-      result.waitlistStatus !== 202 ||
-      !result.waitlistPreviewVisible ||
-      result.waitlistSubmitStateBefore !== "idle" ||
+      result.dropWaitlistCount !== 0 ||
       result.clubSectionCount !== 0 ||
+      result.homeWaitlistCount !== 0 ||
+      result.publicEngineMentioned ||
+      result.staleLaunchClaimPresent ||
       !result.heroCarouselChanged ||
       !result.heroMotion.state ||
       result.heroMotion.decorativeLayers !== 2 ||

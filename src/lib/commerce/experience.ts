@@ -51,7 +51,6 @@ export type CommerceExperience = {
     checkoutTitle: string;
     checkoutDescription: string;
   };
-  waitlistResponse: string;
 };
 
 const connectedExperience: CommerceExperience = {
@@ -122,8 +121,6 @@ const connectedExperience: CommerceExperience = {
     checkoutDescription:
       "Confirmá tu pedido VYVO; el pago y la entrega se coordinan directamente.",
   },
-  waitlistResponse:
-    "Validamos el formulario, pero la lista de novedades todavía no almacena correos.",
 };
 
 const demoExperience: CommerceExperience = {
@@ -195,8 +192,6 @@ const demoExperience: CommerceExperience = {
     checkoutDescription:
       "Completá el recorrido de compra VYVO sin procesar un pago real.",
   },
-  waitlistResponse:
-    "Modo demostrativo: validamos el formulario, pero todavía no guardamos tu correo.",
 };
 
 export function getCommerceExperience(

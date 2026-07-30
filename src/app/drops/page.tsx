@@ -3,7 +3,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "@/components/icon";
 import { ProductPurchasePanel } from "@/components/product-purchase-panel";
-import { WaitlistForm } from "@/components/waitlist-form";
 import { getBilbildinMode } from "@/lib/bilbildin/config";
 import { getStorefrontProduct } from "@/lib/bilbildin/provider";
 import { getCommerceExperience } from "@/lib/commerce/experience";
@@ -17,20 +16,20 @@ export const metadata: Metadata = {
 
 const rules = [
   {
-    title: "Cantidad verificable",
-    copy: "Una edición se anuncia solo cuando producción define un límite real.",
+    title: "Disponibilidad real",
+    copy: "Una pieza se puede pedir únicamente cuando existe inventario confirmado.",
   },
   {
-    title: "Serial trazable",
-    copy: "Cada número se conecta con variante, fecha y control de calidad.",
+    title: "Precio visible",
+    copy: "El monto aparece en CRC y se vuelve a validar al confirmar el pedido.",
   },
   {
-    title: "Plazo sostenible",
-    copy: "No se abre preventa si el proceso no puede cumplir la promesa.",
+    title: "Sin urgencia fabricada",
+    copy: "No usamos contadores ni escasez que no correspondan al inventario real.",
   },
   {
-    title: "Estado transparente",
-    copy: "Concepto, prototipo y pieza terminada siempre se diferencian.",
+    title: "Coordinación humana",
+    copy: "VYVO confirma directamente pago, condiciones y entrega con cada cliente.",
   },
 ] as const;
 
@@ -72,9 +71,9 @@ export default async function DropsPage() {
               <a href="#comprar" className="button button--light">
                 {experience.drops.primaryAction} <Icon name="arrow" />
               </a>
-              <a href="#alerta" className="button button--ghost-light">
-                Seguir el lanzamiento
-              </a>
+              <Link href="/catalogo" className="button button--ghost-light">
+                Comparar personajes
+              </Link>
             </div>
             <p className="drops-hero__micro">
               {experience.drops.microcopy}
@@ -90,12 +89,12 @@ export default async function DropsPage() {
             <p><strong>Concepto</strong>Aprobado</p>
           </div>
           <div className="is-current">
-            <span>02</span>
-            <p><strong>Prototipo</strong>Próxima validación</p>
+            <span><Icon name="check" size={15} /></span>
+            <p><strong>Disponibilidad</strong>{canPurchase ? "Confirmada" : "Agotada"}</p>
           </div>
-          <div>
-            <span>03</span>
-            <p><strong>Lanzamiento</strong>Fecha por confirmar</p>
+          <div className={canPurchase ? "is-complete" : ""}>
+            <span>{canPurchase ? <Icon name="check" size={15} /> : "03"}</span>
+            <p><strong>Pedido</strong>{canPurchase ? "Habilitado" : "No disponible"}</p>
           </div>
         </div>
       </section>
@@ -121,7 +120,17 @@ export default async function DropsPage() {
                 ))}
               </ul>
             </div>
-            <ProductPurchasePanel product={abyss} />
+            {canPurchase ? (
+              <ProductPurchasePanel product={abyss} />
+            ) : (
+              <div className="drop-unavailable" role="status">
+                <strong>ABYSS está agotado por el momento.</strong>
+                <p>Volvé al catálogo para descubrir otras piezas disponibles.</p>
+                <Link href="/catalogo" className="button button--dark">
+                  Explorar catálogo <Icon name="arrow" />
+                </Link>
+              </div>
+            )}
           </div>
         </section>
       ) : null}
@@ -151,20 +160,6 @@ export default async function DropsPage() {
               </article>
             ))}
           </div>
-        </div>
-      </section>
-
-      <section className="section drop-alert" id="alerta">
-        <div className="container drop-alert__grid">
-          <div data-reveal>
-            <span className="eyebrow eyebrow--light">Señal de profundidad</span>
-            <h2>Enterate cuando el estado cambie.</h2>
-            <p>
-              Avances de prototipo, edición confirmada y apertura real. Nada de
-              urgencia artificial.
-            </p>
-          </div>
-          <WaitlistForm productSlug="vyvo-abyss" />
         </div>
       </section>
 
