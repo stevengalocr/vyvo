@@ -31,6 +31,15 @@ export function ProductFilters({
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortMode>("featured");
   const deferredQuery = useDeferredValue(query.trim().toLocaleLowerCase("es"));
+  const availableSegments = useMemo(
+    () =>
+      segments.filter(
+        (item) =>
+          item.id === "all" ||
+          products.some((product) => matchesSegment(product, item.id)),
+      ),
+    [products],
+  );
 
   const filtered = useMemo(() => {
     const result = products.filter((product) => {
@@ -98,7 +107,7 @@ export function ProductFilters({
         data-reveal
         data-reveal-index="1"
       >
-        {segments.map((item) => (
+        {availableSegments.map((item) => (
           <button
             key={item.id}
             type="button"
@@ -126,7 +135,7 @@ export function ProductFilters({
       </div>
 
       {filtered.length ? (
-        <div className="product-grid">
+        <div className="product-grid" data-results-key={`${segment}-${sort}`}>
           {filtered.map((product, index) => (
             <ProductCard
               product={product}

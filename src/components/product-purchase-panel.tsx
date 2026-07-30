@@ -52,6 +52,7 @@ export function ProductPurchasePanel({
     <div
       className="purchase-panel"
       data-purchase-state={added ? "added" : "idle"}
+      aria-live="polite"
     >
       <div className="purchase-panel__price">
         <span>{isLive ? "Precio" : "Precio demostrativo"}</span>
@@ -75,7 +76,7 @@ export function ProductPurchasePanel({
           }}
         >
           {unavailable
-            ? "Disponible pronto"
+            ? "Agotado por el momento"
             : added
               ? "Agregado al carrito"
               : "Agregar al carrito"}

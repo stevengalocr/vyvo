@@ -61,31 +61,21 @@ export default async function ProductPage({ params }: ProductPageProps) {
     <>
       <section className={`pdp-hero accent-${product.accent}`}>
         <div className="container pdp-hero__grid">
-          <div className="pdp-gallery">
-            <div className="pdp-gallery__main">
-              <div className="product-card__badges">
-                <span>Render conceptual</span>
-                <span>Origins {product.originsNumber}</span>
-              </div>
-              <Image
-                src={product.image}
-                alt={product.alt}
-                fill
-                priority
-                sizes="(max-width: 900px) 100vw, 55vw"
-              />
+          <div className="pdp-primary-media pdp-gallery__main">
+            <div className="product-card__badges">
+              <span>Render conceptual</span>
+              <span>Origins {product.originsNumber}</span>
             </div>
-            <div className="pdp-gallery__missing" aria-label="Medios todavía no disponibles">
-              {["Vista posterior", "Articulación", "Escala"].map((label) => (
-                <div key={label}>
-                  <span aria-hidden="true">V</span>
-                  <p>{label}<small>Pendiente de prototipo</small></p>
-                </div>
-              ))}
-            </div>
+            <Image
+              src={product.image}
+              alt={product.alt}
+              fill
+              priority
+              sizes="(max-width: 900px) 100vw, 55vw"
+            />
           </div>
 
-          <div className="pdp-summary">
+          <div className="pdp-commerce pdp-summary">
             <Link href="/catalogo" className="back-link">
               <Icon name="chevron" /> Volver al catálogo
             </Link>
@@ -133,6 +123,18 @@ export default async function ProductPage({ params }: ProductPageProps) {
               {experience.product.security}
             </p>
           </div>
+
+          <div
+            className="pdp-secondary-media pdp-gallery__missing"
+            aria-label="Medios todavía no disponibles"
+          >
+            {["Vista posterior", "Articulación", "Escala"].map((label) => (
+              <div key={label}>
+                <span aria-hidden="true">V</span>
+                <p>{label}<small>Pendiente de prototipo</small></p>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -175,7 +177,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
         <div className="container pdp-includes__grid">
           <div>
             <span className="eyebrow">Concepto de contenido</span>
-            <h2>Lo que podría incluir.</h2>
+            <h2>Contenido previsto.</h2>
             <p>Todo componente se confirma después del prototipo y costeo.</p>
           </div>
           <ul>

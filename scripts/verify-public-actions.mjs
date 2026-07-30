@@ -26,6 +26,32 @@ try {
     await page.getByRole("button", { name: "Agregar al carrito" }).count(),
     1,
   );
+
+  await page.goto(`${baseUrl}/catalogo`, {
+    waitUntil: "networkidle",
+    timeout: 30_000,
+  });
+  const productCards = page.locator(".product-card");
+  const productCardCount = await productCards.count();
+  assert.ok(productCardCount > 0);
+  for (let index = 0; index < productCardCount; index += 1) {
+    assert.equal(await productCards.nth(index).locator("a").count(), 1);
+  }
+
+  await page.goto(`${baseUrl}/producto/vyvo-core`, {
+    waitUntil: "networkidle",
+    timeout: 30_000,
+  });
+  const purchaseBox = await page.locator(".purchase-panel").boundingBox();
+  const secondaryMediaBox = await page
+    .locator(".pdp-secondary-media, .pdp-gallery__missing")
+    .boundingBox();
+  assert.ok(purchaseBox);
+  assert.ok(secondaryMediaBox);
+  assert.ok(
+    purchaseBox.y < secondaryMediaBox.y,
+    "mobile purchase decision must appear before secondary media",
+  );
 } finally {
   await browser.close();
 }
