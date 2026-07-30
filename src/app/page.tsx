@@ -33,13 +33,6 @@ const intents = [
   },
 ] as const;
 
-const lines = [
-  { code: "01", name: "Mini", copy: "Personajes articulados de entrada.", accent: "purple" },
-  { code: "02", name: "You", copy: "Tu historia convertida en figura.", accent: "orange" },
-  { code: "03", name: "Drops", copy: "Ediciones originales con carácter.", accent: "purple" },
-  { code: "04", name: "One", copy: "Piezas únicas de mayor escala.", accent: "green" },
-] as const;
-
 const productionSteps = [
   ["01", "Diseño", "Definimos forma, intención y límites antes de producir."],
   ["02", "Impresión", "Cada componente parte de un archivo y perfil controlados."],
@@ -117,33 +110,6 @@ export default async function HomePage() {
                 <p>{intent.copy}</p>
                 <span className="text-link">Empezar <Icon name="arrow" /></span>
               </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="section lines-section">
-        <div className="container">
-          <div className="split-heading">
-            <SectionHeading eyebrow="Un universo, distintas formas" title="Líneas VYVO" />
-            <p>
-              Desde una figura compacta hasta una pieza única: cada línea resuelve
-              una intención distinta sin perder el ADN VYVO.
-            </p>
-          </div>
-          <div className="line-grid">
-            {lines.map((line, index) => (
-              <article
-                className={`line-card accent-${line.accent}`}
-                key={line.name}
-                data-reveal
-                data-reveal-index={index}
-              >
-                <span>{line.code}</span>
-                <h3>VYVO {line.name}</h3>
-                <p>{line.copy}</p>
-                <i aria-hidden="true">V</i>
-              </article>
             ))}
           </div>
         </div>

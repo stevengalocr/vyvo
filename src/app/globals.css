@@ -1509,6 +1509,7 @@ img {
 .intent-section {
   border-top: 1px solid var(--border);
   background: white;
+  padding-bottom: 72px;
 }
 
 .intent-grid {
@@ -1554,7 +1555,6 @@ img {
 }
 
 .intent-card h3,
-.line-card h3,
 .process-grid h3 {
   margin: 34px 0 10px;
   font-family: var(--font-display);
@@ -1576,63 +1576,10 @@ img {
   color: var(--accent);
 }
 
-/* Lines */
-.lines-section {
-  background: var(--vyvo-white);
-}
-
-.line-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-}
-
-.line-card {
-  position: relative;
-  min-height: 320px;
-  overflow: hidden;
-  border-radius: var(--radius);
-  background: var(--vyvo-black);
-  color: white;
-  padding: 30px;
-}
-
-.line-card > span {
-  color: var(--accent);
-  font-family: var(--font-display);
-  font-size: 0.72rem;
-  font-weight: 760;
-  letter-spacing: 0.15em;
-}
-
-.line-card h3 {
-  margin-top: 120px;
-}
-
-.line-card p {
-  max-width: 200px;
-  margin: 0;
-  color: rgba(255, 255, 255, 0.58);
-  font-size: 0.86rem;
-}
-
-.line-card i {
-  position: absolute;
-  top: -82px;
-  right: -18px;
-  color: var(--accent);
-  font-family: var(--font-display);
-  font-size: 17rem;
-  font-style: normal;
-  font-weight: 850;
-  line-height: 1;
-  opacity: 0.1;
-  transform: rotate(180deg);
-}
-
 /* Product cards */
 .origins-preview {
   background: white;
+  padding-top: 72px;
 }
 
 .product-grid {
@@ -4065,10 +4012,6 @@ img {
     gap: 12px;
   }
 
-  .line-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
   .custom-section__grid,
   .abyss-section__grid {
     gap: 50px;
@@ -4087,6 +4030,14 @@ img {
 @media (max-width: 900px) {
   .section {
     padding: 88px 0;
+  }
+
+  .intent-section {
+    padding-bottom: 56px;
+  }
+
+  .origins-preview {
+    padding-top: 56px;
   }
 
   .desktop-nav,
@@ -4277,6 +4228,14 @@ img {
     padding: 72px 0;
   }
 
+  .intent-section {
+    padding-bottom: 44px;
+  }
+
+  .origins-preview {
+    padding-top: 44px;
+  }
+
   .section-heading h2,
   .split-heading h2,
   .custom-copy h2,
@@ -4389,17 +4348,8 @@ img {
     width: 100%;
   }
 
-  .line-grid,
   .product-grid {
     grid-template-columns: 1fr;
-  }
-
-  .line-card {
-    min-height: 260px;
-  }
-
-  .line-card h3 {
-    margin-top: 80px;
   }
 
   .product-grid {
