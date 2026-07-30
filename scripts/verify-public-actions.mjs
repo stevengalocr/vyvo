@@ -52,6 +52,35 @@ try {
     purchaseBox.y < secondaryMediaBox.y,
     "mobile purchase decision must appear before secondary media",
   );
+
+  await page.getByRole("button", { name: "Agregar al carrito" }).click();
+  await page.getByRole("link", { name: "Ver carrito" }).click();
+  await page.waitForURL("**/carrito");
+  assert.equal(
+    await page
+      .getByRole("button", { name: "Reducir cantidad de CORE" })
+      .isDisabled(),
+    true,
+  );
+
+  await page.getByRole("link", { name: "Continuar al checkout" }).click();
+  await page.waitForURL("**/checkout");
+  const stepOneFields = page.locator("input");
+  const stepOneFieldCount = await stepOneFields.count();
+  assert.ok(stepOneFieldCount > 0);
+  for (let index = 0; index < stepOneFieldCount; index += 1) {
+    assert.ok(await stepOneFields.nth(index).getAttribute("name"));
+  }
+
+  await page.getByLabel("Correo electrónico").fill("cliente@vyvo.test");
+  await page.getByLabel("Nombre").fill("Cliente");
+  await page.getByLabel("Apellidos").fill("VYVO");
+  await page.getByLabel("Teléfono").fill("+506 8888 8888");
+  await page.getByRole("button", { name: "Continuar" }).click();
+  assert.equal(
+    await page.evaluate(() => document.activeElement?.tagName),
+    "LEGEND",
+  );
 } finally {
   await browser.close();
 }

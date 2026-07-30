@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { formatMoney } from "@/lib/commerce/cart";
 import { getCommerceExperience } from "@/lib/commerce/experience";
 import { useCart } from "./cart-provider";
@@ -45,8 +45,16 @@ export function CheckoutClient() {
     useState<PaymentMethod>("sinpe");
   const [submitError, setSubmitError] = useState("");
   const idempotencyKey = useRef<string | null>(null);
+  const legendRef = useRef<HTMLLegendElement>(null);
+  const previousStep = useRef(step);
   const isLive = mode === "bilbildin";
   const experience = getCommerceExperience(mode);
+
+  useEffect(() => {
+    if (previousStep.current === step) return;
+    previousStep.current = step;
+    legendRef.current?.focus({ preventScroll: true });
+  }, [step]);
 
   function updateDraft(field: keyof CheckoutDraft, value: string) {
     setDraft((current) => ({ ...current, [field]: value }));
@@ -189,13 +197,15 @@ export function CheckoutClient() {
 
         <form className="checkout-form" onSubmit={onSubmit}>
           {step === 1 ? (
-            <fieldset>
-              <legend>¿Quién recibe la señal?</legend>
-              <p>{experience.checkout.contactPrivacy}</p>
+            <fieldset aria-describedby="checkout-contact-help">
+              <legend ref={legendRef} tabIndex={-1}>¿Quién recibe la señal?</legend>
+              <p id="checkout-contact-help">{experience.checkout.contactPrivacy}</p>
               <div className="form-grid">
                 <label className="field field--full">
                   Correo electrónico
                   <input
+                    id="checkout-email"
+                    name="email"
                     type="email"
                     autoComplete="email"
                     value={draft.email}
@@ -206,6 +216,8 @@ export function CheckoutClient() {
                 <label className="field">
                   Nombre
                   <input
+                    id="checkout-first-name"
+                    name="firstName"
                     type="text"
                     autoComplete="given-name"
                     value={draft.firstName}
@@ -217,6 +229,8 @@ export function CheckoutClient() {
                 <label className="field">
                   Apellidos
                   <input
+                    id="checkout-last-name"
+                    name="lastName"
                     type="text"
                     autoComplete="family-name"
                     value={draft.lastName}
@@ -228,6 +242,8 @@ export function CheckoutClient() {
                 <label className="field field--full">
                   Teléfono
                   <input
+                    id="checkout-phone"
+                    name="phone"
                     type="tel"
                     autoComplete="tel"
                     inputMode="tel"
@@ -243,9 +259,9 @@ export function CheckoutClient() {
           ) : null}
 
           {step === 2 ? (
-            <fieldset>
-              <legend>¿Dónde llegaría?</legend>
-              <p>
+            <fieldset aria-describedby="checkout-delivery-help">
+              <legend ref={legendRef} tabIndex={-1}>¿Dónde llegaría?</legend>
+              <p id="checkout-delivery-help">
                 {isLive
                   ? "La entrega se coordina dentro de Costa Rica."
                   : "La entrega es simulada y está limitada a Costa Rica."}
@@ -253,13 +269,15 @@ export function CheckoutClient() {
               <div className="form-grid">
                 <label className="field field--full">
                   País
-                  <select value="CR" disabled>
+                  <select id="checkout-country" name="country" value="CR" disabled>
                     <option value="CR">Costa Rica</option>
                   </select>
                 </label>
                 <label className="field field--full">
                   Dirección
                   <input
+                    id="checkout-address"
+                    name="address"
                     type="text"
                     autoComplete="street-address"
                     value={draft.address}
@@ -271,6 +289,8 @@ export function CheckoutClient() {
                 <label className="field">
                   Provincia
                   <select
+                    id="checkout-province"
+                    name="province"
                     autoComplete="address-level1"
                     value={draft.province}
                     onChange={(event) => updateDraft("province", event.target.value)}
@@ -293,6 +313,8 @@ export function CheckoutClient() {
                 <label className="field">
                   Cantón o ciudad
                   <input
+                    id="checkout-city"
+                    name="city"
                     type="text"
                     autoComplete="address-level2"
                     value={draft.city}
@@ -304,6 +326,8 @@ export function CheckoutClient() {
                 <label className="field">
                   Código postal
                   <input
+                    id="checkout-postal-code"
+                    name="postalCode"
                     type="text"
                     autoComplete="postal-code"
                     inputMode="numeric"
@@ -337,9 +361,9 @@ export function CheckoutClient() {
           ) : null}
 
           {step === 3 ? (
-            <fieldset>
-              <legend>Revisá antes de finalizar.</legend>
-              <p>
+            <fieldset aria-describedby="checkout-review-help">
+              <legend ref={legendRef} tabIndex={-1}>Revisá antes de finalizar.</legend>
+              <p id="checkout-review-help">
                 {isLive
                   ? "Revisá los datos antes de enviar tu pedido a VYVO."
                   : "Esta pantalla valida la experiencia; no crea una orden comercial."}
@@ -360,6 +384,8 @@ export function CheckoutClient() {
                 <label className="field field--full">
                   Forma de pago
                   <select
+                    id="checkout-payment-method"
+                    name="paymentMethod"
                     value={paymentMethod}
                     onChange={(event) =>
                       setPaymentMethod(event.target.value as PaymentMethod)

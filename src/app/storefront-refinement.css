@@ -218,6 +218,20 @@
   transition: opacity 180ms ease-out;
 }
 
+.checkout-form legend:focus {
+  outline: none;
+}
+
+.quantity-control button {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.quantity-control button:disabled {
+  cursor: not-allowed;
+  opacity: 0.38;
+}
+
 @media (max-width: 900px) {
   .craft-proof__grid {
     grid-template-columns: 1fr;

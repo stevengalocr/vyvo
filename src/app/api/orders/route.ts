@@ -13,6 +13,7 @@ import {
 import {
   checkoutRequestSchema,
 } from "@/lib/bilbildin/order-schema";
+import { classifyOrderError } from "@/lib/bilbildin/order-errors";
 
 export const runtime = "nodejs";
 
@@ -101,15 +102,22 @@ export async function POST(request: Request) {
   );
 
   if (error) {
-    const unavailable =
-      /store_not_active|product_unavailable|insufficient_stock/i.test(
-        error.message,
+    const kind = classifyOrderError(error.message);
+    if (kind === "availability") {
+      return errorResponse(
+        "La disponibilidad cambió. Revisá tu carrito e intentá de nuevo.",
+        409,
       );
+    }
+    if (kind === "retryable") {
+      return errorResponse(
+        "El servicio está tardando más de lo esperado. Intentá nuevamente.",
+        503,
+      );
+    }
     return errorResponse(
-      unavailable
-        ? "La disponibilidad cambió. Revisá tu carrito e intentá de nuevo."
-        : "No pudimos confirmar el pedido. Intentá nuevamente.",
-      unavailable ? 409 : 500,
+      "No pudimos confirmar el pedido. Intentá nuevamente.",
+      500,
     );
   }
 

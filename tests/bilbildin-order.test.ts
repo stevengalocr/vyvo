@@ -6,6 +6,7 @@ import {
   createOrderReference,
   parseOrderReference,
 } from "../src/lib/bilbildin/order-reference";
+import { classifyOrderError } from "../src/lib/bilbildin/order-errors";
 
 const validCheckout = {
   customer: {
@@ -110,4 +111,11 @@ test("order retries are serialized and return the original result", () => {
   assert.match(sql, /create_storefront_order\(p_business_id, p_payload\)/i);
   assert.match(sql, /grant execute.*service_role/is);
   assert.match(sql, /revoke all.*anon/is);
+});
+
+test("order errors are classified without exposing provider details", () => {
+  assert.equal(classifyOrderError("insufficient_stock"), "availability");
+  assert.equal(classifyOrderError("store_not_active"), "availability");
+  assert.equal(classifyOrderError("connection timeout"), "retryable");
+  assert.equal(classifyOrderError("database detail"), "internal");
 });

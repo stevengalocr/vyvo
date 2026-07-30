@@ -105,6 +105,7 @@ export function CartPageClient() {
                   <button
                     type="button"
                     aria-label={`Reducir cantidad de ${line.product.name}`}
+                    disabled={line.quantity <= 1}
                     onClick={() =>
                       updateQuantity(line.id, line.quantity - 1)
                     }
