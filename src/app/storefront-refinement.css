@@ -1,0 +1,169 @@
+/*
+ * VYVO storefront refinement layer.
+ * Loaded after globals.css so production polish stays isolated from the
+ * established component foundations.
+ */
+
+.hero {
+  --stage-shadow: rgb(111 44 255 / 22%);
+  --stage-enter-x: 0px;
+  --stage-enter-y: 10px;
+  --stage-enter-rotate: 0deg;
+  --stage-signal-scale: 0.9;
+}
+
+.hero[data-motion-profile="rush"] {
+  --stage-shadow: rgb(255 90 31 / 22%);
+  --stage-enter-x: 22px;
+  --stage-enter-y: 3px;
+  --stage-enter-rotate: 0.7deg;
+  --stage-signal-scale: 0.92;
+}
+
+.hero[data-motion-profile="ground"] {
+  --stage-shadow: rgb(121 201 67 / 21%);
+  --stage-enter-x: 0px;
+  --stage-enter-y: 18px;
+  --stage-enter-rotate: 0deg;
+  --stage-signal-scale: 0.94;
+}
+
+.hero[data-motion-profile="graphite"] {
+  --stage-shadow: rgb(41 39 46 / 20%);
+  --stage-enter-x: -10px;
+  --stage-enter-y: 8px;
+  --stage-enter-rotate: -0.5deg;
+  --stage-signal-scale: 0.91;
+}
+
+.hero__texture {
+  background-image: none;
+}
+
+.hero__image-wrap {
+  background: #f6f3f0;
+  box-shadow: 0 34px 84px -50px var(--stage-shadow);
+  transition:
+    background-color 220ms ease-out,
+    box-shadow 280ms ease-out;
+}
+
+.hero__stage::after {
+  background: none;
+}
+
+.hero[data-hero-state="product"] .hero__image-wrap {
+  box-shadow: 0 36px 90px -42px var(--stage-shadow);
+}
+
+.hero[data-hero-state="product"] .hero-focus {
+  box-shadow:
+    0 24px 58px -32px var(--stage-shadow),
+    0 18px 48px rgb(17 17 17 / 12%);
+}
+
+@keyframes vyvo-character-enter {
+  from {
+    filter: blur(3px);
+    opacity: 0;
+    transform:
+      translate3d(var(--stage-enter-x), var(--stage-enter-y), 0)
+      rotate(var(--stage-enter-rotate))
+      scale(0.965);
+  }
+  to {
+    filter: blur(0);
+    opacity: 1;
+    transform: translate3d(0, 0, 0) rotate(0deg) scale(1);
+  }
+}
+
+@keyframes vyvo-signal-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) scale(var(--stage-signal-scale));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero__stage-media--product {
+    animation: vyvo-character-enter 330ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .hero[data-hero-state="product"] .hero__stage-signal {
+    animation: vyvo-signal-enter 360ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+.craft-proof {
+  overflow: clip;
+  background: var(--vyvo-black);
+  color: white;
+}
+
+.craft-proof__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(340px, 0.9fr);
+  align-items: center;
+  gap: clamp(48px, 8vw, 120px);
+}
+
+.craft-proof h2 {
+  max-width: 780px;
+  margin: 20px 0 0;
+  color: white;
+  font-family: var(--font-display);
+  font-size: clamp(2.5rem, 5vw, 5rem);
+  letter-spacing: -0.04em;
+  line-height: 0.98;
+}
+
+.craft-proof__points {
+  display: grid;
+}
+
+.craft-proof__points p {
+  display: grid;
+  grid-template-columns: 30px 1fr;
+  gap: 4px 14px;
+  margin: 0;
+  border-bottom: 1px solid rgb(255 255 255 / 14%);
+  padding: 22px 0;
+}
+
+.craft-proof__points svg {
+  grid-row: 1 / 3;
+  color: var(--vyvo-purple);
+}
+
+.craft-proof__points strong {
+  font-family: var(--font-display);
+  font-size: 1rem;
+}
+
+.craft-proof__points span {
+  color: rgb(255 255 255 / 72%);
+  line-height: 1.55;
+}
+
+.final-cta--focused .final-cta__grid {
+  grid-template-columns: minmax(0, 900px);
+}
+
+@media (max-width: 900px) {
+  .craft-proof__grid {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__image-wrap,
+  .hero-focus {
+    transition: none;
+  }
+}

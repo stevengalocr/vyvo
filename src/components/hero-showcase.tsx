@@ -21,6 +21,7 @@ import {
   selectHeroProduct,
   type HeroDirection,
 } from "@/lib/hero/showcase-state";
+import { getHeroMotionProfile } from "@/lib/hero/motion-profile";
 import type { StorefrontProduct } from "@/types/commerce";
 import { Icon } from "./icon";
 
@@ -58,6 +59,7 @@ export function HeroShowcase({
     : "/landing/hero-family-concept-v1.png";
   const stageAccent =
     selectedProduct?.accent ?? focusProduct?.accent ?? "purple";
+  const motionProfile = getHeroMotionProfile(stageAccent);
   const announcement = selectedProduct
     ? `${selectedProduct.name} seleccionado como protagonista.`
     : "Familia VYVO seleccionada.";
@@ -165,6 +167,8 @@ export function HeroShowcase({
       ref={heroRef}
       aria-labelledby="hero-title"
       data-hero-state={selectedProduct ? "product" : "family"}
+      data-motion-profile={motionProfile.id}
+      data-motion-axis={motionProfile.axis}
     >
       <div className="hero__texture" aria-hidden="true" />
       <div
@@ -226,6 +230,7 @@ export function HeroShowcase({
                   : "hero__stage-media--family"
               }`}
               data-direction={showcase.direction}
+              data-stage-key={selectedProduct?.slug ?? "family"}
               key={selectedProduct?.slug ?? "family"}
             >
               <Image

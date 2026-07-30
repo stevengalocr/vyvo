@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { getHeroMotionProfile } from "../src/lib/hero/motion-profile";
 import {
   advanceHeroPreview,
   clearHeroSelection,
@@ -8,6 +9,7 @@ import {
   moveHero,
   selectHeroProduct,
 } from "../src/lib/hero/showcase-state";
+import type { Product } from "../src/types/product";
 
 test("hero starts in family mode while previewing the first character", () => {
   assert.deepEqual(createHeroShowcaseState(), {
@@ -83,4 +85,20 @@ test("zero products leave the state stable", () => {
   assert.deepEqual(moveHero(state, 1, 0), state);
   assert.deepEqual(selectHeroProduct(state, 0, 0), state);
   assert.equal(getHeroKeyboardTarget("Home", 0, 0), null);
+});
+
+test("every VYVO accent receives a distinct motion profile", () => {
+  const accents: Product["accent"][] = [
+    "purple",
+    "orange",
+    "green",
+    "white",
+  ];
+  const profiles = accents.map((accent) => getHeroMotionProfile(accent));
+
+  assert.deepEqual(
+    profiles.map((profile) => profile.id),
+    ["signal", "rush", "ground", "graphite"],
+  );
+  assert.equal(new Set(profiles.map((profile) => profile.id)).size, 4);
 });
