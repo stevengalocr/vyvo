@@ -1,18 +1,35 @@
 # VYVO Web
 
-Tienda VYVO construida con Next.js 16, React 19 y TypeScript. Incluye landing,
-catálogo, fichas, personalización, carrito, checkout y confirmación de pedido.
-La administración permanece en BilBildin.
+Tienda pública de VYVOCR construida con Next.js 16, React 19 y TypeScript.
+Incluye landing, catálogo, fichas, personalización, carrito, checkout y
+confirmación. BilBildin funciona como motor administrativo y no aparece en la
+navegación ni en el lenguaje dirigido al cliente.
+
+## Arquitectura
+
+```text
+Cliente VYVOCR
+  → Next.js obtiene catálogo visible por negocio
+  → BilBildin resuelve precio, stock, estado y SKU
+  → el carrito conserva solo producto, variante, cantidad y configuración
+  → la API de servidor valida origen y payload
+  → PostgreSQL recalcula valores y crea el pedido en una transacción
+  → VYVO coordina pago y entrega con el cliente
+```
+
+La aplicación no contiene un panel administrativo. No acepta precios, costos,
+totales ni `business_id` desde el navegador.
 
 ## Modos de operación
 
-- `BILBILDIN_ENABLED=false`: catálogo y compra demostrativos, sin persistencia.
+- `BILBILDIN_ENABLED=false`: catálogo y recorrido demostrativos, sin cobro ni
+  persistencia comercial.
 - `BILBILDIN_ENABLED=true`: catálogo, precios, stock, clientes y pedidos reales
   desde BilBildin.
 
-El modo real falla de forma segura si faltan variables, el negocio no está
-activo o BilBildin no devuelve productos visibles. Nunca mezcla datos demo con
-pedidos reales.
+El modo conectado falla de forma segura si falta configuración, el negocio no
+está activo o el catálogo público no es válido. Nunca mezcla datos demo con un
+pedido real.
 
 ## Desarrollo
 
@@ -24,109 +41,95 @@ copy .env.example .env.local
 npm run dev
 ```
 
-Abrí `http://localhost:3000`.
+La aplicación queda disponible en `http://localhost:3000`.
 
 ## Variables de entorno
 
-Configuración recomendada:
-
 ```bash
-NEXT_PUBLIC_SITE_URL=https://vyvo-six.vercel.app
-BILBILDIN_ENABLED=false
+NEXT_PUBLIC_SITE_URL=https://vyvocr.com
+BILBILDIN_ENABLED=true
 NEXT_PUBLIC_SUPABASE_URL=https://wgicaiphzwppnshagxve.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 NEXT_PUBLIC_VYVO_BUSINESS_ID=14d10531-d6fc-45a9-9c74-1ff15c657099
 SUPABASE_SECRET_KEY=
 ```
 
-También se aceptan temporalmente:
+También se aceptan temporalmente
+`NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY` y
+`NEXT_PUBLIC_BUSINESS_ID`. Las claves privadas son exclusivamente de servidor
+y nunca deben usar `NEXT_PUBLIC_`.
 
-```bash
-NEXT_PUBLIC_SUPABASE_ANON_KEY=
-SUPABASE_SERVICE_ROLE_KEY=
-NEXT_PUBLIC_BUSINESS_ID=
-```
+## Estado conectado
 
-Las claves `secret` o `service_role` son exclusivamente de servidor y nunca
-deben usar el prefijo `NEXT_PUBLIC_`.
+| Campo | Estado |
+|---|---|
+| Negocio | `active` |
+| Plan | `starter` |
+| Propietario | `vyvocr@gmail.com` |
+| Moneda | CRC |
+| Catálogo | 9 productos visibles |
+| Inventario | 10 por producto, 90 total |
+| Pagos | SINPE, transferencia, efectivo contra entrega |
+| Business ID | `14d10531-d6fc-45a9-9c74-1ff15c657099` |
+| Vercel | `https://vyvo-six.vercel.app` |
+| Dominio objetivo | `https://vyvocr.com` |
 
-## Integración BilBildin
+El dominio personalizado solo se considera activo cuando DNS y SSL se hayan
+verificado externamente.
 
-- Proyecto Supabase: `wgicaiphzwppnshagxve`
-- Negocio VYVO: `14d10531-d6fc-45a9-9c74-1ff15c657099`
-- Estado observado y aprobado: `active`
-- Plan: `starter`
-- Producción: `BILBILDIN_ENABLED=true`
-- Producción temporal: `https://vyvo-six.vercel.app`
-- Dominio objetivo: `vyvocr.com` (pendiente de compra y conexión DNS)
-- Moneda: CRC
-- Catálogo conectado: 9 productos visibles en CRC, stock 10 por producto
-- Inventario total: 90 unidades, con movimientos de reposición auditados
-- Administrador asociado: `vyvocr@gmail.com`, correo confirmado
-- Configuración BilBildin: identidad VYVO y URL `https://vyvocr.com`
-- Pagos: SINPE, transferencia y efectivo contra entrega
+## Integración de pedidos
 
-El catálogo se consulta con clave pública, siempre filtrado por negocio y
-estado visible, con caché de 60 segundos. El costo nunca se selecciona en el
-proveedor público.
-
-Los pedidos se crean mediante
+La escritura usa
 `public.create_storefront_order_idempotent(uuid, uuid, jsonb)`, que serializa
-reintentos y delega la transacción a
-`public.create_storefront_order(uuid, jsonb)`. El flujo:
+reintentos y delega en
+`public.create_storefront_order(uuid, jsonb)`.
+
+La transacción:
 
 - solo puede ejecutarla `service_role`;
 - exige un negocio activo;
 - bloquea y valida inventario;
-- recalcula precios y costos dentro de PostgreSQL;
-- crea cliente, pedido, líneas, movimientos y tracking en una transacción;
-- devuelve el pedido original cuando se repite la misma llave de idempotencia;
-- mantiene el pago pendiente para coordinación privada con VYVO.
+- recalcula precio y costo dentro de PostgreSQL;
+- crea cliente, pedido, líneas, movimientos y tracking;
+- devuelve el pedido original ante la misma llave de idempotencia;
+- mantiene el pago pendiente para coordinación privada.
 
-La confirmación usa una referencia HMAC firmada. Conocer o modificar un UUID no
-permite consultar pedidos ajenos.
-
-## Estado de activación
-
-- [x] Negocio y plan aprobados en BilBildin.
-- [x] Variables de Supabase y Business ID verificadas en Vercel Production.
-- [x] `BILBILDIN_ENABLED=true` en Production.
-- [x] Catálogo real validado: nueve productos visibles y precios en CRC.
-- [x] Preview y desarrollo conservan el modo demo.
-- [x] Inventario cargado: diez unidades por producto, 90 en total.
-- [ ] Ejecutar un pedido transaccional controlado con datos acordados.
-
-La producción ya recibe catálogo, precios y stock desde BilBildin. Las acciones
-de compra están habilitadas; el pago permanece pendiente para coordinación
-privada con VYVO.
+La referencia de confirmación está firmada con HMAC. Un UUID conocido o
+alterado no autoriza la lectura de pedidos ajenos.
 
 ## Seguridad
 
-- CSP, anti-framing, `nosniff`, políticas de referencia y permisos.
-- Sin rutas administrativas en esta aplicación.
+- CSP, anti-framing, `nosniff`, Referrer Policy y Permissions Policy.
+- Sin rutas administrativas en el storefront.
 - Cliente privilegiado marcado `server-only`.
-- Validación Zod estricta, límite de cuerpo y protección de origen.
-- El navegador no envía precios, costos, totales ni `business_id`.
-- Todas las lecturas privadas usan `order.id + business_id`.
-- Las referencias personales de configuraciones se guardan únicamente dentro
-  del pedido y no se publican en catálogo.
+- Zod estricto, límite de cuerpo y validación de origen.
+- Lecturas privadas siempre acotadas por `order.id + business_id`.
+- Errores del proveedor clasificados sin filtrar detalles internos.
+- Configuraciones personales almacenadas solo dentro del pedido.
+- Sin números SINPE, IBAN ni instrucciones bancarias públicas.
 
 ## Calidad
 
 ```bash
 npm run check
+npm run verify:content
+npm run verify:responsive
 npm run verify:browser
 ```
 
-Las 24 pruebas cubren configuración, catálogo CRC, aislamiento del seed,
-carrito, stock cero, copy por modo, validación de checkout, referencias firmadas
-y permisos esperados de la función transaccional.
+La suite contiene 36 pruebas unitarias/de contrato. La matriz responsive cubre
+24 combinaciones de cuatro rutas críticas en seis tamaños, de 375 a 1440 px.
+El recorrido integral audita 23 rutas y completa personalización, carrito y
+checkout demo en escritorio y móvil sin crear pedidos comerciales.
 
 ## Documentación
 
-- Handoff operativo: `docs/integraciones/VYVO.md`
+- Estado operativo: `docs/integraciones/VYVO.md`
+- Requerimientos para BilBildin:
+  `docs/integraciones/BILBILDIN_REQUERIMIENTOS_VYVO.md`
 - Seed auditable: `scripts/bilbildin/seed-vyvo.sql`
-- Migración de pedidos:
-  `supabase/migrations/202607290001_create_vyvo_storefront_order.sql`
-- Diseño:
-  `docs/superpowers/specs/2026-07-29-vyvo-bilbildin-integration-design.md`
+- Migraciones: `supabase/migrations/`
+- Diseño de refinamiento:
+  `docs/superpowers/specs/2026-07-29-vyvo-storefront-production-audit-design.md`
+- Plan ejecutado:
+  `docs/superpowers/plans/2026-07-29-vyvo-storefront-production-refinement.md`

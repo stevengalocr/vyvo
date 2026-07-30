@@ -1,15 +1,20 @@
 # Alta e integración de VYVO en BilBildin
 
-Fecha de preparación: 2026-07-29  
-Repositorio de tienda: `stevengalocr/vyvo`  
-Producción temporal: `https://vyvo-six.vercel.app`
+- Fecha de corte: 2026-07-29
+- Repositorio: `stevengalocr/vyvo`
+- Proyecto Supabase: `wgicaiphzwppnshagxve`
+- Producción Vercel: `https://vyvo-six.vercel.app`
 
-Dominio objetivo: `https://vyvocr.com` (pendiente de compra y conexión DNS)
-Proyecto Supabase BilBildin: `wgicaiphzwppnshagxve`
+## Resumen
 
-Estado de integración: negocio aprobado y producción conectada a BilBildin el
-2026-07-29. El catálogo real, la configuración de marca y el inventario están
-activos; la tienda puede preparar pedidos y VYVO coordina pago y entrega.
+VYVOCR es la tienda pública. BilBildin administra negocio, catálogo, precio,
+stock y pedidos sin aparecer en la interfaz del cliente.
+
+El negocio está aprobado y la integración técnica está preparada para operar.
+El catálogo contiene nueve productos visibles en CRC y diez unidades de cada
+uno. La única validación comercial pendiente es un pedido controlado con datos
+acordados. El dominio `vyvocr.com` no debe declararse activo hasta comprobar
+DNS y SSL.
 
 ## Negocio
 
@@ -17,134 +22,155 @@ activos; la tienda puede preparar pedidos y VYVO coordina pago y entrega.
 |---|---|
 | `business_id` | `14d10531-d6fc-45a9-9c74-1ff15c657099` |
 | Nombre | VYVO |
-| Correo propietario | `vyvocr@gmail.com` |
+| Propietario | `vyvocr@gmail.com` |
 | Plan | `starter` |
-| Estado de cuenta | `active` y aprobado |
-| Estado de plan | `active` |
-| Dominio objetivo | `vyvocr.com` (pendiente de compra y DNS) |
+| Estado | `active` y aprobado |
 | Moneda / país | CRC / Costa Rica |
 | WhatsApp operativo | `+506 7287 4779` |
-| Administrador | `vyvocr@gmail.com`, asociado y confirmado |
-| Colores | `#111111`, `#6F2CFF`, `#FAFAF7`, `#FF5A1F` |
-| URL de tienda | `https://vyvocr.com` |
+| Dominio objetivo | `https://vyvocr.com` |
+| Producción verificable | `https://vyvo-six.vercel.app` |
 | Pagos | SINPE, transferencia, efectivo contra entrega |
 | Coordinación | VYVO contacta al cliente después de recibir el pedido |
 
-No se almacenaron números SINPE, IBAN, cuentas ni instrucciones bancarias
-públicas.
+No se publican números SINPE, IBAN, cuentas ni instrucciones bancarias.
+
+## Identidad
+
+| Uso | Color |
+|---|---|
+| Negro | `#111111` |
+| Violeta | `#6F2CFF` |
+| Naranja | `#FF5A1F` |
+| Blanco cálido | `#FAFAF7` |
+
+El storefront también usa verde `#79C943` como acento de personajes. El motor
+administrativo permanece visualmente separado del sitio público.
 
 ## Catálogo e inventario
 
-Todos los registros están `visible` y tienen diez unidades disponibles. El
-inventario total verificado es de 90 unidades.
+Todos los productos están visibles y tienen diez unidades. Los costos se
+mantienen en BilBildin y no se exponen en el storefront.
 
-| UUID | SKU | Producto | Categoría | Precio CRC | Costo CRC | Stock |
-|---|---|---|---|---:|---:|---:|
-| `14d10531-d6fc-45a9-9c74-1ff15c657001` | VYV-MINI-CORE-001 | CORE | Collectibles | ₡15.000 | ₡7.000 | 10 |
-| `14d10531-d6fc-45a9-9c74-1ff15c657002` | VYV-MINI-RUSH-002 | RUSH | Collectibles | ₡16.000 | ₡7.100 | 10 |
-| `14d10531-d6fc-45a9-9c74-1ff15c657003` | VYV-MINI-WILD-003 | WILD | Collectibles | ₡16.500 | ₡7.200 | 10 |
-| `14d10531-d6fc-45a9-9c74-1ff15c657004` | VYV-MINI-ECHO-004 | ECHO | Collectibles | ₡17.000 | ₡7.200 | 10 |
-| `14d10531-d6fc-45a9-9c74-1ff15c657006` | VYV-MINI-NOVA-006 | NOVA | Collectibles | ₡18.000 | ₡7.400 | 10 |
-| `14d10531-d6fc-45a9-9c74-1ff15c657005` | VYV-CUSTOM-SHIFT-005 | SHIFT | Personalizables | ₡20.500 | ₡7.800 | 10 |
-| `14d10531-d6fc-45a9-9c74-1ff15c657008` | VYV-SPORT-ARENA-008 | ARENA | Personalizables | ₡22.000 | ₡7.800 | 10 |
-| `14d10531-d6fc-45a9-9c74-1ff15c657009` | VYV-COMP-NEXO-009 | NEXO | Personalizables | ₡23.500 | ₡8.000 | 10 |
-| `14d10531-d6fc-45a9-9c74-1ff15c657010` | VYV-DROP-ABYSS-010 | ABYSS | Drops | ₡25.000 | ₡8.000 | 10 |
+| UUID | SKU | Producto | Línea | Precio CRC | Stock |
+|---|---|---|---|---:|---:|
+| `14d10531-d6fc-45a9-9c74-1ff15c657001` | VYV-MINI-CORE-001 | CORE | Coleccionable | ₡15.000 | 10 |
+| `14d10531-d6fc-45a9-9c74-1ff15c657002` | VYV-MINI-RUSH-002 | RUSH | Coleccionable | ₡16.000 | 10 |
+| `14d10531-d6fc-45a9-9c74-1ff15c657003` | VYV-MINI-WILD-003 | WILD | Coleccionable | ₡16.500 | 10 |
+| `14d10531-d6fc-45a9-9c74-1ff15c657004` | VYV-MINI-ECHO-004 | ECHO | Coleccionable | ₡17.000 | 10 |
+| `14d10531-d6fc-45a9-9c74-1ff15c657006` | VYV-MINI-NOVA-006 | NOVA | Coleccionable | ₡18.000 | 10 |
+| `14d10531-d6fc-45a9-9c74-1ff15c657005` | VYV-CUSTOM-SHIFT-005 | SHIFT | Personalizable | ₡20.500 | 10 |
+| `14d10531-d6fc-45a9-9c74-1ff15c657008` | VYV-SPORT-ARENA-008 | ARENA | Personalizable | ₡22.000 | 10 |
+| `14d10531-d6fc-45a9-9c74-1ff15c657009` | VYV-COMP-NEXO-009 | NEXO | Personalizable | ₡23.500 | 10 |
+| `14d10531-d6fc-45a9-9c74-1ff15c657010` | VYV-DROP-ABYSS-010 | ABYSS | Drop | ₡25.000 | 10 |
 
-El seed idempotente y auditable está en
+Total: 90 unidades. El seed idempotente está en
 `scripts/bilbildin/seed-vyvo.sql`.
 
-La carga del 2026-07-29 actualizó ocho productos de cero a diez y registró ocho
-movimientos `restock`. ABYSS ya estaba en diez y no recibió un movimiento
-artificial.
+## Lectura pública
+
+- BilBildin se habilita únicamente con `BILBILDIN_ENABLED=true`.
+- El catálogo usa una clave pública y siempre filtra por negocio y visibilidad.
+- Precio, stock, categoría, SKU y estado vienen del motor.
+- El costo no se selecciona en el proveedor público.
+- La caché del catálogo es de 60 segundos.
+- `public.is_storefront_business_active(uuid)` expone solo un booleano.
+- Un plazo solo se publica si existe un atributo válido
+  `lead_time_days: { min, max }`; nunca se inventa.
 
 ## Escritura de pedidos
 
-Se aplicó la migración `create_storefront_order`, que crea:
+Funciones:
 
 ```sql
-public.create_storefront_order(p_business_id uuid, p_payload jsonb)
+public.create_storefront_order_idempotent(
+  p_business_id uuid,
+  p_idempotency_key uuid,
+  p_payload jsonb
+)
+
+public.create_storefront_order(
+  p_business_id uuid,
+  p_payload jsonb
+)
 ```
 
-Propiedades verificadas:
+Controles verificados:
 
-- `SECURITY DEFINER`;
-- `search_path = ''`;
+- `SECURITY DEFINER` con `search_path = ''`;
 - sin ejecución para `public`, `anon` ni `authenticated`;
 - ejecución únicamente para `service_role`;
-- cuenta activa obligatoria;
-- productos filtrados por `business_id` y `visible`;
+- negocio activo obligatorio;
+- productos acotados por `business_id` y `visible`;
 - inventario bloqueado con `FOR UPDATE`;
-- precios y costos resueltos en PostgreSQL;
-- cliente, pedido, items, movimiento y tracking en una transacción.
+- precio y costo resueltos en PostgreSQL;
+- cliente, pedido, líneas, movimiento y tracking en una transacción;
+- idempotencia por `(business_id, idempotency_key)`;
+- pago inicial `pending`.
 
-La migración fuente está en
-`supabase/migrations/202607290001_create_vyvo_storefront_order.sql`.
-
-La lectura pública valida la activación mediante
-`public.is_storefront_business_active(uuid)`, que devuelve únicamente un
-booleano y no expone campos del negocio. Su fuente está en
-`supabase/migrations/202607290002_add_storefront_status_check.sql`.
-
-Los reintentos usan
-`public.create_storefront_order_idempotent(uuid, uuid, jsonb)` y una tabla
-server-only con llave primaria `(business_id, idempotency_key)`. Las solicitudes
-con la misma llave se serializan y devuelven el pedido original.
+La ruta pública recibe solo cliente, entrega, método de pago, productos,
+cantidades y configuraciones. No confía en precio, costo, total o tenant
+enviados por el navegador.
 
 ## Variables Vercel
 
-Requeridas:
-
 ```bash
-NEXT_PUBLIC_SITE_URL=https://vyvo-six.vercel.app
+NEXT_PUBLIC_SITE_URL=https://vyvocr.com
 NEXT_PUBLIC_SUPABASE_URL=https://wgicaiphzwppnshagxve.supabase.co
 NEXT_PUBLIC_VYVO_BUSINESS_ID=14d10531-d6fc-45a9-9c74-1ff15c657099
 BILBILDIN_ENABLED=true
-```
-
-Usar uno de cada par, prefiriendo los nombres nuevos:
-
-```bash
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
-# o NEXT_PUBLIC_SUPABASE_ANON_KEY=
-
 SUPABASE_SECRET_KEY=
-# o SUPABASE_SERVICE_ROLE_KEY=
 ```
 
-Ninguna clave privada debe publicarse en Git, documentación o variables
-`NEXT_PUBLIC_*`.
+Se permiten temporalmente los nombres legacy indicados en `.env.example`.
+Ninguna clave privada debe publicarse en Git o usar `NEXT_PUBLIC_`.
 
-## Checklist para el equipo BilBildin
+## Completado y verificado
 
-- [x] Aprobar el negocio y revisar sus nueve productos.
-- [ ] Confirmar precios/costos preliminares.
-- [x] Crear o asociar el administrador `vyvocr@gmail.com`.
-- [ ] Definir fecha/ciclo del plan si corresponde.
-- [x] Cargar stock: diez unidades por producto, 90 en total.
-- [x] `account_status` figura `active` en la verificación de base de datos.
-- [ ] Confirmar que el admin muestra VYVO aislado de otros tenants.
-- [x] Activar `BILBILDIN_ENABLED=true` en producción.
-- [ ] Comprar `vyvocr.com`, asociarlo al proyecto Vercel `vyvo` y validar DNS/SSL.
-- [ ] Cambiar `NEXT_PUBLIC_SITE_URL` a `https://vyvocr.com` y redesplegar.
+- [x] Negocio y plan aprobados.
+- [x] Propietario `vyvocr@gmail.com` asociado.
+- [x] Identidad VYVO configurada.
+- [x] Nueve productos visibles con precios CRC.
+- [x] Diez unidades por producto y 90 en total.
+- [x] Pagos coordinados: SINPE, transferencia y efectivo.
+- [x] Catálogo público filtrado por tenant.
+- [x] Escritura transaccional, idempotente y server-only.
+- [x] Referencias de confirmación firmadas.
+- [x] Navegación pública limitada a Catálogo, Personalizar y Drops.
+- [x] Copy público sin menciones de BilBildin.
+- [x] Landing, catálogo, ficha, carrito y checkout responsive.
+- [x] Cero waitlists o botones de persistencia simulada.
+- [x] 36 pruebas unitarias/de contrato.
+- [x] 24 combinaciones responsive sin fallos.
+- [x] Recorrido integral de navegador con `failureCount: 0`.
+
+## Pendiente controlado
+
+- [ ] Verificar DNS y SSL de `vyvocr.com`.
+- [ ] Confirmar `NEXT_PUBLIC_SITE_URL=https://vyvocr.com` después del DNS.
+- [ ] Ejecutar un pedido real con datos acordados.
+- [ ] Confirmar que el admin muestra únicamente el tenant VYVO.
+- [ ] Confirmar precios y costos finales antes de venta pública.
 - [ ] Habilitar protección de contraseñas filtradas en Supabase Auth.
 
-## Pruebas posteriores a la activación
+No se creó una orden comercial ficticia durante el desarrollo.
 
-- catálogo visible en CRC;
-- actualización de precio/stock reflejada en menos de 60 segundos;
-- productos sin stock no comprables;
-- pedido real con pago `pending`;
-- precio y costo correctos en `orders` y `order_items`;
-- descuento y movimiento de inventario;
-- evento inicial de tracking;
-- confirmación accesible solo con referencia firmada;
-- rechazo de precio, tenant o referencia manipulados.
+## Requerimientos futuros
 
-La base de datos quedó verificada con los nueve productos visibles, stock diez
-por producto, 90 unidades totales y ocho movimientos auditados. El usuario de
-administración coincide exactamente con `owner_email`, está confirmado, y los
-otros tres negocios conservaron sus huellas de configuración e inventario.
+Las mejoras no bloqueantes para el equipo de BilBildin están documentadas en
+`docs/integraciones/BILBILDIN_REQUERIMIENTOS_VYVO.md`: plazos validados,
+galería con alt/orden, materiales y seguridad, estado de Drops, límites de
+compra, errores estables, protección contra abuso y revisión de grants.
 
-No se ejecutó una compra real durante esta configuración para evitar crear
-clientes u órdenes falsas. Esa prueba debe realizarse con datos controlados y
-acordados.
+## Prueba de activación
+
+Con un pedido controlado:
+
+1. confirmar catálogo, precio y stock en CRC;
+2. crear el pedido con pago `pending`;
+3. verificar precio y costo calculados en PostgreSQL;
+4. comprobar movimiento y descuento de inventario;
+5. comprobar tracking inicial;
+6. repetir con la misma llave y obtener el mismo pedido;
+7. rechazar precio, tenant o referencia manipulados;
+8. cerrar o anular el pedido según el procedimiento operativo.

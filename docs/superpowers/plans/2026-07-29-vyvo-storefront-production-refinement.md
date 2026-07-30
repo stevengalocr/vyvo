@@ -29,7 +29,10 @@
 
 - `src/lib/hero/motion-profile.ts`: contrato puro que asigna a cada acento un perfil de movimiento y una señal CSS estable.
 - `src/app/storefront-refinement.css`: estilos de refinamiento comercial, responsive y movimiento cargados después de `globals.css`.
-- `tests/storefront-content.test.ts`: invariantes de copy público, acciones reales y ausencia de waitlist no persistente.
+- `scripts/verify-public-actions.mjs`: invariantes renderizadas de copy,
+  acciones reales, orden de compra y accesibilidad del checkout.
+- `scripts/verify-responsive.mjs`: matriz de seis viewports y cuatro perfiles
+  de movimiento.
 - `docs/integraciones/BILBILDIN_REQUERIMIENTOS_VYVO.md`: mejoras no bloqueantes solicitables al equipo del motor.
 
 ### Modificados
@@ -50,7 +53,7 @@
 - `src/app/api/orders/route.ts`: conservar fail-closed y normalizar respuestas públicas.
 - `src/lib/validation.ts`: retirar el esquema de waitlist si queda sin consumidores.
 - `scripts/verify-browser.mjs`: reflejar rutas y acciones reales; no enviar formularios ficticios.
-- `package.json`: registrar la nueva prueba en `npm test`.
+- `package.json`: registrar `verify:content` y `verify:responsive`.
 - `README.md`: arquitectura, estado, pruebas y checklist reales.
 - `docs/integraciones/VYVO.md`: separar estado actual de solicitudes futuras.
 
@@ -74,7 +77,7 @@
 - Produces: `mapBilbildinProduct(product, row): StorefrontProduct` con `commerce.fulfillment.leadTimeDays` nulo salvo que exista un objeto válido `lead_time_days`.
 - Produces: `getCommerceExperience("bilbildin")` con lenguaje enteramente VYVO.
 
-- [ ] **Step 1: Escribir pruebas fallidas para copy y plazo verificable**
+- [x] **Step 1: Escribir pruebas fallidas para copy y plazo verificable**
 
 Agregar a `tests/bilbildin-catalog.test.ts`:
 
@@ -134,7 +137,7 @@ assert.doesNotMatch(copy, /cuando exista inventario/i);
 assert.match(copy, /disponible|pedido|por coordinar/i);
 ```
 
-- [ ] **Step 2: Ejecutar las pruebas y confirmar el fallo**
+- [x] **Step 2: Ejecutar las pruebas y confirmar el fallo**
 
 Run:
 
@@ -144,7 +147,7 @@ npx tsx --test tests/bilbildin-catalog.test.ts tests/commerce-experience.test.ts
 
 Expected: FAIL porque el adaptador asigna `3–7`/`5–12` días y el copy conectado nombra BilBildin.
 
-- [ ] **Step 3: Implementar un parser conservador de plazo**
+- [x] **Step 3: Implementar un parser conservador de plazo**
 
 En `src/lib/bilbildin/catalog.ts`, añadir:
 
@@ -191,7 +194,7 @@ product: {
 },
 ```
 
-- [ ] **Step 4: Ejecutar pruebas**
+- [x] **Step 4: Ejecutar pruebas**
 
 Run:
 
@@ -201,7 +204,7 @@ npx tsx --test tests/bilbildin-catalog.test.ts tests/commerce-experience.test.ts
 
 Expected: PASS.
 
-- [ ] **Step 5: Confirmar**
+- [x] **Step 5: Confirmar**
 
 ```bash
 git add tests/bilbildin-catalog.test.ts tests/commerce-experience.test.ts src/lib/bilbildin/catalog.ts src/lib/commerce/experience.ts
@@ -213,7 +216,7 @@ git commit -m "Align storefront truth with VYVO commerce"
 ### Task 2: Landing y Drops sin acciones ficticias
 
 **Files:**
-- Create: `tests/storefront-content.test.ts`
+- Create: `scripts/verify-public-actions.mjs`
 - Modify: `package.json`
 - Modify: `src/app/page.tsx`
 - Modify: `src/app/drops/page.tsx`
@@ -226,44 +229,23 @@ git commit -m "Align storefront truth with VYVO commerce"
 - Produces: landing con hero, ruta de compra, productos, personalización, prueba local compacta, FAQ y CTA.
 - Produces: Drops con CTA de compra cuando ABYSS sea comprable y estado agotado cuando no lo sea.
 
-- [ ] **Step 1: Crear prueba de invariantes públicas**
+- [x] **Step 1: Crear prueba de invariantes públicas**
 
-Crear `tests/storefront-content.test.ts`:
+Crear `scripts/verify-public-actions.mjs` con Playwright y validar la interfaz
+renderizada: lenguaje público, ausencia de waitlist, compra real en Drops,
+un único enlace por tarjeta, orden de compra móvil y campos/foco de checkout.
 
-```ts
-import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
-import test from "node:test";
+Añadir `verify:content` al `package.json`.
 
-const publicFiles = [
-  "src/app/page.tsx",
-  "src/app/drops/page.tsx",
-  "src/lib/commerce/experience.ts",
-].map((path) => readFileSync(path, "utf8")).join("\n");
-
-test("public purchase copy hides internal engines and stale launch claims", () => {
-  assert.doesNotMatch(publicFiles, /BilBildin/i);
-  assert.doesNotMatch(publicFiles, /Próximo drop|cuando exista inventario/i);
-});
-
-test("public storefront has no non-persistent waitlist action", () => {
-  assert.doesNotMatch(publicFiles, /WaitlistForm|Seguir el lanzamiento|Preferís enterarte/i);
-});
-```
-
-Añadir `tests/storefront-content.test.ts` al script `test` de `package.json`.
-
-- [ ] **Step 2: Confirmar el fallo**
+- [x] **Step 2: Confirmar el fallo**
 
 Run:
 
-```bash
-npx tsx --test tests/storefront-content.test.ts
-```
+`npm run verify:content`
 
 Expected: FAIL por el “Próximo drop” y los dos formularios de novedades.
 
-- [ ] **Step 3: Simplificar la landing**
+- [x] **Step 3: Simplificar la landing**
 
 En `src/app/page.tsx`:
 
@@ -274,7 +256,7 @@ En `src/app/page.tsx`:
 - Conservar la personalización, el catálogo destacado, FAQ y CTA final.
 - Hacer que el CTA final tenga únicamente enlaces reales a `/catalogo` y `/personalizar`.
 
-- [ ] **Step 4: Hacer Drops dependiente de disponibilidad real**
+- [x] **Step 4: Hacer Drops dependiente de disponibilidad real**
 
 En `src/app/drops/page.tsx`:
 
@@ -294,7 +276,7 @@ En `src/app/drops/page.tsx`:
 
 Retirar el bloque `#alerta`, `WaitlistForm` y cualquier copy de lanzamiento futuro cuando exista inventario.
 
-- [ ] **Step 5: Eliminar la waitlist demostrativa**
+- [x] **Step 5: Eliminar la waitlist demostrativa**
 
 Eliminar:
 
@@ -304,7 +286,7 @@ Eliminar:
 
 Retirar estilos huérfanos en la tarea de CSS.
 
-- [ ] **Step 6: Ejecutar pruebas**
+- [x] **Step 6: Ejecutar pruebas**
 
 Run:
 
@@ -314,10 +296,10 @@ npm test
 
 Expected: PASS y el total de pruebas aumenta con las dos invariantes nuevas.
 
-- [ ] **Step 7: Confirmar**
+- [x] **Step 7: Confirmar**
 
 ```bash
-git add package.json tests/storefront-content.test.ts src/app/page.tsx src/app/drops/page.tsx src/lib/validation.ts src/components/waitlist-form.tsx src/app/api/waitlist/route.ts
+git add package.json scripts/verify-public-actions.mjs src/app/page.tsx src/app/drops/page.tsx src/lib/validation.ts src/components/waitlist-form.tsx src/app/api/waitlist/route.ts
 git commit -m "Focus VYVO landing on real purchase actions"
 ```
 
@@ -337,7 +319,7 @@ git commit -m "Focus VYVO landing on real purchase actions"
 - Produces: `<section data-motion-profile="...">` y stage con clave por familia/producto.
 - Consumes: `StorefrontProduct.accent`, `showcase.direction`, `prefersReducedMotion`.
 
-- [ ] **Step 1: Escribir prueba de perfiles**
+- [x] **Step 1: Escribir prueba de perfiles**
 
 Agregar a `tests/hero-showcase.test.ts`:
 
@@ -352,7 +334,7 @@ test("every VYVO accent receives a distinct motion profile", () => {
 });
 ```
 
-- [ ] **Step 2: Confirmar el fallo**
+- [x] **Step 2: Confirmar el fallo**
 
 Run:
 
@@ -362,7 +344,7 @@ npx tsx --test tests/hero-showcase.test.ts
 
 Expected: FAIL porque `motion-profile.ts` no existe.
 
-- [ ] **Step 3: Crear el contrato puro**
+- [x] **Step 3: Crear el contrato puro**
 
 Crear `src/lib/hero/motion-profile.ts`:
 
@@ -386,7 +368,7 @@ export function getHeroMotionProfile(accent: Product["accent"]) {
 }
 ```
 
-- [ ] **Step 4: Conectar perfil, clave y anuncio**
+- [x] **Step 4: Conectar perfil, clave y anuncio**
 
 En `hero-showcase.tsx`:
 
@@ -397,7 +379,7 @@ En `hero-showcase.tsx`:
 - Pausar el ciclo con movimiento reducido, pestaña oculta o hero fuera del viewport.
 - Corregir el anuncio accesible para que el contador del carrito no sea confundido con la selección.
 
-- [ ] **Step 5: Definir la capa visual inicial**
+- [x] **Step 5: Definir la capa visual inicial**
 
 Crear `storefront-refinement.css` con variables sin gradientes:
 
@@ -434,7 +416,7 @@ import "./globals.css";
 import "./storefront-refinement.css";
 ```
 
-- [ ] **Step 6: Ejecutar pruebas**
+- [x] **Step 6: Ejecutar pruebas**
 
 Run:
 
@@ -444,7 +426,7 @@ npx tsx --test tests/hero-showcase.test.ts tests/motion.test.ts
 
 Expected: PASS.
 
-- [ ] **Step 7: Confirmar**
+- [x] **Step 7: Confirmar**
 
 ```bash
 git add src/lib/hero/motion-profile.ts tests/hero-showcase.test.ts src/components/hero-showcase.tsx src/app/storefront-refinement.css src/app/layout.tsx
@@ -461,35 +443,27 @@ git commit -m "Add character-led VYVO hero motion"
 - Modify: `src/app/producto/[slug]/page.tsx`
 - Modify: `src/components/product-purchase-panel.tsx`
 - Modify: `src/app/storefront-refinement.css`
-- Modify: `tests/storefront-content.test.ts`
+- Modify: `scripts/verify-public-actions.mjs`
 
 **Interfaces:**
 - Consumes: `StorefrontProduct.commerce.purchasable`, `inventory.status`, `price`, `accent`.
 - Produces: estructura `.pdp-primary-media`, `.pdp-commerce`, `.pdp-secondary-media`.
 - Produces: resultados de catálogo anunciados mediante `aria-live="polite"`.
 
-- [ ] **Step 1: Ampliar invariantes de contenido**
+- [x] **Step 1: Ampliar invariantes de contenido**
 
-Agregar:
+Agregar una aserción de navegador que compare los límites renderizados de
+`.purchase-panel` y `.pdp-secondary-media` a 390 px.
 
-```ts
-test("product purchase content precedes secondary media in the route source", () => {
-  const source = readFileSync("src/app/producto/[slug]/page.tsx", "utf8");
-  assert.ok(source.indexOf("pdp-commerce") < source.indexOf("pdp-secondary-media"));
-});
-```
-
-- [ ] **Step 2: Confirmar el fallo**
+- [x] **Step 2: Confirmar el fallo**
 
 Run:
 
-```bash
-npx tsx --test tests/storefront-content.test.ts
-```
+`npm run verify:content`
 
 Expected: FAIL porque las clases y el orden nuevo no existen.
 
-- [ ] **Step 3: Reestructurar la ficha**
+- [x] **Step 3: Reestructurar la ficha**
 
 En `src/app/producto/[slug]/page.tsx`:
 
@@ -499,7 +473,7 @@ En `src/app/producto/[slug]/page.tsx`:
 - Mantener en escritorio dos columnas mediante áreas CSS; en móvil usar el orden del DOM.
 - Cambiar “Lo que podría incluir” por “Contenido previsto” y conservar la advertencia de confirmación.
 
-- [ ] **Step 4: Afinar compra y tarjetas**
+- [x] **Step 4: Afinar compra y tarjetas**
 
 En `product-purchase-panel.tsx`:
 
@@ -520,7 +494,7 @@ En `product-filters.tsx`:
 - Conservar botón “Limpiar filtros” únicamente cuando haya filtros activos.
 - Anunciar “N productos” después del cambio sin mover el foco.
 
-- [ ] **Step 5: Estilos de conversión y responsive**
+- [x] **Step 5: Estilos de conversión y responsive**
 
 En `storefront-refinement.css`:
 
@@ -531,7 +505,7 @@ En `storefront-refinement.css`:
 - Evitar `transition: all`; usar propiedades explícitas.
 - No producir overflow horizontal.
 
-- [ ] **Step 6: Ejecutar pruebas y build**
+- [x] **Step 6: Ejecutar pruebas y build**
 
 Run:
 
@@ -543,10 +517,10 @@ npm run build
 
 Expected: PASS.
 
-- [ ] **Step 7: Confirmar**
+- [x] **Step 7: Confirmar**
 
 ```bash
-git add src/components/product-filters.tsx src/components/product-card.tsx src/app/producto/[slug]/page.tsx src/components/product-purchase-panel.tsx src/app/storefront-refinement.css tests/storefront-content.test.ts
+git add src/components/product-filters.tsx src/components/product-card.tsx src/app/producto/[slug]/page.tsx src/components/product-purchase-panel.tsx src/app/storefront-refinement.css scripts/verify-public-actions.mjs
 git commit -m "Prioritize purchase decisions across catalog"
 ```
 
@@ -566,7 +540,7 @@ git commit -m "Prioritize purchase decisions across catalog"
 - Produces: campos con `name`, `id`, ayudas asociadas y errores públicos consistentes.
 - Preserva: cuerpo de pedido sin precio/costo de cliente y referencia firmada.
 
-- [ ] **Step 1: Añadir pruebas de contrato del pedido**
+- [x] **Step 1: Añadir pruebas de contrato del pedido**
 
 Agregar a `tests/bilbildin-order.test.ts`:
 
@@ -601,7 +575,7 @@ test("checkout rejects invalid Costa Rica delivery data", () => {
 });
 ```
 
-- [ ] **Step 2: Ejecutar prueba**
+- [x] **Step 2: Ejecutar prueba**
 
 Run:
 
@@ -611,7 +585,7 @@ npx tsx --test tests/bilbildin-order.test.ts
 
 Expected: PASS si el contrato ya es correcto; la prueba actúa como guardia antes de tocar UI.
 
-- [ ] **Step 3: Afinar formulario y feedback**
+- [x] **Step 3: Afinar formulario y feedback**
 
 En `checkout-client.tsx`:
 
@@ -629,7 +603,7 @@ En `cart-page-client.tsx`:
 - Deshabilitar reducción en cantidad 1 o explicar que eliminar es la acción correspondiente.
 - Anunciar cambios de cantidad y total sin mover el foco.
 
-- [ ] **Step 4: Normalizar errores públicos**
+- [x] **Step 4: Normalizar errores públicos**
 
 En `src/app/api/orders/route.ts`, conservar códigos actuales y mapear:
 
@@ -641,7 +615,7 @@ const retryable = /timeout|temporarily|connection/i.test(error.message);
 
 Responder `409` para disponibilidad, `503` para fallo temporal y `500` para el resto, siempre con `Cache-Control: no-store` y sin incluir `error.message`.
 
-- [ ] **Step 5: Completar estilos**
+- [x] **Step 5: Completar estilos**
 
 En `storefront-refinement.css`:
 
@@ -651,7 +625,7 @@ En `storefront-refinement.css`:
 - Controles de cantidad de al menos 44 px.
 - Resumen legible a 375 px.
 
-- [ ] **Step 6: Ejecutar verificación local**
+- [x] **Step 6: Ejecutar verificación local**
 
 Run:
 
@@ -663,7 +637,7 @@ npm test
 
 Expected: PASS.
 
-- [ ] **Step 7: Confirmar**
+- [x] **Step 7: Confirmar**
 
 ```bash
 git add tests/bilbildin-order.test.ts src/components/cart-page-client.tsx src/components/checkout-client.tsx src/app/api/orders/route.ts src/app/storefront-refinement.css
@@ -676,6 +650,7 @@ git commit -m "Harden VYVO cart and checkout usability"
 
 **Files:**
 - Modify: `scripts/verify-browser.mjs`
+- Create: `scripts/verify-responsive.mjs`
 - Modify: `src/app/storefront-refinement.css`
 - Modify: `src/app/globals.css`
 
@@ -683,7 +658,7 @@ git commit -m "Harden VYVO cart and checkout usability"
 - Consumes: servidor local en `http://localhost:3000`.
 - Produces: JSON con resultados desktop/mobile, integridad de enlaces, flujo de compra seguro y cero errores de consola.
 
-- [ ] **Step 1: Actualizar el verificador**
+- [x] **Step 1: Actualizar el verificador**
 
 En `scripts/verify-browser.mjs`:
 
@@ -697,7 +672,7 @@ En `scripts/verify-browser.mjs`:
 - Llegar al paso de revisión del checkout sin confirmar un pedido real.
 - Exigir cero enlaces rotos, botones sin nombre, formularios sin submit, overflow horizontal, errores de consola o respuestas 4xx/5xx inesperadas.
 
-- [ ] **Step 2: Ejecutar el servidor**
+- [x] **Step 2: Ejecutar el servidor**
 
 Run:
 
@@ -707,7 +682,7 @@ npm run dev
 
 Expected: servidor disponible en `http://localhost:3000`.
 
-- [ ] **Step 3: Ejecutar el verificador**
+- [x] **Step 3: Ejecutar el verificador**
 
 Run:
 
@@ -717,7 +692,7 @@ npm run verify:browser
 
 Expected: `failureCount: 0`.
 
-- [ ] **Step 4: Corregir hallazgos en una sola pasada**
+- [x] **Step 4: Corregir hallazgos en una sola pasada**
 
 Aplicar en `storefront-refinement.css` y, únicamente si existe CSS muerto relacionado con waitlist o club, retirarlo de `globals.css`. Corregir juntos:
 
@@ -730,7 +705,7 @@ Aplicar en `storefront-refinement.css` y, únicamente si existe CSS muerto relac
 - contraste;
 - estados de filtros y carrito.
 
-- [ ] **Step 5: Confirmar con una segunda y última pasada**
+- [x] **Step 5: Confirmar con una segunda y última pasada**
 
 Run:
 
@@ -740,7 +715,7 @@ npm run verify:browser
 
 Expected: `failureCount: 0` sin cambios adicionales.
 
-- [ ] **Step 6: Confirmar**
+- [x] **Step 6: Confirmar**
 
 ```bash
 git add scripts/verify-browser.mjs src/app/storefront-refinement.css src/app/globals.css
@@ -761,7 +736,7 @@ git commit -m "Verify responsive VYVO purchase journeys"
 - Produces: handoff claro para VYVO y solicitudes no bloqueantes para BilBildin.
 - Produces: commit final verificable en `origin/main`.
 
-- [ ] **Step 1: Documentar el límite VYVOCR ↔ BilBildin**
+- [x] **Step 1: Documentar el límite VYVOCR ↔ BilBildin**
 
 Actualizar `README.md` con:
 
@@ -775,7 +750,7 @@ Actualizar `README.md` con:
 - Total real de pruebas.
 - Dominio canónico objetivo y URL Vercel actual.
 
-- [ ] **Step 2: Preparar el handoff para BilBildin**
+- [x] **Step 2: Preparar el handoff para BilBildin**
 
 Crear `docs/integraciones/BILBILDIN_REQUERIMIENTOS_VYVO.md`:
 
@@ -808,7 +783,7 @@ Actualizar `docs/integraciones/VYVO.md` para separar:
 - pendiente de pedido controlado;
 - solicitudes futuras.
 
-- [ ] **Step 3: Ejecutar la suite completa**
+- [x] **Step 3: Ejecutar la suite completa**
 
 Run:
 
@@ -818,7 +793,7 @@ npm run check
 
 Expected: lint, TypeScript, todas las pruebas y build PASS.
 
-- [ ] **Step 4: Revisar el diff**
+- [x] **Step 4: Revisar el diff**
 
 Run:
 
@@ -830,7 +805,7 @@ git diff --stat
 
 Expected: sin whitespace errors ni archivos generados accidentales.
 
-- [ ] **Step 5: Confirmar documentación**
+- [x] **Step 5: Confirmar documentación**
 
 ```bash
 git add README.md docs/integraciones/VYVO.md docs/integraciones/BILBILDIN_REQUERIMIENTOS_VYVO.md docs/superpowers/plans/2026-07-29-vyvo-storefront-production-refinement.md
