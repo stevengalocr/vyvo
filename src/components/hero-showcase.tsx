@@ -43,6 +43,8 @@ export function HeroShowcase({
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
   const [failedStageSlug, setFailedStageSlug] = useState<string | null>(null);
   const heroRef = useRef<HTMLElement>(null);
+  const heroChipsRef = useRef<HTMLDivElement>(null);
+  const familyTabRef = useRef<HTMLButtonElement>(null);
   const productTabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   const focusProduct = products[showcase.previewIndex] ?? null;
@@ -110,6 +112,27 @@ export function HeroShowcase({
     observer.observe(node);
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    const strip = heroChipsRef.current;
+    const selected =
+      showcase.selectedIndex === null
+        ? familyTabRef.current
+        : productTabRefs.current[showcase.selectedIndex];
+    if (!strip || !selected) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      const stripRect = strip.getBoundingClientRect();
+      const selectedRect = selected.getBoundingClientRect();
+      if (selectedRect.left < stripRect.left) {
+        strip.scrollLeft -= stripRect.left - selectedRect.left + 4;
+      } else if (selectedRect.right > stripRect.right) {
+        strip.scrollLeft += selectedRect.right - stripRect.right + 4;
+      }
+    });
+
+    return () => window.cancelAnimationFrame(frame);
+  }, [showcase.selectedIndex]);
 
   const selectProduct = useCallback(
     (index: number) => {
@@ -229,7 +252,6 @@ export function HeroShowcase({
                   ? "hero__stage-media--product"
                   : "hero__stage-media--family"
               }`}
-              data-direction={showcase.direction}
               data-stage-key={selectedProduct?.slug ?? "family"}
               key={selectedProduct?.slug ?? "family"}
             >
@@ -324,7 +346,27 @@ export function HeroShowcase({
           <Icon name="chevron" />
         </button>
 
-        <div className="hero-chips" role="tablist" aria-label="Personajes VYVO">
+        <div
+          className="hero-chips"
+          ref={heroChipsRef}
+          role="tablist"
+          aria-label="Personajes VYVO"
+        >
+          <button
+            ref={familyTabRef}
+            type="button"
+            role="tab"
+            aria-selected={showcase.selectedIndex === null}
+            aria-controls="hero-character-stage"
+            tabIndex={showcase.selectedIndex === null ? 0 : -1}
+            className={
+              showcase.selectedIndex === null ? "is-selected" : undefined
+            }
+            onClick={selectFamily}
+            onKeyDown={handleFamilyKeyDown}
+          >
+            Familia
+          </button>
           {products.map((product, index) => {
             const isSelected = showcase.selectedIndex === index;
             const isPreviewing =
@@ -357,20 +399,6 @@ export function HeroShowcase({
               </button>
             );
           })}
-          <button
-            type="button"
-            role="tab"
-            aria-selected={showcase.selectedIndex === null}
-            aria-controls="hero-character-stage"
-            tabIndex={showcase.selectedIndex === null ? 0 : -1}
-            className={
-              showcase.selectedIndex === null ? "is-selected" : undefined
-            }
-            onClick={selectFamily}
-            onKeyDown={handleFamilyKeyDown}
-          >
-            Familia
-          </button>
         </div>
 
         <button

@@ -15,7 +15,6 @@ import {
   getStorefrontProduct,
 } from "@/lib/bilbildin/provider";
 import { getBilbildinMode } from "@/lib/bilbildin/config";
-import { formatMoney } from "@/lib/commerce/cart";
 import { getCommerceExperience } from "@/lib/commerce/experience";
 
 type ProductPageProps = {
@@ -82,6 +81,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
             <span className="eyebrow">{product.lineLabel}</span>
             <h1>{product.name}</h1>
             <p className="pdp-summary__descriptor">{product.descriptor}</p>
+            <ProductPurchasePanel product={product} />
+            <p className="pdp-security">
+              <Icon name="shield" size={16} />
+              {experience.product.security}
+            </p>
             <div className="pdp-status">
               <span />
               <div>
@@ -93,14 +97,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <div>
                 <dt>Modalidad</dt>
                 <dd>{salesModelLabel(product.commerce.salesModel)}</dd>
-              </div>
-              <div>
-                <dt>Precio</dt>
-                <dd>
-                  {product.commerce.price
-                    ? `${formatMoney(product.commerce.price)}${experience.product.priceSuffix}`
-                    : "Por confirmar"}
-                </dd>
               </div>
               <div>
                 <dt>Disponibilidad</dt>
@@ -117,11 +113,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </dl>
             <p>{product.shortDescription}</p>
             <blockquote>“{product.quote}”</blockquote>
-            <ProductPurchasePanel product={product} />
-            <p className="pdp-security">
-              <Icon name="shield" size={16} />
-              {experience.product.security}
-            </p>
           </div>
 
           <div

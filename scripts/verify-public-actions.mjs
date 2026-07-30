@@ -65,6 +65,7 @@ try {
 
   await page.getByRole("link", { name: "Continuar al checkout" }).click();
   await page.waitForURL("**/checkout");
+  await page.locator(".checkout-form").waitFor({ state: "visible" });
   const stepOneFields = page.locator("input");
   const stepOneFieldCount = await stepOneFields.count();
   assert.ok(stepOneFieldCount > 0);

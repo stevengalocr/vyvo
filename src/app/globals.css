@@ -993,14 +993,6 @@ img {
   transform-origin: 54% 56%;
 }
 
-.hero__stage-media[data-direction="-1"] {
-  --hero-stage-shift: -34px;
-}
-
-.hero__stage-media[data-direction="1"] {
-  --hero-stage-shift: 34px;
-}
-
 .hero__stage-media--product {
   inset: 2% 4% 1%;
 }
@@ -1335,32 +1327,6 @@ img {
   }
 }
 
-@keyframes hero-focus-enter {
-  from {
-    filter: blur(3px);
-    opacity: 0;
-    transform: translate3d(12px, 0, 0);
-  }
-  to {
-    filter: blur(0);
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
-  }
-}
-
-@keyframes hero-stage-product-enter {
-  from {
-    filter: blur(3px);
-    opacity: 0;
-    transform: translate3d(var(--hero-stage-shift), 0, 0) scale(0.96);
-  }
-  to {
-    filter: blur(0);
-    opacity: 1;
-    transform: translate3d(0, 0, 0) scale(1);
-  }
-}
-
 @keyframes hero-stage-family-enter {
   from {
     clip-path: inset(0 8% 0 8% round 36px);
@@ -1369,28 +1335,6 @@ img {
   to {
     clip-path: inset(0 0 0 0 round 0);
     opacity: 1;
-  }
-}
-
-@keyframes hero-stage-signal-enter {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) scale(0.88);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) scale(1);
-  }
-}
-
-@keyframes hero-stage-orbit-enter {
-  from {
-    opacity: 0;
-    transform: translateX(-50%) scaleX(0.62) rotate(-14deg);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(-50%) scaleX(0.72) rotate(-8deg);
   }
 }
 
@@ -1441,24 +1385,8 @@ img {
     animation: hero-layer-enter 980ms var(--motion-out) 160ms both;
   }
 
-  .hero-focus__content {
-    animation: hero-focus-enter 260ms var(--motion-out) both;
-  }
-
-  .hero__stage-media--product {
-    animation: hero-stage-product-enter 420ms var(--motion-out) both;
-  }
-
   .hero__stage-media--family {
     animation: hero-stage-family-enter 360ms var(--motion-out) both;
-  }
-
-  .hero[data-hero-state="product"] .hero__stage-signal {
-    animation: hero-stage-signal-enter 460ms var(--motion-out) both;
-  }
-
-  .hero[data-hero-state="product"] .hero__stage-orbit {
-    animation: hero-stage-orbit-enter 520ms var(--motion-out) 40ms both;
   }
 
   .hero-focus__progress {
@@ -6373,14 +6301,5 @@ img {
     animation: none !important;
     filter: none !important;
     transition: none !important;
-  }
-
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    scroll-behavior: auto !important;
-    transition-duration: 0.01ms !important;
   }
 }

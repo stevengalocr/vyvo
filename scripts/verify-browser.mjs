@@ -47,7 +47,7 @@ async function inspectRoute(context, route, label) {
   });
 
   const response = await page.goto(`${baseUrl}${route}`, {
-    waitUntil: "networkidle",
+    waitUntil: "domcontentloaded",
     timeout: 30_000,
   });
 
@@ -84,6 +84,7 @@ async function inspectRoute(context, route, label) {
     await page.screenshot({
       path: `artifacts/vyvo-${slug}-${label}.png`,
       fullPage: false,
+      caret: "initial",
     });
   }
 
@@ -111,9 +112,9 @@ async function verifyPrimaryJourneys(context) {
     }
   });
 
-  await page.goto(`${baseUrl}/catalogo`, { waitUntil: "networkidle" });
+  await page.goto(`${baseUrl}/catalogo`, { waitUntil: "domcontentloaded" });
   await page.evaluate(() => localStorage.clear());
-  await page.reload({ waitUntil: "networkidle" });
+  await page.reload({ waitUntil: "domcontentloaded" });
   const navigationLabels = await page
     .locator(".desktop-nav > a")
     .allTextContents();
@@ -140,7 +141,7 @@ async function verifyPrimaryJourneys(context) {
       .textContent(),
   };
 
-  await page.goto(`${baseUrl}/personalizar`, { waitUntil: "networkidle" });
+  await page.goto(`${baseUrl}/personalizar`, { waitUntil: "domcontentloaded" });
   const customizationPathCount = await page
     .locator(".customize-path-grid .customize-path")
     .count();
@@ -219,7 +220,7 @@ async function verifyPrimaryJourneys(context) {
     .getByText("Negro + violeta")
     .isVisible();
 
-  await page.goto(`${baseUrl}/drops`, { waitUntil: "networkidle" });
+  await page.goto(`${baseUrl}/drops`, { waitUntil: "domcontentloaded" });
   const dropStatusCount = await page.locator(".drop-status__grid > div").count();
   const dropMotionHooks = {
     depthLayers: await page.locator(".drops-hero__depth").count(),
@@ -230,16 +231,16 @@ async function verifyPrimaryJourneys(context) {
     .isVisible();
   const dropWaitlistCount = await page.locator(".waitlist-form, #alerta").count();
 
-  await page.goto(baseUrl, { waitUntil: "networkidle" });
+  await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
   const clubSectionCount = await page.getByText("VYVO Club · Próximamente").count();
   const homeWaitlistCount = await page.locator(".waitlist-form").count();
   const homeMainCopy = await page.locator("main").innerText();
   const publicEngineMentioned = /BilBildin/i.test(homeMainCopy);
   const staleLaunchClaimPresent =
     /Próximo drop|cuando exista inventario/i.test(homeMainCopy);
-  const selectedBefore = await page
-    .locator('.hero-chips [aria-selected="true"]')
-    .textContent();
+  const focusBefore = await page
+    .locator(".hero-focus__content")
+    .getAttribute("data-focus-key");
   const heroMotion = await page.locator(".hero").evaluate((hero) => ({
     state: hero.getAttribute("data-hero-state"),
     decorativeLayers: hero.querySelectorAll(
@@ -256,9 +257,16 @@ async function verifyPrimaryJourneys(context) {
       .count(),
   };
   await page.getByRole("button", { name: "Personaje siguiente" }).click();
-  const selectedAfter = await page
-    .locator('.hero-chips [aria-selected="true"]')
-    .textContent();
+  await page.waitForFunction(
+    (previous) =>
+      document
+        .querySelector(".hero-focus__content")
+        ?.getAttribute("data-focus-key") !== previous,
+    focusBefore,
+  );
+  const focusAfter = await page
+    .locator(".hero-focus__content")
+    .getAttribute("data-focus-key");
 
   results.push({
     label: "primary-journeys",
@@ -284,7 +292,7 @@ async function verifyPrimaryJourneys(context) {
     homeWaitlistCount,
     publicEngineMentioned,
     staleLaunchClaimPresent,
-    heroCarouselChanged: selectedBefore !== selectedAfter,
+    heroCarouselChanged: focusBefore !== focusAfter,
     heroMotion,
     landingMotion,
     consoleErrors,
@@ -316,10 +324,10 @@ async function verifyPurchaseFlow(context, label) {
     }
   });
 
-  await page.goto(baseUrl, { waitUntil: "networkidle" });
+  await page.goto(baseUrl, { waitUntil: "domcontentloaded" });
   await page.evaluate(() => localStorage.clear());
   await page.goto(`${baseUrl}/producto/vyvo-core`, {
-    waitUntil: "networkidle",
+    waitUntil: "domcontentloaded",
   });
   await page.getByRole("button", { name: "Agregar al carrito" }).click();
   const purchaseState = await page
@@ -343,6 +351,7 @@ async function verifyPurchaseFlow(context, label) {
     .getByRole("link", { name: "Continuar al checkout" })
     .click();
   await page.waitForURL("**/checkout");
+  await page.locator(".checkout-form").waitFor({ state: "visible" });
   const checkoutStepStart = await page
     .locator(".checkout-layout")
     .getAttribute("data-checkout-step");
@@ -444,7 +453,7 @@ async function verifyInteractionIntegrity(context) {
 
   for (const route of routesToAudit) {
     await page.goto(`${baseUrl}${route}`, {
-      waitUntil: "networkidle",
+      waitUntil: "domcontentloaded",
       timeout: 30_000,
     });
     const audit = await page.evaluate(() => {
@@ -563,7 +572,7 @@ for (const route of [
 await verifyPurchaseFlow(mobile, "mobile");
 
 const menuPage = await mobile.newPage();
-await menuPage.goto(baseUrl, { waitUntil: "networkidle" });
+await menuPage.goto(baseUrl, { waitUntil: "domcontentloaded" });
 const menu = menuPage.getByRole("button", { name: "Abrir menú" });
 const menuVisible = await menu.isVisible();
 if (menuVisible) await menu.click();
