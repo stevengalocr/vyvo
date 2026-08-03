@@ -12,7 +12,6 @@ export const siteConfig = {
   },
   flags: {
     socialProof: false,
-    analytics: process.env.NEXT_PUBLIC_ANALYTICS_ENABLED === "true",
   },
 } as const;
 

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import "@fontsource-variable/inter";
 import "@fontsource-variable/sora";
 import "./globals.css";
@@ -63,6 +64,7 @@ export default async function RootLayout({
           <Footer />
           <MotionController />
         </CartProvider>
+        <Analytics />
       </body>
     </html>
   );

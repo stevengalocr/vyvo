@@ -108,6 +108,16 @@ alterado no autoriza la lectura de pedidos ajenos.
 - Configuraciones personales almacenadas solo dentro del pedido.
 - Sin números SINPE, IBAN ni instrucciones bancarias públicas.
 
+## Analítica
+
+Vercel Web Analytics está integrado globalmente en el layout de Next.js para
+medir visitas y páginas vistas en los despliegues de Vercel. No se registran
+eventos personalizados ni se envían campos del checkout, datos de contacto o
+detalles de pedidos.
+
+La recopilación se activa desde **Vercel → Project → Analytics** y no requiere
+variables de entorno adicionales.
+
 ## Calidad
 
 ```bash

@@ -16,6 +16,7 @@ export default function PrivacyPage() {
           bullets: [
             "Correo y consentimiento cuando te unís a una lista de interés.",
             "Producto o ruta de interés y fuente de registro.",
+            "Métricas agregadas de navegación y páginas vistas mediante Vercel Web Analytics.",
             "Datos de cuenta administrativa cuando se conecte el proveedor de identidad.",
             "Referencias de personalización únicamente en fases futuras y mediante almacenamiento privado.",
           ],
@@ -23,7 +24,8 @@ export default function PrivacyPage() {
         {
           title: "Para qué los usamos",
           paragraphs: [
-            "Usamos el correo para comunicar avances relevantes solicitados por vos. No vendemos datos ni usamos referencias privadas como material de marketing sin consentimiento separado.",
+            "Usamos el correo para comunicar avances relevantes solicitados por vos y las métricas de navegación para entender qué recorridos públicos necesitan mejoras. No enviamos a Analytics los datos ingresados en el checkout, direcciones, teléfonos ni detalles de pedidos.",
+            "No vendemos datos ni usamos referencias privadas como material de marketing sin consentimiento separado.",
           ],
         },
         {
