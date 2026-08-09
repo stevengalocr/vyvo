@@ -32,6 +32,20 @@ export const customRequestSchema = z
         phone: text(8, 24),
       })
       .strict(),
+    /**
+     * El encargo entra por el mismo flujo de pedido que una compra, y
+     * `create_storefront_order` exige dirección. Se pide acá para no tener que
+     * perseguir al cliente después, y porque el encargo termina siendo un envío real.
+     */
+    shippingAddress: z
+      .object({
+        address: text(5, 180),
+        city: text(2, 80),
+        province: text(2, 80),
+        postalCode: z.string().regex(/^\d{5}$/),
+        country: z.literal("CR"),
+      })
+      .strict(),
     brief: z
       .object({
         idea: text(IDEA_MIN, IDEA_MAX),
@@ -66,6 +80,8 @@ export type StoredReferenceImage = {
   path: string;
   contentType: string;
   bytes: number;
+  /** URL firmada del bucket privado; null si Storage no la pudo emitir. */
+  url: string | null;
 };
 
 /**

@@ -24,7 +24,7 @@ const ACCEPT = ACCEPTED_IMAGE_TYPES.join(",");
 export function CustomRequestForm({ baseProductSlug, baseProductName }: Props) {
   const [status, setStatus] = useState<Status>("idle");
   const [error, setError] = useState<string | null>(null);
-  const [reference, setReference] = useState<string | null>(null);
+  const [orderNumber, setOrderNumber] = useState<string | null>(null);
   const [idea, setIdea] = useState("");
   const [files, setFiles] = useState<File[]>([]);
   const fileInput = useRef<HTMLInputElement>(null);
@@ -57,6 +57,13 @@ export function CustomRequestForm({ baseProductSlug, baseProductName }: Props) {
         email: String(form.get("email") ?? "").trim(),
         phone: String(form.get("phone") ?? "").trim(),
       },
+      shippingAddress: {
+        address: String(form.get("address") ?? "").trim(),
+        city: String(form.get("city") ?? "").trim(),
+        province: String(form.get("province") ?? "").trim(),
+        postalCode: String(form.get("postalCode") ?? "").trim(),
+        country: "CR" as const,
+      },
       brief: {
         idea: String(form.get("idea") ?? "").trim(),
         recipient: String(form.get("recipient") ?? "").trim() || undefined,
@@ -77,7 +84,7 @@ export function CustomRequestForm({ baseProductSlug, baseProductName }: Props) {
     try {
       const response = await fetch("/api/encargos", { method: "POST", body });
       const data = (await response.json()) as {
-        reference?: string;
+        orderNumber?: string;
         error?: string;
       };
       if (!response.ok) {
@@ -85,7 +92,7 @@ export function CustomRequestForm({ baseProductSlug, baseProductName }: Props) {
         setStatus("idle");
         return;
       }
-      setReference(data.reference ?? null);
+      setOrderNumber(data.orderNumber ?? null);
       setStatus("done");
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch {
@@ -103,17 +110,18 @@ export function CustomRequestForm({ baseProductSlug, baseProductName }: Props) {
         <span className="eyebrow">Encargo recibido</span>
         <h1>Ya tenemos tu idea.</h1>
         <p>
-          La revisamos y te escribimos con el alcance, el precio y el plazo.
-          Todavía no hay ningún cobro: el encargo se cotiza antes de producir.
+          Te escribimos por WhatsApp con el alcance, el precio y el plazo.
+          Todavía no hay ningún cobro: el encargo se cotiza antes de producir y
+          vos decidís si seguimos.
         </p>
         <dl>
           <div>
-            <dt>Referencia</dt>
-            <dd>{reference}</dd>
+            <dt>Número de encargo</dt>
+            <dd>{orderNumber}</dd>
           </div>
           <div>
             <dt>Estado</dt>
-            <dd>En revisión</dd>
+            <dd>En revisión · sin cotizar</dd>
           </div>
         </dl>
         <Link className="button button--ghost" href="/catalogo">
@@ -206,19 +214,16 @@ export function CustomRequestForm({ baseProductSlug, baseProductName }: Props) {
 
       <fieldset>
         <legend>Cómo te contactamos</legend>
-        <p>Solo para responderte con la cotización. No compartimos tus datos.</p>
+        <p>
+          Te escribimos por WhatsApp con el alcance, el precio y el plazo. No
+          compartimos tus datos con nadie.
+        </p>
         <div className="form-grid">
           <label className="field">
             <span>
               Nombre <em>*</em>
             </span>
             <input name="name" required minLength={2} maxLength={140} autoComplete="name" />
-          </label>
-          <label className="field">
-            <span>
-              Correo <em>*</em>
-            </span>
-            <input name="email" type="email" required maxLength={254} autoComplete="email" />
           </label>
           <label className="field">
             <span>
@@ -232,6 +237,61 @@ export function CustomRequestForm({ baseProductSlug, baseProductName }: Props) {
               inputMode="tel"
               autoComplete="tel"
               placeholder="8888-8888"
+            />
+          </label>
+          <label className="field field--full">
+            <span>
+              Correo <em>*</em>
+            </span>
+            <input name="email" type="email" required maxLength={254} autoComplete="email" />
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>A dónde llegaría</legend>
+        <p>
+          La dejamos anotada desde ya para no perseguirte después. Nada se envía
+          hasta que aceptes la cotización.
+        </p>
+        <div className="form-grid">
+          <label className="field field--full">
+            <span>
+              Dirección <em>*</em>
+            </span>
+            <input
+              name="address"
+              required
+              minLength={5}
+              maxLength={180}
+              autoComplete="street-address"
+              placeholder="Del parque 100 m norte, casa verde"
+            />
+          </label>
+          <label className="field">
+            <span>
+              Cantón <em>*</em>
+            </span>
+            <input name="city" required minLength={2} maxLength={80} autoComplete="address-level2" />
+          </label>
+          <label className="field">
+            <span>
+              Provincia <em>*</em>
+            </span>
+            <input name="province" required minLength={2} maxLength={80} autoComplete="address-level1" />
+          </label>
+          <label className="field">
+            <span>
+              Código postal <em>*</em>
+            </span>
+            <input
+              name="postalCode"
+              required
+              pattern="\d{5}"
+              inputMode="numeric"
+              maxLength={5}
+              autoComplete="postal-code"
+              placeholder="10101"
             />
           </label>
         </div>

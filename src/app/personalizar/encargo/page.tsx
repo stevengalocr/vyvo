@@ -21,8 +21,8 @@ export const metadata: Metadata = {
 const steps = [
   ["01", "Mandás tu idea", "Escribís qué querés y, si podés, adjuntás fotos."],
   ["02", "La revisamos", "Definimos si es fabricable y con qué alcance."],
-  ["03", "Te cotizamos", "Precio, plazo y detalles. Ahí decidís vos."],
-  ["04", "La hacemos VYVO", "Aprobás el concepto y entra a producción."],
+  ["03", "Te cotizamos", "Te escribimos por WhatsApp con precio y plazo."],
+  ["04", "La hacemos VYVO", "Aprobás y entra a producción. Pagás al recibirla."],
 ] as const;
 
 export default function EncargoPage() {
@@ -58,13 +58,13 @@ export default function EncargoPage() {
             </p>
             <ul>
               <li>
-                <Icon name="check" /> Pedir no cuesta ni compromete
+                <Icon name="check" /> Enviar no cuesta ni compromete
               </li>
               <li>
                 <Icon name="check" /> El precio se define después de revisarla
               </li>
               <li>
-                <Icon name="shield" /> Tus referencias quedan privadas
+                <Icon name="shield" /> Tus fotos quedan privadas
               </li>
             </ul>
           </div>

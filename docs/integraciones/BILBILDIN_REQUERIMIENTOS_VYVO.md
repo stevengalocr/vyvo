@@ -6,63 +6,70 @@
 
 ---
 
-## ⚠️ Pendiente de aplicar: encargos personalizados
+## ⚠️ Pendiente para activar encargos personalizados
 
-**Migración:** `supabase/migrations/202608090001_create_vyvo_custom_request.sql`
-**Estado:** escrita y probada en el repositorio, **sin aplicar en la base de BilBildin**.
+VYVO publicó `/personalizar/encargo`: el cliente cuenta su idea, adjunta fotos y completa
+el formulario como si fuera una compra. **El encargo no lleva precio** — se cotiza
+después de revisarlo.
 
-Mientras no se aplique, `/personalizar/encargo` queda publicado pero el envío responde
-**503** con un mensaje claro al cliente. Nada se rompe; simplemente no recibe encargos.
+Se resolvió **sin funciones nuevas en BilBildin**: el encargo entra por
+`create_storefront_order_idempotent`, la misma que usa el checkout, y aparece en la lista
+de pedidos normal.
 
-### Qué resuelve
+Faltan dos cosas, ninguna es una migración de esquema:
 
-`create_storefront_order` calcula el subtotal desde el precio del catálogo y descuenta
-inventario. Sirve para piezas que ya existen y ya tienen precio. **Un encargo
-personalizado no tiene ninguna de las dos cosas:** el cliente manda su idea, VYVO la
-revisa y recién ahí define alcance, precio y plazo.
+### 1. Crear el producto de encargo
 
-### Qué agrega — y qué NO toca
-
-Es **estrictamente aditiva**. Hay una prueba automatizada
-(`tests/custom-request.test.ts`) que falla si alguien mete un `alter table` sobre
-`orders` o cualquier `drop`.
-
-| Objeto nuevo | Para qué |
+| Campo | Valor |
 |---|---|
-| `public.storefront_custom_requests` | Tabla de encargos, con `business_id`, contacto, `brief` jsonb, imágenes y estado |
-| `public.create_storefront_custom_request(uuid, jsonb)` | La crea de forma atómica; valida negocio activo y reutiliza `store_customers` |
-| bucket `vyvo-custom-references` | Imágenes de referencia, **privado**, 5 MB, solo JPG/PNG/WEBP |
+| Slug | `vyvo-encargo-personalizado` |
+| Nombre sugerido | VYVO You · Encargo personalizado |
+| Precio | **₡0** — el precio real se define al cotizar |
+| Stock | Alto (ej. 9999) |
+| Estado | `visible` |
 
-**Por qué una tabla propia y no una fila en `orders`:** un encargo sin precio obligaría
-a inventar valores para columnas cuyas restricciones (`payment_method`, `status`,
-`payment_status`) son de BilBildin. Escribir ahí a ciegas falla en producción y ensucia
-los reportes de ventas. Cuando VYVO cotice y el cliente acepte, BilBildin crea el pedido
-real por su flujo normal y lo enlaza con `converted_order_id`.
+No aparece en la tienda: el storefront solo lista los nueve slugs de Origins.
 
-### Postura de seguridad — igual que `create_storefront_order`
+### 2. Crear el bucket de fotos
 
-- `security definer` con `set search_path = ''`.
-- RLS activo y **sin políticas**: nadie llega por PostgREST.
-- `revoke` a `public`, `anon` y `authenticated`; `grant execute` solo a `service_role`.
-- El bucket es privado: son fotos de personas y mascotas reales. BilBildin las lee con
-  URL firmada.
+`supabase/migrations/202608090001_create_vyvo_reference_bucket.sql`, o a mano desde
+Supabase → Storage → New bucket:
 
-### Ciclo de vida del encargo
+- Nombre `vyvo-custom-references`
+- **Privado** (son fotos de personas y mascotas reales)
+- Límite 5 MB, solo `image/jpeg`, `image/png`, `image/webp`
 
-`pending_review` → `quoted` → `accepted` | `declined` → `archived`
+VYVO sube desde el servidor con `service_role` y guarda en el pedido una **URL firmada a
+90 días**, así que BilBildin abre las fotos sin credenciales y el bucket nunca queda
+expuesto.
 
-Campos para que BilBildin cierre el ciclo: `quoted_amount`, `quoted_currency`,
-`internal_notes`, `converted_order_id`.
+Mientras falte cualquiera de las dos, el envío responde **503** con un mensaje claro al
+cliente. Nada se rompe.
 
-### Cómo aplicarla
+### Cómo llega el encargo
 
-```bash
-supabase db push
-# o pegar el archivo en el SQL editor del proyecto
-```
+Dentro del pedido, en `notes.configurations`, con estos campos en orden:
 
-Después de aplicar, verificar con un envío real desde `/personalizar/encargo` y revisar
-que la fila aparezca en `storefront_custom_requests`.
+`Idea del cliente` · `Para quién` · `Ocasión` · `Tamaño que imagina` · `Para cuándo` ·
+`Referencia 1..5` (URLs firmadas) · `Estado comercial`
+
+Método de pago **efectivo** y total **₡0**.
+
+### Efectos conocidos
+
+Consecuencia de reutilizar el flujo de pedidos, aceptados a conciencia:
+
+- Los encargos aparecen como **pedidos de ₡0** en los reportes de ventas.
+- Cada encargo **descuenta stock** del producto de encargo y deja un
+  `inventory_movements` de tipo `sale`. Hay que reponer stock cada tanto.
+- Suman al `total_orders` del cliente.
+
+### Alternativa limpia, si algún día molesta
+
+`supabase/opcional/storefront_custom_requests.sql` — tabla y función propias, sin pedidos
+de ₡0 ni stock fantasma. **No está en `migrations/` a propósito**, para que
+`supabase db push` no la aplique sola. Requiere que BilBildin exponga esa tabla en su
+panel; si no, los encargos quedan donde nadie los ve.
 
 ---
 

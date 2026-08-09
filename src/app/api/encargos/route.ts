@@ -1,23 +1,29 @@
 import { NextResponse } from "next/server";
 import { getBilbildinMode } from "@/lib/bilbildin/config";
+import { createOrderReference } from "@/lib/bilbildin/order-reference";
+import { getPrivateBilbildinConfig } from "@/lib/bilbildin/config";
 import {
   customRequestSchema,
   MAX_IMAGE_BYTES,
   MAX_REFERENCE_IMAGES,
 } from "@/lib/bilbildin/custom-request-schema";
 import {
+  CustomProductMissingError,
   ReferenceImageError,
-  createCustomRequest,
-  draftReferenceKey,
+  createCustomOrder,
+  referenceFolder,
   uploadReferenceImages,
 } from "@/lib/bilbildin/custom-requests";
+import { classifyOrderError } from "@/lib/bilbildin/order-errors";
 
 export const runtime = "nodejs";
 
 /**
- * Encargos personalizados. Espeja la postura de seguridad de /api/orders — mismo control
- * de origen, mismo límite de tamaño, mismo campo trampa — pero acepta multipart porque
- * el cliente puede adjuntar fotos de referencia.
+ * Encargos personalizados.
+ *
+ * Espeja la postura de seguridad de /api/orders — mismo control de origen, mismo campo
+ * trampa, mismo bloqueo en modo demo — pero acepta multipart porque el cliente puede
+ * adjuntar fotos, y arma el pedido contra el producto de encargo en ₡0.
  */
 
 // El JSON del brief pesa poco; el grueso son hasta 5 imágenes de 5 MB.
@@ -89,11 +95,16 @@ export async function POST(request: Request) {
     return errorResponse(IMAGE_ERRORS.too_many_images, 400);
   }
 
-  // Las imágenes se suben antes de crear el registro para no dejar encargos
-  // apuntando a archivos que nunca llegaron. Si falla la subida, no hay encargo.
+  // La llave de idempotencia la genera el servidor: si el cliente reintenta el envío,
+  // vuelve a subir las fotos pero crea un pedido nuevo, que es preferible a que un
+  // valor manipulado desde el navegador colisione con el pedido de otra persona.
+  const idempotencyKey = crypto.randomUUID();
+
+  // Las imágenes se suben antes de crear el pedido para no dejar encargos apuntando a
+  // archivos que nunca llegaron. Si falla la subida, no hay pedido.
   let images;
   try {
-    images = await uploadReferenceImages(files, draftReferenceKey());
+    images = await uploadReferenceImages(files, referenceFolder());
   } catch (error) {
     if (error instanceof ReferenceImageError) {
       return errorResponse(
@@ -105,20 +116,35 @@ export async function POST(request: Request) {
   }
 
   try {
-    const result = await createCustomRequest(parsed.data, images);
+    const result = await createCustomOrder(parsed.data, images, idempotencyKey);
+    const config = getPrivateBilbildinConfig(process.env);
     return NextResponse.json(
-      { reference: result.reference, status: result.status },
+      {
+        reference: createOrderReference(result.orderId, config.secretKey),
+        orderNumber: result.orderNumber,
+      },
       { status: 201, headers: { "Cache-Control": "no-store" } },
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : "";
-    if (/store_not_active/i.test(message)) {
-      return errorResponse("La tienda no está recibiendo encargos.", 409);
-    }
-    // Mientras la migración no esté aplicada en Bilbildin, la función no existe.
-    if (/could not find the function|does not exist|PGRST202/i.test(message)) {
+    if (error instanceof CustomProductMissingError) {
+      // Falta crear el producto de encargo en Bilbildin. Es configuración, no un fallo
+      // del cliente: no tiene sentido pedirle que reintente.
       return errorResponse(
-        "Los encargos todavía no están habilitados en el sistema de pedidos.",
+        "Los encargos todavía no están habilitados. Escribinos y lo coordinamos.",
+        503,
+      );
+    }
+    const message = error instanceof Error ? error.message : "";
+    const kind = classifyOrderError(message);
+    if (kind === "availability") {
+      return errorResponse(
+        "No pudimos registrar el encargo en este momento. Intentá más tarde.",
+        409,
+      );
+    }
+    if (kind === "retryable") {
+      return errorResponse(
+        "El servicio está tardando más de lo esperado. Intentá nuevamente.",
         503,
       );
     }

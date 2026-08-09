@@ -93,3 +93,41 @@ export async function getStorefrontCatalog() {
 export async function getStorefrontProduct(slug: string) {
   return getCommerceProvider().getProduct(slug);
 }
+
+/**
+ * Producto contra el que se registran los encargos personalizados.
+ *
+ * Va aparte del catálogo a propósito: `readBilbildinCatalog` recorre los nueve Origins
+ * de `src/data/products.ts` y descarta cualquier fila de Bilbildin que no coincida por
+ * slug, así que este producto queda invisible en la tienda sin necesidad de ocultarlo.
+ * Se consulta solo cuando alguien envía un encargo.
+ *
+ * Debe existir en Bilbildin con precio ₡0, stock alto y `status = 'visible'`. El precio
+ * real se define al cotizar, después de revisar la idea.
+ */
+export const CUSTOM_ORDER_SLUG =
+  serverEnv.BILBILDIN_CUSTOM_PRODUCT_SLUG?.trim() || "vyvo-encargo-personalizado";
+
+export const getCustomOrderProduct = unstable_cache(
+  async (): Promise<{ id: string; name: string; stock: number } | null> => {
+    const config = getPublicBilbildinConfig(serverEnv);
+    const supabase = createPublicBilbildinClient();
+
+    const { data, error } = await supabase
+      .from("products")
+      .select("id, name, stock_quantity, status")
+      .eq("business_id", config.businessId)
+      .eq("slug", CUSTOM_ORDER_SLUG)
+      .eq("status", "visible")
+      .maybeSingle();
+
+    if (error || !data) return null;
+    return {
+      id: data.id as string,
+      name: data.name as string,
+      stock: Number(data.stock_quantity ?? 0),
+    };
+  },
+  ["vyvo-custom-order-product-v1"],
+  { revalidate: 300, tags: ["vyvo-catalog"] },
+);

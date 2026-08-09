@@ -9,6 +9,7 @@ import {
   customRequestSchema,
   detectImageType,
 } from "../src/lib/bilbildin/custom-request-schema";
+import { checkoutRequestSchema } from "../src/lib/bilbildin/order-schema";
 
 const validRequest = {
   customer: {
@@ -16,45 +17,65 @@ const validRequest = {
     email: "maria@example.com",
     phone: "+506 8888 8888",
   },
+  shippingAddress: {
+    address: "Del parque 100 m norte",
+    city: "San José",
+    province: "San José",
+    postalCode: "10101",
+    country: "CR",
+  },
   brief: {
     idea: "Quiero una figura de mi perro Rocco, un schnauzer gris, sentado y con su pañuelo azul.",
   },
 };
 
 test("un encargo mínimo válido pasa el esquema", () => {
-  const parsed = customRequestSchema.safeParse(validRequest);
-  assert.equal(parsed.success, true);
+  assert.equal(customRequestSchema.safeParse(validRequest).success, true);
 });
 
 test("la idea exige una descripción real, no una palabra suelta", () => {
-  const tooShort = customRequestSchema.safeParse({
-    ...validRequest,
-    brief: { idea: "un perro" },
-  });
-  assert.equal(tooShort.success, false);
-
-  const atLimit = customRequestSchema.safeParse({
-    ...validRequest,
-    brief: { idea: "x".repeat(IDEA_MIN) },
-  });
-  assert.equal(atLimit.success, true);
-
-  const tooLong = customRequestSchema.safeParse({
-    ...validRequest,
-    brief: { idea: "x".repeat(IDEA_MAX + 1) },
-  });
-  assert.equal(tooLong.success, false);
+  assert.equal(
+    customRequestSchema.safeParse({ ...validRequest, brief: { idea: "un perro" } })
+      .success,
+    false,
+  );
+  assert.equal(
+    customRequestSchema.safeParse({
+      ...validRequest,
+      brief: { idea: "x".repeat(IDEA_MIN) },
+    }).success,
+    true,
+  );
+  assert.equal(
+    customRequestSchema.safeParse({
+      ...validRequest,
+      brief: { idea: "x".repeat(IDEA_MAX + 1) },
+    }).success,
+    false,
+  );
 });
 
-test("el encargo no pide dirección ni método de pago: no hay compra todavía", () => {
-  const withShipping = customRequestSchema.safeParse({
-    ...validRequest,
-    shippingAddress: { address: "Del parque 100 m norte" },
-  });
-  assert.equal(withShipping.success, false, "el esquema es strict");
+test("el encargo no acepta método de pago desde el cliente", () => {
+  // El pago lo fija el servidor en efectivo: no hay precio que cobrar todavía.
+  assert.equal(
+    customRequestSchema.safeParse({ ...validRequest, paymentMethod: "sinpe" })
+      .success,
+    false,
+    "el esquema es strict",
+  );
+});
 
-  const parsed = customRequestSchema.parse(validRequest);
-  assert.equal("paymentMethod" in parsed, false);
+test("la dirección se valida como en una compra", () => {
+  for (const shippingAddress of [
+    { ...validRequest.shippingAddress, postalCode: "123" },
+    { ...validRequest.shippingAddress, country: "US" },
+    { ...validRequest.shippingAddress, address: "abc" },
+  ]) {
+    assert.equal(
+      customRequestSchema.safeParse({ ...validRequest, shippingAddress }).success,
+      false,
+    );
+  }
 });
 
 test("el campo trampa se acepta vacío y se rechaza lleno", () => {
@@ -63,8 +84,7 @@ test("el campo trampa se acepta vacío y se rechaza lleno", () => {
     true,
   );
   assert.equal(
-    customRequestSchema.safeParse({ ...validRequest, website: "http://spam" })
-      .success,
+    customRequestSchema.safeParse({ ...validRequest, website: "http://spam" }).success,
     false,
   );
 });
@@ -82,6 +102,38 @@ test("el contacto se valida antes de aceptar el encargo", () => {
   }
 });
 
+test("la configuración del pedido admite la idea completa y las fotos", () => {
+  // El brief viaja dentro del pedido: la idea larga y hasta 5 URLs firmadas tienen
+  // que caber sin que el esquema del checkout las rechace.
+  const details = [
+    { label: "Idea del cliente", value: "x".repeat(1800) },
+    ...Array.from({ length: MAX_REFERENCE_IMAGES }, (_, index) => ({
+      label: `Referencia ${index + 1}`,
+      value: `https://example.supabase.co/storage/v1/object/sign/a/${index}?token=${"t".repeat(120)}`,
+    })),
+  ];
+
+  const parsed = checkoutRequestSchema.safeParse({
+    customer: validRequest.customer,
+    shippingAddress: validRequest.shippingAddress,
+    paymentMethod: "cash",
+    idempotencyKey: "424ef6ac-5eba-4f3d-8d95-6b9d672b040f",
+    items: [
+      {
+        productId: "14d10531-d6fc-45a9-9c74-1ff15c657001",
+        quantity: 1,
+        configuration: {
+          id: "cfg-424ef6ac-5eba-4f3d-8d95-6b9d672b040f",
+          label: "Encargo personalizado",
+          details,
+        },
+      },
+    ],
+  });
+
+  assert.equal(parsed.success, true);
+});
+
 test("el tipo de imagen sale de la firma binaria, no del nombre ni del Content-Type", () => {
   const jpeg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0, 0, 0, 0, 0, 0, 0, 0]);
   const png = new Uint8Array([
@@ -95,44 +147,56 @@ test("el tipo de imagen sale de la firma binaria, no del nombre ni del Content-T
   assert.equal(detectImageType(webp), "image/webp");
 
   // Un ejecutable renombrado a .jpg no pasa.
-  const notAnImage = new Uint8Array([0x4d, 0x5a, 0x90, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
-  assert.equal(detectImageType(notAnImage), null);
+  assert.equal(
+    detectImageType(new Uint8Array([0x4d, 0x5a, 0x90, 0, 0, 0, 0, 0, 0, 0, 0, 0])),
+    null,
+  );
   assert.equal(detectImageType(new Uint8Array([0xff, 0xd8])), null);
-
-  for (const type of ACCEPTED_IMAGE_TYPES) {
-    assert.equal(typeof type, "string");
-  }
+  assert.equal(ACCEPTED_IMAGE_TYPES.length, 3);
 });
 
-test("la migración de encargos no toca estructuras existentes de Bilbildin", () => {
+test("la única migración nueva es el bucket, y es privado", () => {
   const sql = readFileSync(
-    "supabase/migrations/202608090001_create_vyvo_custom_request.sql",
+    "supabase/migrations/202608090001_create_vyvo_reference_bucket.sql",
     "utf8",
   );
 
-  // Aditiva: crea lo suyo y no altera ni borra nada de BilBildin.
-  assert.match(sql, /create table if not exists public\.storefront_custom_requests/);
-  assert.doesNotMatch(sql, /alter table public\.orders/i);
+  // Aditiva: no altera ni borra nada del esquema de BilBildin.
+  assert.match(sql, /insert into storage\.buckets/);
+  assert.doesNotMatch(sql, /alter table/i);
   assert.doesNotMatch(sql, /drop\s+(table|function|column)/i);
+  assert.doesNotMatch(sql, /create (table|function)/i);
 
-  // Misma postura de seguridad que create_storefront_order.
-  assert.match(sql, /security definer/);
-  assert.match(sql, /set search_path = ''/);
-  assert.match(sql, /enable row level security/);
-  assert.match(
-    sql,
-    /revoke all on function public\.create_storefront_custom_request\(uuid, jsonb\)\s*\nfrom public, anon, authenticated;/,
-  );
-  assert.match(sql, /grant execute on function[\s\S]*?to service_role;/);
-
-  // El bucket de referencias es privado: son fotos de gente real.
-  assert.match(sql, /'vyvo-custom-references'[\s\S]*?false/);
+  // Privado: son fotos de personas y mascotas reales.
+  assert.match(sql, /'vyvo-custom-references',\s*\n\s*false/);
+  assert.match(sql, /5242880/);
 });
 
-test("el endpoint de encargos exige el mismo origen y rechaza el modo demo", () => {
+test("el endpoint de encargos protege el mismo perímetro que el checkout", () => {
   const route = readFileSync("src/app/api/encargos/route.ts", "utf8");
   assert.match(route, /getBilbildinMode\(process\.env\) !== "bilbildin"/);
   assert.match(route, /originHost !== host/);
   assert.match(route, /parsed\.data\.website/);
-  assert.ok(MAX_REFERENCE_IMAGES >= 1);
+  // La llave de idempotencia la genera el servidor, no llega del navegador.
+  assert.match(route, /const idempotencyKey = crypto\.randomUUID\(\)/);
+  assert.doesNotMatch(route, /form\.get\("idempotencyKey"\)/);
+});
+
+test("el producto de encargo queda fuera del catálogo público", () => {
+  const provider = readFileSync("src/lib/bilbildin/provider.ts", "utf8");
+  // El catálogo recorre los Origins locales, así que un slug ajeno nunca se lista.
+  assert.match(provider, /products\.flatMap/);
+  assert.match(provider, /CUSTOM_ORDER_SLUG/);
+
+  const localProducts = readFileSync("src/data/products.ts", "utf8");
+  assert.doesNotMatch(localProducts, /vyvo-encargo-personalizado/);
+});
+
+test("el encargo se registra en efectivo y sin precio propio", () => {
+  const lib = readFileSync("src/lib/bilbildin/custom-requests.ts", "utf8");
+  assert.match(lib, /payment_method: "cash"/);
+  assert.match(lib, /create_storefront_order_idempotent/);
+  assert.match(lib, /Encargo sin cotizar/);
+  // No inventa montos: el precio lo pone el producto de encargo en Bilbildin.
+  assert.doesNotMatch(lib, /amountMinor|unit_price|subtotal/);
 });

@@ -3,6 +3,13 @@ import { z } from "zod";
 const text = (minimum: number, maximum: number) =>
   z.string().trim().min(minimum).max(maximum);
 
+/**
+ * Los límites crecieron para que quepa un encargo personalizado: la idea del cliente es
+ * un texto largo, no una opción de una lista, y además viajan las URLs de sus fotos de
+ * referencia. El RPC guarda `configuration` como jsonb opaco y no valida ni forma ni
+ * longitud, así que el único techo real es este esquema y el límite de cuerpo de
+ * /api/orders. Con 20 pares de 2000 caracteres el peor caso queda muy por debajo.
+ */
 const configurationSchema = z
   .object({
     id: z.string().regex(/^cfg-[a-z0-9-]{6,64}$/i),
@@ -12,12 +19,12 @@ const configurationSchema = z
         z
           .object({
             label: text(1, 80),
-            value: text(1, 180),
+            value: text(1, 2000),
           })
           .strict(),
       )
       .min(1)
-      .max(8),
+      .max(20),
   })
   .strict();
 

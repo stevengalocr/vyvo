@@ -119,30 +119,64 @@ alterado no autoriza la lectura de pedidos ajenos.
 ## Encargos personalizados
 
 `/personalizar/encargo` recibe ideas que no encajan en SHIFT, ARENA o NEXO: el cliente
-escribe qué quiere, adjunta hasta 5 fotos de referencia y deja su contacto. **No se pide
-dirección ni método de pago, y no se muestra ningún precio** — el encargo se cotiza
-después de revisarlo.
+escribe qué quiere, adjunta hasta 5 fotos de referencia y completa el formulario **como
+si fuera una compra**. La diferencia es que **no se muestra ningún precio**: el encargo
+se cotiza después de revisarlo y se paga contra entrega.
 
 ```
 formulario → POST /api/encargos (multipart)
-           → sube las imágenes al bucket privado con service_role
-           → RPC create_storefront_custom_request
-           → public.storefront_custom_requests (estado pending_review)
+           → sube las fotos al bucket privado con service_role
+           → RPC create_storefront_order_idempotent (la misma del checkout)
+           → pedido normal en Bilbildin, ₡0, pago en efectivo
 ```
 
-Decisiones que conviene no deshacer:
+**Va por el flujo de pedidos existente a propósito.** El encargo aparece en la lista de
+pedidos donde VYVO ya trabaja todos los días, en vez de en una tabla aparte que nadie
+mira. El brief del cliente y las URLs de sus fotos viajan dentro de `configuration`.
+
+### Requisito de configuración
+
+Tiene que existir en Bilbildin un producto con slug **`vyvo-encargo-personalizado`**:
+
+| Campo | Valor |
+|---|---|
+| Precio | **₡0** — el precio real se define al cotizar |
+| Stock | Alto (ej. 9999); cada encargo descuenta una unidad |
+| Estado | `visible` |
+
+No aparece en el catálogo público: `readBilbildinCatalog` recorre los nueve Origins de
+`src/data/products.ts` y descarta cualquier fila que no coincida por slug, así que queda
+invisible sin necesidad de ocultarlo. El slug se puede cambiar con
+`BILBILDIN_CUSTOM_PRODUCT_SLUG`.
+
+Si el producto no existe, el envío responde **503** con un mensaje claro y no se pierde
+nada.
+
+### Efectos conocidos de usar el flujo de pedidos
+
+Son consecuencia de reutilizar `create_storefront_order`, y conviene tenerlos presentes:
+
+- Los encargos aparecen como **pedidos de ₡0** en los reportes de ventas.
+- Cada encargo **descuenta stock** del producto de encargo y registra un
+  `inventory_movements` de tipo `sale`. Hay que reponer el stock cada tanto.
+- Suman al `total_orders` del cliente.
+
+La alternativa sin estos efectos —una tabla propia `storefront_custom_requests`— está
+escrita en [`supabase/opcional/`](supabase/opcional/storefront_custom_requests.sql), sin
+aplicar. Requiere que BilBildin la exponga en su panel.
+
+### Decisiones que conviene no deshacer
 
 - **La subida pasa por nuestro propio endpoint**, no del navegador a Supabase. Por eso el
   CSP sigue siendo `connect-src 'self'`: el cliente nunca habla con Supabase.
 - **El tipo de imagen se decide por la firma binaria**, no por la extensión ni por el
   `Content-Type` que manda el navegador — los dos se falsifican renombrando.
-- **Las imágenes se suben antes de crear el registro.** Si falla la subida no queda un
-  encargo apuntando a archivos que nunca llegaron.
-- El bucket es **privado**: son fotos de personas y mascotas reales.
-
-> ⚠️ **La migración todavía no está aplicada en BilBildin.** Hasta que se aplique, el
-> envío responde 503 con un mensaje claro y no se pierde nada. Ver
-> [`docs/integraciones/BILBILDIN_REQUERIMIENTOS_VYVO.md`](docs/integraciones/BILBILDIN_REQUERIMIENTOS_VYVO.md).
+- **Las fotos se suben antes de crear el pedido.** Si falla la subida no queda un pedido
+  apuntando a archivos que nunca llegaron.
+- **La llave de idempotencia la genera el servidor.** Si llegara del navegador, un valor
+  manipulado podría colisionar con el pedido de otra persona.
+- El bucket es **privado** y en el pedido va una URL firmada a 90 días: son fotos de
+  personas y mascotas reales.
 
 ## SEO y Core Web Vitals
 
