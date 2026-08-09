@@ -8,6 +8,9 @@
   --vyvo-soft-gray: #eceae7;
   --white: #ffffff;
   --muted: #6a676e;
+  /* El morado de marca sobre el negro de estructura da 3.13:1. Este tono es el
+     mínimo que cruza 4.5:1 manteniéndose inequívocamente morado (4.59:1). */
+  --vyvo-purple-on-dark: #8f5bff;
   --border: rgba(17, 17, 17, 0.12);
   --shadow: 0 24px 80px rgba(17, 17, 17, 0.1);
   --radius-sm: 12px;
@@ -556,7 +559,8 @@ img {
 }
 
 .eyebrow--light {
-  color: rgba(255, 255, 255, 0.7);
+  /* 0.7 sobre el morado daba 3.67:1. */
+  color: rgba(255, 255, 255, 0.84);
 }
 
 .eyebrow--orange {
@@ -1271,7 +1275,9 @@ img {
 
 .hero-chips button span {
   font-size: 0.6rem;
-  opacity: 0.6;
+  /* 0.6 daba 2.45:1 sobre el blanco y 0.92 se quedaba en 4.39:1 sobre el beige
+     cálido del hero en móvil. 0.96 pasa en ambos fondos (4.94 y 4.74). */
+  opacity: 0.96;
 }
 
 .hero-chips button.is-selected {
@@ -2266,7 +2272,8 @@ img {
 }
 
 .final-cta p {
-  color: rgba(255, 255, 255, 0.7);
+  /* 0.7 sobre el morado daba 3.67:1. */
+  color: rgba(255, 255, 255, 0.84);
 }
 
 .final-cta__waitlist {
@@ -2424,7 +2431,7 @@ img {
 }
 
 .footer__brand > span {
-  color: var(--vyvo-purple);
+  color: var(--vyvo-purple-on-dark);
   font-size: 0.7rem;
   font-weight: 650;
 }
@@ -2437,7 +2444,8 @@ img {
 
 .footer__group h2 {
   margin: 0 0 12px;
-  color: rgba(255, 255, 255, 0.42);
+  /* 0.42 daba 4.10:1. */
+  color: rgba(255, 255, 255, 0.48);
   font-size: 0.68rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -2460,7 +2468,8 @@ img {
   gap: 30px;
   margin-top: 72px;
   border-top: 1px solid rgba(255, 255, 255, 0.12);
-  color: rgba(255, 255, 255, 0.36);
+  /* 0.36 daba 3.34:1. */
+  color: rgba(255, 255, 255, 0.48);
   font-size: 0.66rem;
   padding-top: 24px;
 }

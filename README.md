@@ -45,8 +45,16 @@ La aplicación queda disponible en `http://localhost:3000`.
 
 ## Variables de entorno
 
+> ⚠️ **`NEXT_PUBLIC_SITE_URL` no puede apuntar a un dominio de despliegue.** Estuvo
+> configurada como `https://vyvo-six.vercel.app` y, como de ahí salen el canonical, el
+> `robots.txt`, el `sitemap.xml` y las URLs de Open Graph, el sitio publicado en
+> `www.vyvocr.com` le estaba declarando a Google que la versión buena vivía en otro
+> dominio. `src/lib/site.ts` ahora descarta cualquier host `*.vercel.app`, `*.netlify.app`
+> o `*.pages.dev` y usa el dominio de producción; aun así, conviene dejar la variable
+> correcta en Vercel. `localhost` sigue siendo un override válido para desarrollo.
+
 ```bash
-NEXT_PUBLIC_SITE_URL=https://vyvocr.com
+NEXT_PUBLIC_SITE_URL=https://www.vyvocr.com
 BILBILDIN_ENABLED=true
 NEXT_PUBLIC_SUPABASE_URL=https://wgicaiphzwppnshagxve.supabase.co
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
@@ -107,6 +115,35 @@ alterado no autoriza la lectura de pedidos ajenos.
 - Errores del proveedor clasificados sin filtrar detalles internos.
 - Configuraciones personales almacenadas solo dentro del pedido.
 - Sin números SINPE, IBAN ni instrucciones bancarias públicas.
+
+## SEO y Core Web Vitals
+
+Medido con Lighthouse sobre el build de producción:
+
+| | Rendimiento | Accesibilidad | SEO |
+|---|---|---|---|
+| Escritorio | 100 | 100 | 100 |
+| Móvil | 96 | 100 | 100 |
+
+Tres piezas sostienen ese resultado y conviene no romperlas:
+
+**1. No agregar `loading.tsx` en la raíz de `app/`.** Había uno y costaba **0.254 de CLS**
+— el 98 % del total. Como todas las rutas públicas son estáticas, ese archivo creaba un
+límite de Suspense: el HTML salía con el fallback y el footer pegado debajo, y al llegar
+el contenido real el footer se desplazaba miles de píxeles. El fallback ahora vive solo en
+`checkout/confirmacion`, que sí es dinámica. Con eso el rendimiento de escritorio pasó de
+87 a 100 sin tocar una línea de diseño.
+
+**2. El dominio canónico se resuelve en `src/lib/site.ts`.** Ver la advertencia en
+variables de entorno: un host de despliegue nunca puede ser canónico.
+
+**3. Datos estructurados en `src/lib/seo/structured-data.ts`.** El sitio no tenía ninguno.
+Se emite un solo `@graph` por página con `Organization` y `WebSite` desde el layout, más
+`ItemList` en home y catálogo, y `Product` + `BreadcrumbList` en cada ficha.
+
+> **Los precios solo entran al grafo en modo `bilbildin`.** En modo demo la interfaz
+> rotula los montos como demostrativos; publicarlos como datos estructurados sería
+> declararle a Google precios que no son reales.
 
 ## Analítica
 

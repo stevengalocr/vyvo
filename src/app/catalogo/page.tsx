@@ -1,10 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Icon } from "@/components/icon";
+import { JsonLd } from "@/components/json-ld";
 import { ProductFilters } from "@/components/product-filters";
 import { getBilbildinMode } from "@/lib/bilbildin/config";
 import { getStorefrontCatalog } from "@/lib/bilbildin/provider";
 import { getCommerceExperience } from "@/lib/commerce/experience";
+import {
+  breadcrumbNode,
+  buildGraph,
+  itemListNode,
+} from "@/lib/seo/structured-data";
 
 export const metadata: Metadata = {
   title: "Catálogo",
@@ -15,10 +21,25 @@ export const metadata: Metadata = {
 
 export default async function CatalogPage() {
   const catalog = await getStorefrontCatalog();
-  const experience = getCommerceExperience(getBilbildinMode(process.env));
+  const mode = getBilbildinMode(process.env);
+  const experience = getCommerceExperience(mode);
 
   return (
     <>
+      <JsonLd
+        graph={buildGraph([
+          itemListNode(
+            catalog,
+            { id: "/catalogo#lista", name: "Catálogo VYVO", url: "/catalogo" },
+            mode,
+          ),
+          breadcrumbNode([
+            { name: "Inicio", path: "/" },
+            { name: "Catálogo", path: "/catalogo" },
+          ]),
+        ])}
+      />
+
       <header className="page-hero">
         <div className="container page-hero__grid">
           <div data-reveal>

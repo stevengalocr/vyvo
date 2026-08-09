@@ -2,8 +2,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { HeroShowcase } from "@/components/hero-showcase";
 import { Icon } from "@/components/icon";
+import { JsonLd } from "@/components/json-ld";
 import { ProductCard } from "@/components/product-card";
 import { SectionHeading } from "@/components/section-heading";
+import { buildGraph, itemListNode } from "@/lib/seo/structured-data";
 import { getBilbildinMode } from "@/lib/bilbildin/config";
 import { getStorefrontCatalog } from "@/lib/bilbildin/provider";
 import { getCommerceExperience } from "@/lib/commerce/experience";
@@ -62,6 +64,20 @@ export default async function HomePage() {
 
   return (
     <>
+      <JsonLd
+        graph={buildGraph([
+          itemListNode(
+            catalog,
+            {
+              id: "/#origins",
+              name: "VYVO Origins · Primera transmisión",
+              url: "/catalogo",
+            },
+            mode,
+          ),
+        ])}
+      />
+
       <HeroShowcase products={catalog} mode={mode} />
 
       <section className="purchase-path">

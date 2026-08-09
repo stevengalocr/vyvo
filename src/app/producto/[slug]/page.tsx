@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Icon } from "@/components/icon";
+import { JsonLd } from "@/components/json-ld";
 import { ProductCard } from "@/components/product-card";
 import { ProductPurchasePanel } from "@/components/product-purchase-panel";
 import {
@@ -16,6 +17,11 @@ import {
 } from "@/lib/bilbildin/provider";
 import { getBilbildinMode } from "@/lib/bilbildin/config";
 import { getCommerceExperience } from "@/lib/commerce/experience";
+import {
+  breadcrumbNode,
+  buildGraph,
+  productNode,
+} from "@/lib/seo/structured-data";
 
 type ProductPageProps = {
   params: Promise<{ slug: string }>;
@@ -46,7 +52,8 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const product = await getStorefrontProduct(slug);
   if (!product) notFound();
 
-  const experience = getCommerceExperience(getBilbildinMode(process.env));
+  const mode = getBilbildinMode(process.env);
+  const experience = getCommerceExperience(mode);
   const catalog = await getStorefrontCatalog();
   const related = catalog
     .filter(
@@ -58,6 +65,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   return (
     <>
+      <JsonLd
+        graph={buildGraph([
+          productNode(product, mode),
+          breadcrumbNode([
+            { name: "Inicio", path: "/" },
+            { name: "Catálogo", path: "/catalogo" },
+            { name: `VYVO ${product.name}`, path: `/producto/${product.slug}` },
+          ]),
+        ])}
+      />
+
       <section className={`pdp-hero accent-${product.accent}`}>
         <div className="container pdp-hero__grid">
           <div className="pdp-primary-media pdp-gallery__main">

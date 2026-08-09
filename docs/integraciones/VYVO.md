@@ -1,9 +1,19 @@
 # Alta e integración de VYVO en BilBildin
 
-- Fecha de corte: 2026-07-29
+- Fecha de corte: 2026-07-29 · revisado 2026-08-09
 - Repositorio: `stevengalocr/vyvo`
 - Proyecto Supabase: `wgicaiphzwppnshagxve`
-- Producción Vercel: `https://vyvo-six.vercel.app`
+- Origen canónico: **`https://www.vyvocr.com`** (verificado: el ápex `vyvocr.com`
+  responde 308 hacia `www`, y `www` responde 200)
+- Alias de despliegue: `https://vyvo-six.vercel.app` — **nunca canónico**
+
+> **Actualización 2026-08-09.** Mientras el dominio estuvo pendiente de DNS y SSL,
+> `NEXT_PUBLIC_SITE_URL` quedó apuntando al alias de Vercel. Como de esa variable salen
+> el canonical, el `robots.txt`, el `sitemap.xml` y las URLs de Open Graph, el sitio ya
+> publicado en `www.vyvocr.com` le estaba declarando a Google que la versión buena vivía
+> en `vyvo-six.vercel.app`: todas las señales de ranking iban al dominio equivocado.
+> `src/lib/site.ts` ahora ignora cualquier host de despliegue. Queda pendiente corregir
+> también el valor de la variable en Vercel.
 
 ## Resumen
 

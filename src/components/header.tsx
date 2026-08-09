@@ -55,8 +55,11 @@ export function Header() {
           <Link
             href="/carrito"
             className="cart-link"
-            aria-label={`Carrito${
-              hydrated && itemCount ? `, ${itemCount} productos` : " vacío"
+            // El número visible tiene que estar dentro del nombre accesible: si el
+            // enlace muestra "0" y el label dice "Carrito vacío", quien navega por voz
+            // dice "carrito vacío" y el comando no encuentra el control (WCAG 2.5.3).
+            aria-label={`Carrito, ${hydrated ? itemCount : 0} ${
+              (hydrated ? itemCount : 0) === 1 ? "producto" : "productos"
             }`}
           >
             <Icon name="cart" size={21} />
