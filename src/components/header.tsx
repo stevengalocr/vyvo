@@ -42,6 +42,7 @@ export function Header() {
             <Link
               href={item.href}
               key={item.href}
+              prefetch={false}
               aria-current={isActive(item.href) ? "page" : undefined}
             >
               {item.label}
@@ -54,6 +55,7 @@ export function Header() {
           </Link>
           <Link
             href="/carrito"
+            prefetch={false}
             className="cart-link"
             // El número visible tiene que estar dentro del nombre accesible: si el
             // enlace muestra "0" y el label dice "Carrito vacío", quien navega por voz
@@ -86,6 +88,7 @@ export function Header() {
           <Link
             href={item.href}
             key={item.href}
+            prefetch={false}
             aria-label={item.label}
             aria-current={isActive(item.href) ? "page" : undefined}
             onClick={() => setOpen(false)}

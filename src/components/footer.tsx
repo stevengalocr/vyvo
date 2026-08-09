@@ -44,7 +44,7 @@ export function Footer() {
           <div key={group.title} className="footer__group">
             <h2>{group.title}</h2>
             {group.links.map(([label, href]) => (
-              <Link href={href} key={href}>
+              <Link href={href} key={href} prefetch={false}>
                 {label}
               </Link>
             ))}

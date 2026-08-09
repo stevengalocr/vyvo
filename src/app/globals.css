@@ -1,3 +1,30 @@
+/* ══ FUENTES ═══════════════════════════════════════════════════════════════
+   Self-hosted y subseteadas a latín + español + monedas.
+
+   Venían de @fontsource-variable, que declara un @font-face por subset con su
+   unicode-range. El símbolo del colón (₡, U+20A1) cae en el subset latin-ext,
+   así que cada precio de la tienda obligaba a descargar ese subset entero:
+   83 KB de Inter y 15 KB de Sora, casi 99 KB por un solo glifo.
+
+   Un archivo por familia: de 179 KB en cuatro peticiones a 105 KB en dos.
+   Se regeneran con "npm run fonts:build" y se verifican con "npm run fonts:check".
+   ══════════════════════════════════════════════════════════════════════════ */
+@font-face {
+  font-family: "Inter Variable";
+  src: url("/fonts/inter-var.woff2") format("woff2-variations");
+  font-weight: 300 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Sora Variable";
+  src: url("/fonts/sora-var.woff2") format("woff2-variations");
+  font-weight: 300 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   --vyvo-purple: #6f2cff;
   --vyvo-orange: #ff5a1f;

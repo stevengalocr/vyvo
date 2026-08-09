@@ -165,9 +165,8 @@ Tiene que existir en Bilbildin un producto con slug **`vyvo-encargo-personalizad
 | Stock | Alto (ej. 9999); cada encargo descuenta una unidad |
 | Estado | `visible` |
 
-No aparece en el catálogo público: `readBilbildinCatalog` recorre los nueve Origins de
-`src/data/products.ts` y descarta cualquier fila que no coincida por slug, así que queda
-invisible sin necesidad de ocultarlo. El slug se puede cambiar con
+No aparece en el catálogo público porque `readBilbildinCatalog` **excluye ese slug de
+forma explícita** — es la única exclusión. El slug se puede cambiar con
 `BILBILDIN_CUSTOM_PRODUCT_SLUG`.
 
 Si el producto no existe, el envío responde **503** con un mensaje claro y no se pierde
@@ -198,6 +197,40 @@ aplicar. Requiere que BilBildin la exponga en su panel.
   manipulado podría colisionar con el pedido de otra persona.
 - El bucket es **privado** y en el pedido va una URL firmada a 90 días: son fotos de
   personas y mascotas reales.
+
+## Rendimiento: dos decisiones que no conviene deshacer
+
+**1. Los enlaces de navegación llevan `prefetch={false}`.** Next precarga el payload
+RSC de cada ruta enlazada; con el catálogo dentro, cada uno pesaba ~155 KB. El header,
+el footer y el logo sumaban **468 KB descargados de entrada** para páginas que el
+visitante quizá nunca abre — el 43 % del peso total. Los CTA de intención de compra sí
+conservan prefetch.
+
+**2. Las fuentes son self-hosted y subseteadas** (`scripts/subset-fonts.mjs`). Venían de
+`@fontsource-variable`, que declara un @font-face por subset: el símbolo del colón (₡)
+cae en `latin-ext`, así que cada precio arrastraba ese subset entero — 83 KB de Inter y
+15 KB de Sora por un solo glifo. Ahora es un archivo por familia.
+
+```bash
+npm run fonts:check    # verifica cobertura de glifos, incluido el ₡
+npm run fonts:build    # regenera los subsets (requiere los TTF originales)
+```
+
+El eje `opsz` de Inter va fijo en su valor por defecto — es lo que ya hacía fontsource,
+así que el dibujo no cambia, pero dejarlo variable costaba 34 KB. Sora no trae el glifo
+del colón en ninguna versión; las cifras se pintan con Inter y el fallback por carácter
+cubre el resto.
+
+Los preloads de fuente en el layout están medidos: bajan el FCP de 1.7 s a 0.9 s y el
+Speed Index de 1.7 s a 1.1 s. Retrasan un poco el arranque de la imagen del hero, pero
+el LCP total no cambia.
+
+| | antes | después |
+|---|---|---|
+| Peso total | 1077 KB | **404 KB** |
+| Peticiones | 48 | **33** |
+| Fuentes | 179 KB en 4 req | **105 KB en 2 req** |
+| Style & Layout | 939 ms | **293 ms** |
 
 ## SEO y Core Web Vitals
 
