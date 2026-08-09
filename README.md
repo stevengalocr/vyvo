@@ -19,14 +19,19 @@ Medido sobre `https://www.vyvocr.com`, no sobre el build local.
 | Verificado en producción | |
 |---|---|
 | Rutas públicas | 17/17 responden 200 |
-| Fichas de producto | 10/10 responden 200, FORGE incluido |
+| Fichas de producto | Todas las del catálogo responden 200 |
 | Canonical | Correcto por ruta; **cero referencias a `vercel.app`** |
 | `noindex` | Activo en `/carrito`, `/checkout` y confirmación |
 | Datos estructurados | `Organization`, `WebSite`, `ItemList`, `Product`, `BreadcrumbList` — válidos |
 | `Product` | Campos requeridos y recomendados completos, con precio real en CRC |
-| Sitemap | 20 URLs, con las 10 fichas |
+| Sitemap | 10 rutas fijas + una por producto publicado |
 | Imágenes base64 | **0 en el HTML** (se sirven por `/api/media/`) |
+| Encargos | `GET /api/encargos` responde `listo: true` |
 | Suite | 57 pruebas, `npm run check` en verde |
+
+> El catálogo cambia desde el admin sin pasar por un deploy, así que los conteos de
+> productos y de URLs del sitemap varían. Se comprobó el **mecanismo**: publicar un
+> producto lo hace aparecer y borrarlo lo hace desaparecer, con la ficha pasando a 404.
 
 **Techo actual del rendimiento:** los 175 KB de JavaScript, dominados por el hero
 (componente cliente con estado, rotación e IntersectionObserver). Pasar de ~92 pide
@@ -34,10 +39,17 @@ partirlo, y eso ya es rediseño de ese componente, no entrega.
 
 ### Pendiente fuera del código
 
-- Crear el producto `vyvo-encargo-personalizado` (₡0, stock alto, visible) para
-  habilitar `/personalizar/encargo`. Sin él responde 503 con mensaje claro.
-- Corregir `NEXT_PUBLIC_SITE_URL` en Vercel a `https://www.vyvocr.com`.
-- Volver a subir la foto de FORGE **como archivo**, no embebida en base64.
+- **Pedir reindexación en Search Console.** Es lo único con reloj: el canonical apuntó
+  a `vyvo-six.vercel.app` durante un tiempo y, hasta que Google no vuelva a rastrear,
+  las señales de ranking siguen yendo al dominio equivocado.
+- **Un pedido y un encargo de prueba reales**, para cerrar la validación comercial que
+  `docs/integraciones/VYVO.md` lista como pendiente. Nunca se creó una orden ficticia
+  durante el desarrollo, a propósito.
+- Corregir `NEXT_PUBLIC_SITE_URL` en Vercel a `https://www.vyvocr.com`. El código ya
+  descarta hosts de despliegue, así que es higiene, no un fallo.
+- Si volvés a publicar un producto con la foto embebida en base64, subila **como
+  archivo**: se sirve igual por `/api/media/`, pero el servidor tiene que decodificarla
+  en cada revalidación.
 
 ## Arquitectura
 
@@ -109,15 +121,14 @@ y nunca deben usar `NEXT_PUBLIC_`.
 | Plan | `starter` |
 | Propietario | `vyvocr@gmail.com` |
 | Moneda | CRC |
-| Catálogo | 10 productos visibles (Origins + FORGE) |
-| Inventario | 10 por producto, 90 total |
+| Catálogo | Los que estén `visible` en Bilbildin (varía desde el admin) |
+| Inventario | Gestionado en Bilbildin |
 | Pagos | SINPE, transferencia, efectivo contra entrega |
 | Business ID | `14d10531-d6fc-45a9-9c74-1ff15c657099` |
 | Alias de despliegue | `https://vyvo-six.vercel.app` — **nunca canónico** |
 | Dominio canónico | `https://www.vyvocr.com` (el ápex responde 308 hacia www) |
 
-El dominio personalizado solo se considera activo cuando DNS y SSL se hayan
-verificado externamente.
+Dominio verificado y en producción desde el 2026-08-09.
 
 ## Integración de pedidos
 
