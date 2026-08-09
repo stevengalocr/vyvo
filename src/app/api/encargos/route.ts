@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getBilbildinMode } from "@/lib/bilbildin/config";
+import { CUSTOM_ORDER_SLUG, getCustomOrderProduct } from "@/lib/bilbildin/provider";
 import { createOrderReference } from "@/lib/bilbildin/order-reference";
 import { getPrivateBilbildinConfig } from "@/lib/bilbildin/config";
 import {
@@ -42,6 +43,50 @@ const IMAGE_ERRORS: Record<string, string> = {
   unsupported_image: "Solo aceptamos imágenes JPG, PNG o WEBP.",
   upload_failed: "No pudimos guardar las imágenes. Intentá nuevamente.",
 };
+
+/**
+ * Chequeo de estado. Existe porque la única forma de saber si los encargos estaban
+ * habilitados era mandar uno de verdad, y no tiene sentido crear un pedido ficticio
+ * solo para comprobar configuración.
+ *
+ * No expone nada sensible: ni el id del producto ni datos de clientes. Solo si el
+ * flujo puede operar y, si no, por qué.
+ */
+export async function GET() {
+  if (getBilbildinMode(process.env) !== "bilbildin") {
+    return NextResponse.json(
+      {
+        listo: false,
+        motivo: "BILBILDIN_ENABLED no está en true.",
+      },
+      { status: 200, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+
+  const product = await getCustomOrderProduct().catch(() => null);
+  if (!product) {
+    return NextResponse.json(
+      {
+        listo: false,
+        motivo: `No se encontró un producto visible cuyo slug empiece por "${CUSTOM_ORDER_SLUG}".`,
+        sugerencia:
+          "Creá el producto en Bilbildin con ese slug, precio ₡0, stock alto y estado visible.",
+      },
+      { status: 200, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+
+  return NextResponse.json(
+    {
+      listo: product.stock > 0,
+      producto: { nombre: product.name, slug: product.slug, stock: product.stock },
+      ...(product.stock > 0
+        ? {}
+        : { motivo: "El producto de encargo se quedó sin stock. Reponelo." }),
+    },
+    { status: 200, headers: { "Cache-Control": "no-store" } },
+  );
+}
 
 export async function POST(request: Request) {
   if (getBilbildinMode(process.env) !== "bilbildin") {

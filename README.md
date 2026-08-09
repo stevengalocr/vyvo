@@ -206,6 +206,21 @@ forma explícita** — es la única exclusión. El slug se puede cambiar con
 Si el producto no existe, el envío responde **503** con un mensaje claro y no se pierde
 nada.
 
+### Cómo comprobar que los encargos están activos
+
+```
+GET https://www.vyvocr.com/api/encargos
+```
+
+Devuelve `{ listo: true, producto: { nombre, slug, stock } }` cuando todo está en su
+lugar, o el motivo concreto cuando no. **No crea ningún pedido** — existe justamente
+para no tener que mandar uno ficticio solo para verificar configuración.
+
+La búsqueda del producto acepta el slug exacto **o cualquiera que empiece igual**.
+Bilbildin no siempre respeta el slug que se le pide: FORGE quedó guardado como
+`vyvo-forge-origins-007`, no `vyvo-forge`. Si hay varios que coinciden, gana el más
+corto.
+
 ### Efectos conocidos de usar el flujo de pedidos
 
 Son consecuencia de reutilizar `create_storefront_order`, y conviene tenerlos presentes:

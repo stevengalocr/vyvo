@@ -127,25 +127,37 @@ export async function getStorefrontProduct(slug: string) {
  * real se define al cotizar, después de revisar la idea.
  */
 export const getCustomOrderProduct = unstable_cache(
-  async (): Promise<{ id: string; name: string; stock: number } | null> => {
+  async (): Promise<{
+    id: string;
+    name: string;
+    slug: string;
+    stock: number;
+  } | null> => {
     const config = getPublicBilbildinConfig(serverEnv);
     const supabase = createPublicBilbildinClient();
 
+    // Bilbildin no siempre respeta el slug tal cual: FORGE quedó guardado como
+    // `vyvo-forge-origins-007`, no `vyvo-forge`. Por eso la búsqueda acepta el slug
+    // exacto o cualquiera que empiece igual, y se queda con el más corto —el más
+    // parecido al que se pidió— para no depender del sufijo que haya generado el admin.
     const { data, error } = await supabase
       .from("products")
-      .select("id, name, stock_quantity, status")
+      .select("id, name, slug, stock_quantity")
       .eq("business_id", config.businessId)
-      .eq("slug", CUSTOM_ORDER_SLUG)
       .eq("status", "visible")
-      .maybeSingle();
+      .like("slug", `${CUSTOM_ORDER_SLUG}%`)
+      .order("slug", { ascending: true });
 
-    if (error || !data) return null;
+    if (error || !data?.length) return null;
+
+    const elegido = [...data].sort((a, b) => a.slug.length - b.slug.length)[0];
     return {
-      id: data.id as string,
-      name: data.name as string,
-      stock: Number(data.stock_quantity ?? 0),
+      id: elegido.id as string,
+      name: elegido.name as string,
+      slug: elegido.slug as string,
+      stock: Number(elegido.stock_quantity ?? 0),
     };
   },
-  ["vyvo-custom-order-product-v1"],
+  ["vyvo-custom-order-product-v2"],
   { revalidate: 300, tags: ["vyvo-catalog"] },
 );
