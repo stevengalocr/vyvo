@@ -142,11 +142,10 @@ internos a `500`, siempre con mensajes públicos propios.
 
 ## Dominio y marca
 
-- Dominio objetivo: `https://vyvocr.com`.
-- URL Vercel verificable mientras se completa el dominio:
-  `https://vyvo-six.vercel.app`.
+- Dominio canónico: `https://www.vyvocr.com` (verificado; el ápex responde 308).
+- Alias de despliegue: `https://vyvo-six.vercel.app`. **Nunca debe ser canónico.**
 - Colores: `#111111`, `#6F2CFF`, `#FF5A1F`, `#FAFAF7`.
-- El dominio debe declararse activo únicamente después de validar DNS y SSL.
+- DNS y SSL verificados el 2026-08-09.
 
 ## Prueba coordinada pendiente
 

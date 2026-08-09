@@ -21,10 +21,10 @@ VYVOCR es la tienda pública. BilBildin administra negocio, catálogo, precio,
 stock y pedidos sin aparecer en la interfaz del cliente.
 
 El negocio está aprobado y la integración técnica está preparada para operar.
-El catálogo contiene nueve productos visibles en CRC y diez unidades de cada
-uno. La única validación comercial pendiente es un pedido controlado con datos
-acordados. El dominio `vyvocr.com` no debe declararse activo hasta comprobar
-DNS y SSL.
+El catálogo contiene diez productos visibles en CRC (los nueve Origins más
+FORGE), con diez unidades cada uno. El dominio quedó verificado y en producción
+el 2026-08-09. La única validación comercial pendiente es un pedido controlado
+con datos acordados.
 
 ## Negocio
 
@@ -37,8 +37,8 @@ DNS y SSL.
 | Estado | `active` y aprobado |
 | Moneda / país | CRC / Costa Rica |
 | WhatsApp operativo | `+506 7287 4779` |
-| Dominio objetivo | `https://vyvocr.com` |
-| Producción verificable | `https://vyvo-six.vercel.app` |
+| Dominio canónico | `https://www.vyvocr.com` |
+| Alias de despliegue | `https://vyvo-six.vercel.app` — nunca canónico |
 | Pagos | SINPE, transferencia, efectivo contra entrega |
 | Coordinación | VYVO contacta al cliente después de recibir el pedido |
 
@@ -72,8 +72,9 @@ mantienen en BilBildin y no se exponen en el storefront.
 | `14d10531-d6fc-45a9-9c74-1ff15c657008` | VYV-SPORT-ARENA-008 | ARENA | Personalizable | ₡22.000 | 10 |
 | `14d10531-d6fc-45a9-9c74-1ff15c657009` | VYV-COMP-NEXO-009 | NEXO | Personalizable | ₡23.500 | 10 |
 | `14d10531-d6fc-45a9-9c74-1ff15c657010` | VYV-DROP-ABYSS-010 | ABYSS | Drop | ₡25.000 | 10 |
+| (creado en el admin) | VYVO-FORGE-ORIGINS-007 | FORGE | Drop | ₡22.000 | 10 |
 
-Total: 90 unidades. El seed idempotente está en
+Total: 100 unidades. El seed idempotente de los nueve originales está en
 `scripts/bilbildin/seed-vyvo.sql`.
 
 ## Lectura pública
@@ -124,7 +125,7 @@ enviados por el navegador.
 ## Variables Vercel
 
 ```bash
-NEXT_PUBLIC_SITE_URL=https://vyvocr.com
+NEXT_PUBLIC_SITE_URL=https://www.vyvocr.com
 NEXT_PUBLIC_SUPABASE_URL=https://wgicaiphzwppnshagxve.supabase.co
 NEXT_PUBLIC_VYVO_BUSINESS_ID=14d10531-d6fc-45a9-9c74-1ff15c657099
 BILBILDIN_ENABLED=true
@@ -140,7 +141,7 @@ Ninguna clave privada debe publicarse en Git o usar `NEXT_PUBLIC_`.
 - [x] Negocio y plan aprobados.
 - [x] Propietario `vyvocr@gmail.com` asociado.
 - [x] Identidad VYVO configurada.
-- [x] Nueve productos visibles con precios CRC.
+- [x] Diez productos visibles con precios CRC (Origins + FORGE).
 - [x] Diez unidades por producto y 90 en total.
 - [x] Pagos coordinados: SINPE, transferencia y efectivo.
 - [x] Catálogo público filtrado por tenant.
@@ -156,8 +157,13 @@ Ninguna clave privada debe publicarse en Git o usar `NEXT_PUBLIC_`.
 
 ## Pendiente controlado
 
-- [ ] Verificar DNS y SSL de `vyvocr.com`.
-- [ ] Confirmar `NEXT_PUBLIC_SITE_URL=https://vyvocr.com` después del DNS.
+- [x] DNS y SSL verificados: el ápex responde 308 hacia `www`.
+- [ ] Corregir `NEXT_PUBLIC_SITE_URL` en Vercel a `https://www.vyvocr.com`. El
+      código ya descarta hosts de despliegue, pero la variable no debe mentir.
+- [ ] Crear el producto `vyvo-encargo-personalizado` (₡0, stock alto, visible)
+      para habilitar `/personalizar/encargo`.
+- [ ] Volver a subir la foto de FORGE como archivo: hoy vive como data URI de
+      152 KB y se sirve por `/api/media/`, que es contención, no solución.
 - [ ] Ejecutar un pedido real con datos acordados.
 - [ ] Confirmar que el admin muestra únicamente el tenant VYVO.
 - [ ] Confirmar precios y costos finales antes de venta pública.

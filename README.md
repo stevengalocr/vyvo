@@ -5,6 +5,40 @@ Incluye landing, catálogo, fichas, personalización, carrito, checkout y
 confirmación. BilBildin funciona como motor administrativo y no aparece en la
 navegación ni en el lenguaje dirigido al cliente.
 
+## Auditoría — 2026-08-09
+
+Medido sobre `https://www.vyvocr.com`, no sobre el build local.
+
+| Lighthouse móvil | |
+|---|---|
+| Rendimiento | **90 / 91 / 92** (mediana de 3 corridas) |
+| Accesibilidad · Prácticas recomendadas · SEO | **100 · 100 · 100** |
+| FCP · LCP · CLS | 1.0 s · 2.8 s · **0** |
+| Peso total | **383 KB** en 34 peticiones |
+
+| Verificado en producción | |
+|---|---|
+| Rutas públicas | 17/17 responden 200 |
+| Fichas de producto | 10/10 responden 200, FORGE incluido |
+| Canonical | Correcto por ruta; **cero referencias a `vercel.app`** |
+| `noindex` | Activo en `/carrito`, `/checkout` y confirmación |
+| Datos estructurados | `Organization`, `WebSite`, `ItemList`, `Product`, `BreadcrumbList` — válidos |
+| `Product` | Campos requeridos y recomendados completos, con precio real en CRC |
+| Sitemap | 20 URLs, con las 10 fichas |
+| Imágenes base64 | **0 en el HTML** (se sirven por `/api/media/`) |
+| Suite | 57 pruebas, `npm run check` en verde |
+
+**Techo actual del rendimiento:** los 175 KB de JavaScript, dominados por el hero
+(componente cliente con estado, rotación e IntersectionObserver). Pasar de ~92 pide
+partirlo, y eso ya es rediseño de ese componente, no entrega.
+
+### Pendiente fuera del código
+
+- Crear el producto `vyvo-encargo-personalizado` (₡0, stock alto, visible) para
+  habilitar `/personalizar/encargo`. Sin él responde 503 con mensaje claro.
+- Corregir `NEXT_PUBLIC_SITE_URL` en Vercel a `https://www.vyvocr.com`.
+- Volver a subir la foto de FORGE **como archivo**, no embebida en base64.
+
 ## Arquitectura
 
 ```text
@@ -75,12 +109,12 @@ y nunca deben usar `NEXT_PUBLIC_`.
 | Plan | `starter` |
 | Propietario | `vyvocr@gmail.com` |
 | Moneda | CRC |
-| Catálogo | 9 productos visibles |
+| Catálogo | 10 productos visibles (Origins + FORGE) |
 | Inventario | 10 por producto, 90 total |
 | Pagos | SINPE, transferencia, efectivo contra entrega |
 | Business ID | `14d10531-d6fc-45a9-9c74-1ff15c657099` |
-| Vercel | `https://vyvo-six.vercel.app` |
-| Dominio objetivo | `https://vyvocr.com` |
+| Alias de despliegue | `https://vyvo-six.vercel.app` — **nunca canónico** |
+| Dominio canónico | `https://www.vyvocr.com` (el ápex responde 308 hacia www) |
 
 El dominio personalizado solo se considera activo cuando DNS y SSL se hayan
 verificado externamente.
