@@ -116,6 +116,34 @@ alterado no autoriza la lectura de pedidos ajenos.
 - Configuraciones personales almacenadas solo dentro del pedido.
 - Sin números SINPE, IBAN ni instrucciones bancarias públicas.
 
+## Encargos personalizados
+
+`/personalizar/encargo` recibe ideas que no encajan en SHIFT, ARENA o NEXO: el cliente
+escribe qué quiere, adjunta hasta 5 fotos de referencia y deja su contacto. **No se pide
+dirección ni método de pago, y no se muestra ningún precio** — el encargo se cotiza
+después de revisarlo.
+
+```
+formulario → POST /api/encargos (multipart)
+           → sube las imágenes al bucket privado con service_role
+           → RPC create_storefront_custom_request
+           → public.storefront_custom_requests (estado pending_review)
+```
+
+Decisiones que conviene no deshacer:
+
+- **La subida pasa por nuestro propio endpoint**, no del navegador a Supabase. Por eso el
+  CSP sigue siendo `connect-src 'self'`: el cliente nunca habla con Supabase.
+- **El tipo de imagen se decide por la firma binaria**, no por la extensión ni por el
+  `Content-Type` que manda el navegador — los dos se falsifican renombrando.
+- **Las imágenes se suben antes de crear el registro.** Si falla la subida no queda un
+  encargo apuntando a archivos que nunca llegaron.
+- El bucket es **privado**: son fotos de personas y mascotas reales.
+
+> ⚠️ **La migración todavía no está aplicada en BilBildin.** Hasta que se aplique, el
+> envío responde 503 con un mensaje claro y no se pierde nada. Ver
+> [`docs/integraciones/BILBILDIN_REQUERIMIENTOS_VYVO.md`](docs/integraciones/BILBILDIN_REQUERIMIENTOS_VYVO.md).
+
 ## SEO y Core Web Vitals
 
 Medido con Lighthouse sobre el build de producción:

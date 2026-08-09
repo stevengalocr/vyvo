@@ -85,8 +85,8 @@ export default function CustomizePage() {
               <a className="button button--purple" href="#rutas">
                 Elegir mi ruta <Icon name="arrow" />
               </a>
-              <Link className="button button--ghost" href="/catalogo">
-                Ver catálogo
+              <Link className="button button--ghost" href="/personalizar/encargo">
+                Contame tu idea
               </Link>
             </div>
             <ul className="customize-hero__trust">

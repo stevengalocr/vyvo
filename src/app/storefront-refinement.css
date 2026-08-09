@@ -261,3 +261,32 @@
     transform: none;
   }
 }
+
+/* Encargos personalizados: lista de archivos adjuntos y nota bajo el envío. */
+.custom-request__files {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.custom-request__files li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.custom-request__files svg {
+  color: var(--vyvo-green);
+  flex-shrink: 0;
+}
+
+.custom-request__note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}

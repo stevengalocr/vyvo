@@ -1,8 +1,70 @@
 # Requerimientos de VYVO para BilBildin
 
-- Fecha: 2026-07-29
+- Fecha: 2026-07-29 · actualizado 2026-08-09
 - Tienda: VYVOCR
 - Negocio: `14d10531-d6fc-45a9-9c74-1ff15c657099`
+
+---
+
+## ⚠️ Pendiente de aplicar: encargos personalizados
+
+**Migración:** `supabase/migrations/202608090001_create_vyvo_custom_request.sql`
+**Estado:** escrita y probada en el repositorio, **sin aplicar en la base de BilBildin**.
+
+Mientras no se aplique, `/personalizar/encargo` queda publicado pero el envío responde
+**503** con un mensaje claro al cliente. Nada se rompe; simplemente no recibe encargos.
+
+### Qué resuelve
+
+`create_storefront_order` calcula el subtotal desde el precio del catálogo y descuenta
+inventario. Sirve para piezas que ya existen y ya tienen precio. **Un encargo
+personalizado no tiene ninguna de las dos cosas:** el cliente manda su idea, VYVO la
+revisa y recién ahí define alcance, precio y plazo.
+
+### Qué agrega — y qué NO toca
+
+Es **estrictamente aditiva**. Hay una prueba automatizada
+(`tests/custom-request.test.ts`) que falla si alguien mete un `alter table` sobre
+`orders` o cualquier `drop`.
+
+| Objeto nuevo | Para qué |
+|---|---|
+| `public.storefront_custom_requests` | Tabla de encargos, con `business_id`, contacto, `brief` jsonb, imágenes y estado |
+| `public.create_storefront_custom_request(uuid, jsonb)` | La crea de forma atómica; valida negocio activo y reutiliza `store_customers` |
+| bucket `vyvo-custom-references` | Imágenes de referencia, **privado**, 5 MB, solo JPG/PNG/WEBP |
+
+**Por qué una tabla propia y no una fila en `orders`:** un encargo sin precio obligaría
+a inventar valores para columnas cuyas restricciones (`payment_method`, `status`,
+`payment_status`) son de BilBildin. Escribir ahí a ciegas falla en producción y ensucia
+los reportes de ventas. Cuando VYVO cotice y el cliente acepte, BilBildin crea el pedido
+real por su flujo normal y lo enlaza con `converted_order_id`.
+
+### Postura de seguridad — igual que `create_storefront_order`
+
+- `security definer` con `set search_path = ''`.
+- RLS activo y **sin políticas**: nadie llega por PostgREST.
+- `revoke` a `public`, `anon` y `authenticated`; `grant execute` solo a `service_role`.
+- El bucket es privado: son fotos de personas y mascotas reales. BilBildin las lee con
+  URL firmada.
+
+### Ciclo de vida del encargo
+
+`pending_review` → `quoted` → `accepted` | `declined` → `archived`
+
+Campos para que BilBildin cierre el ciclo: `quoted_amount`, `quoted_currency`,
+`internal_notes`, `converted_order_id`.
+
+### Cómo aplicarla
+
+```bash
+supabase db push
+# o pegar el archivo en el SQL editor del proyecto
+```
+
+Después de aplicar, verificar con un envío real desde `/personalizar/encargo` y revisar
+que la fila aparezca en `storefront_custom_requests`.
+
+---
 
 ## Estado actual
 
