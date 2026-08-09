@@ -171,6 +171,18 @@ real, así que un producto nuevo tiene URL indexable sin esperar un deploy.
 
 La única exclusión es el producto de encargo, **por slug y de forma explícita**.
 
+### Cuánto tarda en reflejarse un cambio del admin
+
+| Superficie | Retraso máximo |
+|---|---|
+| Landing, catálogo, drops, fichas | ~60 s |
+| Sitemap | ~10 min |
+| Ficha de un producto borrado | pasa a 404 en ~60 s |
+
+Sale de `revalidate` en `provider.ts` (60 s), `layout.tsx` (60 s) y `sitemap.ts`
+(600 s). Vercel sirve la versión anterior mientras revalida, así que la primera visita
+después del cambio todavía puede ver lo viejo y la siguiente ya ve lo nuevo.
+
 ## Encargos personalizados
 
 `/personalizar/encargo` recibe ideas que no encajan en SHIFT, ARENA o NEXO: el cliente
