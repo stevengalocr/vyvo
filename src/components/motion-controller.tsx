@@ -31,16 +31,21 @@ export function MotionController() {
         { threshold: 0.12, rootMargin: "0px 0px -6% 0px" },
       );
 
-      for (const node of nodes) {
-        const index = Number(node.dataset.revealIndex ?? "0");
-        node.style.setProperty(
-          "--reveal-delay",
-          `${getRevealDelay(index)}ms`,
-        );
-        const state = getInitialRevealState(
-          node.getBoundingClientRect().top,
-          window.innerHeight,
-        );
+      // Leer y escribir por separado. Antes el bucle alternaba una escritura de
+      // estilo con un getBoundingClientRect() por nodo, y cada lectura obligaba al
+      // navegador a recalcular el layout que la escritura anterior acababa de
+      // invalidar. Con ~20 elementos revelables eso costaba 109 ms de reflujo
+      // forzado justo mientras el hero intentaba pintar.
+      const viewportHeight = window.innerHeight;
+      const measured = nodes.map((node) => ({
+        node,
+        top: node.getBoundingClientRect().top,
+        index: Number(node.dataset.revealIndex ?? "0"),
+      }));
+
+      for (const { node, top, index } of measured) {
+        node.style.setProperty("--reveal-delay", `${getRevealDelay(index)}ms`);
+        const state = getInitialRevealState(top, viewportHeight);
         node.setAttribute("data-reveal-state", state);
         if (state === "pending") observer.observe(node);
       }

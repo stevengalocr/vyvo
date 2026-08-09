@@ -264,6 +264,10 @@ export function HeroShowcase({
                 }
                 fill
                 priority={!selectedProduct}
+                // Esta foto es el elemento LCP. `priority` la precarga, pero sin la
+                // pista de prioridad el navegador la pide en la misma fila que el
+                // resto: Lighthouse marcaba "fetchpriority=high should be applied".
+                fetchPriority={selectedProduct ? "auto" : "high"}
                 sizes="(max-width: 900px) 100vw, 62vw"
                 className="hero__image"
                 onError={

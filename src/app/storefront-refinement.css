@@ -116,57 +116,6 @@
   }
 }
 
-.craft-proof {
-  overflow: clip;
-  background: var(--vyvo-black);
-  color: white;
-}
-
-.craft-proof__grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1.1fr) minmax(340px, 0.9fr);
-  align-items: center;
-  gap: clamp(48px, 8vw, 120px);
-}
-
-.craft-proof h2 {
-  max-width: 780px;
-  margin: 20px 0 0;
-  color: white;
-  font-family: var(--font-display);
-  font-size: clamp(2.5rem, 5vw, 5rem);
-  letter-spacing: -0.04em;
-  line-height: 0.98;
-}
-
-.craft-proof__points {
-  display: grid;
-}
-
-.craft-proof__points p {
-  display: grid;
-  grid-template-columns: 30px 1fr;
-  gap: 4px 14px;
-  margin: 0;
-  border-bottom: 1px solid rgb(255 255 255 / 14%);
-  padding: 22px 0;
-}
-
-.craft-proof__points svg {
-  grid-row: 1 / 3;
-  color: var(--vyvo-purple);
-}
-
-.craft-proof__points strong {
-  font-family: var(--font-display);
-  font-size: 1rem;
-}
-
-.craft-proof__points span {
-  color: rgb(255 255 255 / 72%);
-  line-height: 1.55;
-}
-
 .final-cta--focused .final-cta__grid {
   grid-template-columns: minmax(0, 900px);
 }
@@ -262,10 +211,6 @@
 }
 
 @media (max-width: 900px) {
-  .craft-proof__grid {
-    grid-template-columns: 1fr;
-    gap: 36px;
-  }
 
   .pdp-hero__grid {
     grid-template-areas:

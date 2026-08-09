@@ -137,10 +137,14 @@ export default async function HomePage() {
           </div>
           <div className="product-grid product-grid--preview">
             {catalog.slice(0, 6).map((product, index) => (
+              // Sin `priority`: estas tarjetas viven muy por debajo del pliegue, pero
+              // `priority` emite un <link rel="preload"> que competía con la foto del
+              // hero — el elemento LCP. Se precargaban cuatro imágenes a la vez y
+              // ninguna con prioridad alta. Con lazy loading normal, el navegador las
+              // pide cuando se acercan a pantalla.
               <ProductCard
                 key={product.slug}
                 product={product}
-                priority={index < 3}
                 revealIndex={index}
               />
             ))}
@@ -187,20 +191,6 @@ export default async function HomePage() {
             <Link href="/personalizar" className="button button--dark">
               Empezar mi idea <Icon name="arrow" />
             </Link>
-          </div>
-        </div>
-      </section>
-
-      <section className="section craft-proof">
-        <div className="container craft-proof__grid">
-          <div data-reveal>
-            <span className="eyebrow eyebrow--light">Hecho cerca. Revisado de verdad.</span>
-            <h2>Una pieza VYVO pasa por manos humanas antes de llegar a las tuyas.</h2>
-          </div>
-          <div className="craft-proof__points">
-            <p><Icon name="flag" /><strong>Desarrollo local</strong><span>Creado y terminado en Costa Rica.</span></p>
-            <p><Icon name="motion" /><strong>Acabado cuidado</strong><span>Ajuste y presencia revisados pieza por pieza.</span></p>
-            <p><Icon name="check" /><strong>Coordinación clara</strong><span>Confirmamos disponibilidad, pago y entrega contigo.</span></p>
           </div>
         </div>
       </section>
