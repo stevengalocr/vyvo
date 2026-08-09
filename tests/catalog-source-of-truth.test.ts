@@ -101,6 +101,36 @@ test("los Origins conservan su ficha editorial", () => {
   assert.equal(mapped.originsNumber, core.originsNumber);
 });
 
+test("una imagen en base64 nunca entra al catálogo", () => {
+  // La foto de FORGE llegaba de Bilbildin como data URI de 198 KB y se colaba entera:
+  // al JSON-LD y dos veces al payload RSC, unos 600 KB por visita. Un data URI parsea
+  // como URL válida, así que la comprobación de origen no lo detenía.
+  const dataUri =
+    "data:image/png;base64," + "iVBORw0KGgoAAAANSUhEUgAA".repeat(400);
+  const mapped = mapStandaloneBilbildinProduct(row({ images: [dataUri] }), 10);
+
+  assert.equal(mapped.image, "/api/media/vyvo-forge");
+  assert.ok(mapped.image.length < 60, "la ruta tiene que ser corta");
+  assert.doesNotMatch(JSON.stringify(mapped), /data:image/);
+
+  // Y lo mismo para los productos con ficha editorial.
+  const core = products.find((product) => product.slug === "vyvo-core");
+  assert.ok(core);
+  const conFicha = mapBilbildinProduct(
+    core,
+    row({ slug: "vyvo-core", images: [dataUri] }),
+  );
+  assert.equal(conFicha.image, "/api/media/vyvo-core");
+});
+
+test("una URL normal de imagen pasa sin tocarse", () => {
+  const mapped = mapStandaloneBilbildinProduct(
+    row({ images: ["https://cdn.example.com/forge.png"] }),
+    10,
+  );
+  assert.equal(mapped.image, "https://cdn.example.com/forge.png");
+});
+
 test("un producto agotado o no visible no queda comprable", () => {
   assert.equal(
     mapStandaloneBilbildinProduct(row({ stock_quantity: 0 }), 10).commerce.purchasable,

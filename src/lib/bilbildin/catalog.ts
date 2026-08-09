@@ -46,8 +46,17 @@ function asLeadTimeDays(value: unknown) {
   return { min, max };
 }
 
-function sameOriginImage(value: string | undefined, fallback: string) {
+function sameOriginImage(
+  value: string | undefined,
+  fallback: string,
+  slug: string,
+) {
   if (!value) return fallback;
+
+  // Un data URI parsea como URL válida, así que antes se colaba entero al catálogo y
+  // de ahí al JSON-LD y al payload RSC. La foto de FORGE pesaba 198 KB y viajaba tres
+  // veces en cada visita. Se cambia por una URL corta que sirve /api/media/[slug].
+  if (value.startsWith("data:")) return `/api/media/${slug}`;
 
   try {
     const url = new URL(value);
@@ -139,7 +148,7 @@ export function mapStandaloneBilbildinProduct(
     quote: "",
     cta: `Quiero conocer a ${row.name}`,
     sizeTarget: "Medidas por confirmar",
-    image: sameOriginImage(row.images?.[0], "/landing/hero-family-concept-v1.png"),
+    image: sameOriginImage(row.images?.[0], "/landing/hero-family-concept-v1.png", row.slug),
     alt: `Render conceptual de VYVO ${row.name}.`,
     tags: row.tags?.length ? row.tags : [lineLabel],
     included: [],
@@ -178,7 +187,7 @@ export function mapBilbildinProduct(
     sku,
     shortDescription: row.short_description ?? product.shortDescription,
     longDescription: row.description ?? product.longDescription,
-    image: sameOriginImage(row.images?.[0], product.image),
+    image: sameOriginImage(row.images?.[0], product.image, row.slug),
     tags: row.tags?.length ? row.tags : product.tags,
     availability: purchasable ? "in_stock" : "sold_out",
     commerce: {

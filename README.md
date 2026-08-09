@@ -225,6 +225,17 @@ Los preloads de fuente en el layout están medidos: bajan el FCP de 1.7 s a 0.9 
 Speed Index de 1.7 s a 1.1 s. Retrasan un poco el arranque de la imagen del hero, pero
 el LCP total no cambia.
 
+**3. Las imágenes en base64 se sirven por `/api/media/[slug]`.** El admin de Bilbildin
+permite subir la foto embebida como data URI. La de FORGE pesaba 198 KB y viajaba tres
+veces en cada visita —una en el JSON-LD y dos en el payload RSC— sumando unos 600 KB al
+HTML. Un data URI parsea como URL válida, así que la comprobación de origen no lo
+detenía. Ahora el catálogo lleva una ruta corta, la imagen se descarga aparte, se cachea
+y `next/image` la puede convertir a AVIF/WebP.
+
+> Es una contención, no la solución. **Lo correcto es volver a subir esas fotos como
+> archivo** para que Bilbildin guarde una URL. Hay una prueba que falla si un data URI
+> vuelve a colarse al catálogo.
+
 | | antes | después |
 |---|---|---|
 | Peso total | 1077 KB | **404 KB** |
