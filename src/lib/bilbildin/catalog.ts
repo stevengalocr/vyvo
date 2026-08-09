@@ -69,6 +69,86 @@ function toMinorUnits(value: string | number | null) {
     : null;
 }
 
+/**
+ * Traduce la categoría de Bilbildin a la línea con la que el storefront agrupa y filtra.
+ * Bilbildin es la fuente de verdad, así que el mapeo va de allá hacia acá y no al revés.
+ */
+function lineFromCategory(category: string | null): {
+  line: Product["line"];
+  lineLabel: string;
+} {
+  const value = (category ?? "").toLowerCase();
+  if (/drop/.test(value)) return { line: "drop", lineLabel: "VYVO Drops" };
+  if (/personaliz|custom/.test(value))
+    return { line: "mini_custom", lineLabel: "VYVO Mini Custom" };
+  if (/deporte|sport/.test(value))
+    return { line: "mini_sport", lineLabel: "VYVO Mini Sport" };
+  if (/compañer|companion|mascota/.test(value))
+    return { line: "companion", lineLabel: "VYVO Companions" };
+  return { line: "mini", lineLabel: "VYVO Mini" };
+}
+
+/** Acento visual estable: el mismo producto recibe siempre el mismo color. */
+function accentFromSlug(slug: string): Product["accent"] {
+  const palette: Product["accent"][] = ["purple", "orange", "green"];
+  let hash = 0;
+  for (const char of slug) hash = (hash * 31 + char.charCodeAt(0)) >>> 0;
+  return palette[hash % palette.length];
+}
+
+/**
+ * Construye la ficha de un producto que existe en Bilbildin pero todavía no tiene
+ * texto editorial en `src/data/products.ts`.
+ *
+ * Antes estos productos simplemente no aparecían: el catálogo recorría los nueve
+ * Origins locales y descartaba cualquier fila cuyo slug no coincidiera. Alguien creaba
+ * un producto en el admin, lo marcaba visible, y la tienda lo ignoraba en silencio.
+ *
+ * Los textos salen de la propia fila. Donde Bilbildin no tiene nada que decir se usa
+ * una frase neutra: es preferible a inventarle una historia de marca a una pieza que
+ * nadie escribió todavía.
+ */
+export function mapStandaloneBilbildinProduct(
+  row: BilbildinProductRow,
+  displayOrder: number,
+): StorefrontProduct {
+  const { line, lineLabel } = lineFromCategory(row.category);
+  const attributes = row.attributes ?? {};
+  const shortDescription =
+    row.short_description?.trim() ||
+    `${row.name} · pieza VYVO diseñada y terminada en Costa Rica.`;
+
+  const base: Product = {
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    sku:
+      typeof attributes.sku === "string" && attributes.sku.length > 0
+        ? attributes.sku
+        : row.slug.toUpperCase(),
+    originsNumber: String(displayOrder).padStart(3, "0"),
+    displayOrder,
+    line,
+    lineLabel,
+    accent: accentFromSlug(row.slug),
+    status: "published",
+    availability: "in_stock",
+    descriptor: shortDescription,
+    shortDescription,
+    longDescription: row.description?.trim() || shortDescription,
+    quote: "",
+    cta: `Quiero conocer a ${row.name}`,
+    sizeTarget: "Medidas por confirmar",
+    image: sameOriginImage(row.images?.[0], "/landing/hero-family-concept-v1.png"),
+    alt: `Render conceptual de VYVO ${row.name}.`,
+    tags: row.tags?.length ? row.tags : [lineLabel],
+    included: [],
+    packagingTier: "Signature",
+  };
+
+  return mapBilbildinProduct(base, row);
+}
+
 export function mapBilbildinProduct(
   product: Product,
   row: BilbildinProductRow,

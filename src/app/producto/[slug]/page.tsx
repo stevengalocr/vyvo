@@ -27,8 +27,18 @@ type ProductPageProps = {
   params: Promise<{ slug: string }>;
 };
 
-export function generateStaticParams() {
-  return storefrontProducts.map((product) => ({ slug: product.slug }));
+/**
+ * Los slugs salen del catálogo real. Un producto publicado en Bilbildin tiene que tener
+ * su ficha sin esperar un deploy; si el catálogo no responde en build, se prerenderizan
+ * los Origins y el resto se sirve bajo demanda (`dynamicParams` queda en su default).
+ */
+export async function generateStaticParams() {
+  try {
+    const catalog = await getStorefrontCatalog();
+    return catalog.map((product) => ({ slug: product.slug }));
+  } catch {
+    return storefrontProducts.map((product) => ({ slug: product.slug }));
+  }
 }
 
 export async function generateMetadata({

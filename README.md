@@ -116,6 +116,27 @@ alterado no autoriza la lectura de pedidos ajenos.
 - Configuraciones personales almacenadas solo dentro del pedido.
 - Sin números SINPE, IBAN ni instrucciones bancarias públicas.
 
+## Catálogo: Bilbildin manda
+
+`readBilbildinCatalog` lista **todos los productos visibles de Bilbildin**. El archivo
+`src/data/products.ts` ya no decide qué se muestra: solo aporta el texto editorial de las
+nueve piezas Origins que lo tienen escrito.
+
+> Antes era al revés — se recorrían los nueve slugs locales y se descartaba cualquier
+> fila de Bilbildin que no coincidiera. Alguien publicaba un producto en el admin, lo
+> dejaba `visible`, y la tienda lo ignoraba sin avisar. Así desapareció FORGE.
+
+Un producto sin ficha local (`mapStandaloneBilbildinProduct`) se arma desde su propia
+fila: nombre, descripción, imagen, precio y stock. La línea sale de la categoría de
+Bilbildin (`Drops` → VYVO Drops, `Personalizables` → VYVO Mini Custom, el resto → VYVO
+Mini) y el acento visual es estable por slug. **No se le inventa relato de marca:** sin
+`quote`, sin lista de contenido. Si nadie lo escribió, no aparece.
+
+El sitemap y `generateStaticParams` de `/producto/[slug]` también salen del catálogo
+real, así que un producto nuevo tiene URL indexable sin esperar un deploy.
+
+La única exclusión es el producto de encargo, **por slug y de forma explícita**.
+
 ## Encargos personalizados
 
 `/personalizar/encargo` recibe ideas que no encajan en SHIFT, ARENA o NEXO: el cliente

@@ -182,11 +182,11 @@ test("el endpoint de encargos protege el mismo perímetro que el checkout", () =
   assert.doesNotMatch(route, /form\.get\("idempotencyKey"\)/);
 });
 
-test("el producto de encargo queda fuera del catálogo público", () => {
+test("el producto de encargo se excluye del catálogo de forma explícita", () => {
   const provider = readFileSync("src/lib/bilbildin/provider.ts", "utf8");
-  // El catálogo recorre los Origins locales, así que un slug ajeno nunca se lista.
-  assert.match(provider, /products\.flatMap/);
-  assert.match(provider, /CUSTOM_ORDER_SLUG/);
+  // Antes quedaba fuera por accidente: el catálogo solo listaba los nueve slugs
+  // locales. Ahora manda Bilbildin, así que la exclusión tiene que ser deliberada.
+  assert.match(provider, /\.filter\(\(row\) => row\.slug !== CUSTOM_ORDER_SLUG\)/);
 
   const localProducts = readFileSync("src/data/products.ts", "utf8");
   assert.doesNotMatch(localProducts, /vyvo-encargo-personalizado/);

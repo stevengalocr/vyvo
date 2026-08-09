@@ -16,9 +16,17 @@ Se resolvió **sin funciones nuevas en BilBildin**: el encargo entra por
 `create_storefront_order_idempotent`, la misma que usa el checkout, y aparece en la lista
 de pedidos normal.
 
-Faltan dos cosas, ninguna es una migración de esquema:
+Ninguno de los dos requisitos es una migración de esquema.
 
-### 1. Crear el producto de encargo
+### ✅ Bucket de fotos — hecho (2026-08-09)
+
+`vyvo-custom-references`: privado, 5 MB, solo JPG/PNG/WEBP. Confirmado por VYVO.
+
+VYVO sube desde el servidor con `service_role` y guarda en el pedido una **URL firmada a
+90 días**, así que BilBildin abre las fotos sin credenciales y el bucket nunca queda
+expuesto.
+
+### ⬜ Falta: crear el producto de encargo
 
 | Campo | Valor |
 |---|---|
@@ -28,22 +36,10 @@ Faltan dos cosas, ninguna es una migración de esquema:
 | Stock | Alto (ej. 9999) |
 | Estado | `visible` |
 
-No aparece en la tienda: el storefront solo lista los nueve slugs de Origins.
+**No aparece en la tienda:** el storefront excluye ese slug de forma explícita. Es la
+única exclusión del catálogo — todo lo demás que esté `visible` en BilBildin se publica.
 
-### 2. Crear el bucket de fotos
-
-`supabase/migrations/202608090001_create_vyvo_reference_bucket.sql`, o a mano desde
-Supabase → Storage → New bucket:
-
-- Nombre `vyvo-custom-references`
-- **Privado** (son fotos de personas y mascotas reales)
-- Límite 5 MB, solo `image/jpeg`, `image/png`, `image/webp`
-
-VYVO sube desde el servidor con `service_role` y guarda en el pedido una **URL firmada a
-90 días**, así que BilBildin abre las fotos sin credenciales y el bucket nunca queda
-expuesto.
-
-Mientras falte cualquiera de las dos, el envío responde **503** con un mensaje claro al
+Mientras el producto no exista, el envío responde **503** con un mensaje claro al
 cliente. Nada se rompe.
 
 ### Cómo llega el encargo
@@ -78,8 +74,10 @@ panel; si no, los encargos quedan donde nadie los ve.
 La integración necesaria para operar la tienda está completa:
 
 - negocio `active` en plan `starter`;
-- nueve productos visibles en CRC;
-- diez unidades por producto, 90 en total;
+- **BilBildin es la fuente de verdad del catálogo**: todo producto `visible` se publica
+  en la tienda, tenga o no ficha editorial en el repositorio. Hasta el 2026-08-09 la
+  tienda solo mostraba nueve slugs fijos y descartaba el resto en silencio — así
+  desapareció FORGE;
 - catálogo, precios y stock consumidos desde BilBildin;
 - pedidos idempotentes creados desde servidor;
 - SINPE, transferencia y efectivo contra entrega;

@@ -16,11 +16,20 @@ import {
 } from "./config";
 import {
   mapBilbildinProduct,
+  mapStandaloneBilbildinProduct,
   type BilbildinProductRow,
 } from "./catalog";
 import { createPublicBilbildinClient } from "./client";
 
 const serverEnv = process.env as Record<string, string | undefined>;
+
+/**
+ * Producto contra el que se registran los encargos personalizados. Se declara acá
+ * arriba porque el catálogo lo necesita para excluirlo: es un producto de trastienda,
+ * no una pieza que la gente compre desde la tienda.
+ */
+export const CUSTOM_ORDER_SLUG =
+  serverEnv.BILBILDIN_CUSTOM_PRODUCT_SLUG?.trim() || "vyvo-encargo-personalizado";
 
 const readBilbildinCatalog = unstable_cache(
   async (): Promise<StorefrontProduct[]> => {
@@ -51,13 +60,29 @@ const readBilbildinCatalog = unstable_cache(
       throw new Error("No fue posible cargar el catálogo VYVO desde Bilbildin.");
     }
 
-    const rowsBySlug = new Map(
-      ((data ?? []) as BilbildinProductRow[]).map((row) => [row.slug, row]),
-    );
-    const mapped = products.flatMap((product) => {
-      const row = rowsBySlug.get(product.slug);
-      return row ? [mapBilbildinProduct(product, row)] : [];
-    });
+    /**
+     * Bilbildin es la fuente de verdad del catálogo.
+     *
+     * Antes esto era al revés: se recorrían los nueve Origins de `src/data/products.ts`
+     * y se descartaba cualquier fila de Bilbildin cuyo slug no estuviera en esa lista.
+     * Resultado: alguien creaba un producto en el admin, lo dejaba `visible`, y la
+     * tienda lo ignoraba sin avisar. Ahora manda la base y el archivo local solo aporta
+     * el texto editorial de las piezas que lo tienen escrito.
+     */
+    const localBySlug = new Map(products.map((product) => [product.slug, product]));
+    const rows = (data ?? []) as BilbildinProductRow[];
+
+    const mapped = rows
+      .filter((row) => row.slug !== CUSTOM_ORDER_SLUG)
+      .map((row, index) => {
+        const local = localBySlug.get(row.slug);
+        return local
+          ? mapBilbildinProduct(local, row)
+          : mapStandaloneBilbildinProduct(row, products.length + index + 1);
+      })
+      // Los Origins con ficha escrita conservan su orden curado; lo que llega después
+      // de Bilbildin se ordena por como vino de la base.
+      .sort((a, b) => a.displayOrder - b.displayOrder);
 
     if (!mapped.length) {
       throw new Error("Bilbildin no devolvió productos visibles para VYVO.");
@@ -95,19 +120,12 @@ export async function getStorefrontProduct(slug: string) {
 }
 
 /**
- * Producto contra el que se registran los encargos personalizados.
- *
- * Va aparte del catálogo a propósito: `readBilbildinCatalog` recorre los nueve Origins
- * de `src/data/products.ts` y descarta cualquier fila de Bilbildin que no coincida por
- * slug, así que este producto queda invisible en la tienda sin necesidad de ocultarlo.
- * Se consulta solo cuando alguien envía un encargo.
+ * Busca el producto de encargo. Se consulta aparte del catálogo —que lo excluye por
+ * slug— porque es de trastienda: existe para colgarle los encargos, no para venderse.
  *
  * Debe existir en Bilbildin con precio ₡0, stock alto y `status = 'visible'`. El precio
  * real se define al cotizar, después de revisar la idea.
  */
-export const CUSTOM_ORDER_SLUG =
-  serverEnv.BILBILDIN_CUSTOM_PRODUCT_SLUG?.trim() || "vyvo-encargo-personalizado";
-
 export const getCustomOrderProduct = unstable_cache(
   async (): Promise<{ id: string; name: string; stock: number } | null> => {
     const config = getPublicBilbildinConfig(serverEnv);
