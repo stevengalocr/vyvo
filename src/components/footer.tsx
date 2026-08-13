@@ -23,6 +23,7 @@ const groups = [
   {
     title: "Información",
     links: [
+      ["Seguir mi pedido", "/rastreo"],
       ["Cuidados", "/cuidados"],
       ["Políticas", "/politicas"],
       ["Privacidad", "/privacidad"],

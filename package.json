@@ -11,7 +11,7 @@
     "start": "next start",
     "lint": "eslint . --max-warnings=0",
     "typecheck": "tsc --noEmit",
-    "test": "tsx --test tests/products.test.ts tests/motion.test.ts tests/hero-showcase.test.ts tests/bilbildin-config.test.ts tests/bilbildin-seed.test.ts tests/bilbildin-catalog.test.ts tests/bilbildin-order.test.ts tests/commerce-experience.test.ts tests/custom-request.test.ts tests/catalog-source-of-truth.test.ts",
+    "test": "tsx --test tests/products.test.ts tests/motion.test.ts tests/hero-showcase.test.ts tests/bilbildin-config.test.ts tests/bilbildin-seed.test.ts tests/bilbildin-catalog.test.ts tests/bilbildin-order.test.ts tests/commerce-experience.test.ts tests/custom-request.test.ts tests/catalog-source-of-truth.test.ts tests/order-tracking.test.ts",
     "verify:content": "node scripts/verify-public-actions.mjs",
     "verify:responsive": "node scripts/verify-responsive.mjs",
     "verify:browser": "node scripts/verify-browser.mjs",

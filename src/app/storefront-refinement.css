@@ -326,3 +326,83 @@
     gap: 10px;
   }
 }
+
+/* Seguimiento del pedido: línea de tiempo y ayuda del buscador. */
+.order-timeline {
+  display: grid;
+  gap: 0;
+  margin: 28px 0 0;
+  padding: 0;
+  list-style: none;
+  text-align: left;
+}
+
+.order-timeline__item {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 4px 12px;
+  padding: 0 0 22px;
+  position: relative;
+}
+
+/* La línea que une los puntos se dibuja desde cada elemento salvo el último, para
+   que no quede un tramo colgando bajo el evento más antiguo. */
+.order-timeline__item:not(:last-child)::before {
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 18px;
+  bottom: 0;
+  width: 1px;
+  background: rgb(17 17 17 / 12%);
+}
+
+.order-timeline__dot {
+  width: 11px;
+  height: 11px;
+  margin-top: 5px;
+  border: 2px solid rgb(17 17 17 / 22%);
+  border-radius: 50%;
+  background: white;
+}
+
+.order-timeline__item.is-current .order-timeline__dot {
+  border-color: var(--vyvo-purple);
+  background: var(--vyvo-purple);
+}
+
+.order-timeline__item strong {
+  font-family: var(--font-display);
+  font-size: 0.98rem;
+}
+
+.order-timeline__item p {
+  margin: 3px 0 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.55;
+}
+
+.order-timeline__item time {
+  display: block;
+  margin-top: 5px;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+
+.order-lookup__help {
+  margin: 18px 0 0;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+
+.order-lookup__help a {
+  /* 16 px de alto quedaba por debajo del mínimo táctil; el padding lo sube a 26
+     sin mover la línea de texto. */
+  display: inline-block;
+  min-height: 24px;
+  padding: 5px 2px;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

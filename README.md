@@ -194,6 +194,42 @@ Sale de `revalidate` en `provider.ts` (60 s), `layout.tsx` (60 s) y `sitemap.ts`
 (600 s). Vercel sirve la versión anterior mientras revalida, así que la primera visita
 después del cambio todavía puede ver lo viejo y la siguiente ya ve lo nuevo.
 
+## Seguimiento del pedido
+
+`/rastreo` — la persona consulta el estado de su pedido cuando quiera, sin cuenta y sin
+depender del enlace que le apareció al comprar.
+
+```
+/rastreo  → POST /api/rastreo { número + correo }
+          → valida identidad contra Bilbildin
+          → emite la MISMA referencia firmada del checkout
+          → /checkout/confirmacion?pedido=<ref>  (estado + línea de tiempo)
+```
+
+### Por qué pide correo además del número
+
+El número de pedido **no es un secreto**: viaja por WhatsApp, se comparte en capturas y
+queda en el historial del navegador. Tiene ocho caracteres por día —no es trivial de
+adivinar, pero tampoco imposible de enumerar—, y con solo ese dato alguien podría leer el
+nombre, el teléfono y la dirección de otra persona. El correo actúa como segundo factor y
+no se deduce del número.
+
+Por lo mismo, **todos los fallos devuelven el mismo mensaje**. Distinguir entre “no
+existe” y “el correo no coincide” le confirmaría a quien enumera que ese número es real.
+
+Hay un freno de intentos por IP (8 cada 10 minutos). Es memoria del proceso: en
+serverless cada instancia lleva su cuenta, así que encarece el ataque obvio pero no es
+una defensa fuerte. Centralizarlo sigue anotado en el documento de requerimientos.
+
+### La pantalla de estado es una sola
+
+Quien acaba de comprar y quien vuelve un mes después ven exactamente la misma vista,
+alcanzada con la misma referencia firmada. No hay dos caminos con reglas distintas para
+leer un pedido.
+
+Esa pantalla ahora pinta la **línea de tiempo** (`order_tracking`), que ya se consultaba
+desde siempre y nunca se mostraba. Sigue `noindex`: tiene datos personales.
+
 ## Documentos legales
 
 Tres páginas en `/terminos`, `/privacidad` y `/politicas`, redactadas sobre la **Ley

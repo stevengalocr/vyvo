@@ -1,5 +1,9 @@
 import { z } from "zod";
 
+/** `VYVO-20260809-A1B2C3D4`. Vive acá, y no en orders.ts, porque ese módulo es
+ *  `server-only` y el patrón hace falta también para validar en el borde. */
+export const ORDER_NUMBER_PATTERN = /^VYVO-\d{8}-[A-Z0-9]{8}$/;
+
 const text = (minimum: number, maximum: number) =>
   z.string().trim().min(minimum).max(maximum);
 
