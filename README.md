@@ -5,6 +5,11 @@ Incluye landing, catálogo, fichas, personalización, carrito, checkout y
 confirmación. BilBildin funciona como motor administrativo y no aparece en la
 navegación ni en el lenguaje dirigido al cliente.
 
+> **¿Vas a retomar esto?** Leé primero [`docs/CONTEXTO.md`](docs/CONTEXTO.md). Trae las
+> invariantes que rompen el sitio, las mediciones con su método, las hipótesis ya
+> descartadas sobre el techo de rendimiento —para no repetir caminos que no funcionaron—
+> y lo que queda pendiente.
+
 ## Auditoría — 2026-08-09
 
 Medido sobre `https://www.vyvocr.com`, no sobre el build local.

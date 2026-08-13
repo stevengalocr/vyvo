@@ -7,6 +7,7 @@ export function generateMetadata(): Metadata {
   const experience = getCommerceExperience(getBilbildinMode(process.env));
   return {
     title: experience.metadata.checkoutTitle,
+    alternates: { canonical: "/checkout" },
     description: experience.metadata.checkoutDescription,
     robots: { index: false, follow: false },
   };
