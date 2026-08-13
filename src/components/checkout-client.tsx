@@ -416,6 +416,20 @@ export function CheckoutClient() {
             </fieldset>
           ) : null}
 
+          {/* La aceptación va en el último paso, junto al botón que cierra la compra:
+              es el momento en que la persona se obliga, y es lo que hace exigibles las
+              condiciones si algún día hay una discusión. */}
+          {step === 3 ? (
+            <label className="consent-check checkout-consent">
+              <input type="checkbox" name="acepta" required />
+              <span>
+                Acepto los <Link href="/terminos">términos y condiciones</Link>, las{" "}
+                <Link href="/politicas">políticas de compra</Link> y la{" "}
+                <Link href="/privacidad">política de privacidad</Link>.
+              </span>
+            </label>
+          ) : null}
+
           {submitError ? (
             <p role="alert" className="form-feedback form-feedback--error">
               {submitError}

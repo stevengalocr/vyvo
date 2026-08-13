@@ -194,6 +194,46 @@ Sale de `revalidate` en `provider.ts` (60 s), `layout.tsx` (60 s) y `sitemap.ts`
 (600 s). Vercel sirve la versión anterior mientras revalida, así que la primera visita
 después del cambio todavía puede ver lo viejo y la siguiente ya ve lo nuevo.
 
+## Documentos legales
+
+Tres páginas en `/terminos`, `/privacidad` y `/politicas`, redactadas sobre la **Ley
+7472** (protección al consumidor) y la **Ley 8968** (datos personales) de Costa Rica.
+Son Server Components estáticos: cero JavaScript al cliente y cero costo de rendimiento
+— `/terminos` mide 94 en Lighthouse móvil con accesibilidad 100 y CLS 0.
+
+> **No son asesoría legal.** Son un punto de partida sólido para una tienda pequeña,
+> pero conviene que un abogado los revise antes de tratarlos como vinculantes.
+
+### Reglas al editarlos
+
+- Los datos de identificación y contacto salen de **`src/lib/legal.ts`**, nunca escritos
+  a mano dentro de un documento. Si algún día hay razón social o cédula jurídica, se
+  completan ahí y aparecen solos en los tres.
+- **No inventar datos registrales.** El sitio se identifica con su nombre comercial,
+  VYVOCR: publicar una cédula equivocada es peor que no publicarla.
+- Al cambiar el contenido, actualizá `LEGAL_UPDATED`. Un documento legal sin fecha no
+  sirve para probar qué condiciones regían cuando alguien compró.
+
+### Dónde se aceptan
+
+| Punto | Qué declara |
+|---|---|
+| Checkout, paso 3 | Términos, políticas de compra y privacidad |
+| Formulario de encargo | Además, **que tiene los derechos sobre las fotos que envía** |
+
+La casilla del encargo es la que más protege: sin una declaración explícita de derechos,
+un reclamo de un tercero por una foto que subió el cliente cae sobre VYVO. Va sin marcar,
+es `required`, y el texto dice exactamente qué se está declarando.
+
+### Lo que cubren, por si hace falta ampliarlo
+
+Renders conceptuales frente a pieza física · precios y errores de precio · formación del
+pedido y derecho a rechazarlo · **retracto de 8 días hábiles con la excepción expresa de
+las piezas personalizadas** · defectos y garantía · licencia limitada sobre el material
+del cliente · contenido prohibido · indemnidad · propiedad intelectual de VYVO ·
+limitación de responsabilidad · fuerza mayor · ley aplicable y vía de reclamo ante el
+MEIC.
+
 ## Encargos personalizados
 
 `/personalizar/encargo` recibe ideas que no encajan en SHIFT, ARENA o NEXO: el cliente

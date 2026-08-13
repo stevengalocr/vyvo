@@ -54,6 +54,16 @@ export function Footer() {
       <div className="container footer__bottom">
         <p>© {new Date().getFullYear()} VYVO. Todos los derechos reservados.</p>
         <p>Los productos mostrados son renders conceptuales en desarrollo.</p>
+        <p className="footer__credit">
+          Un producto de{" "}
+          <a
+            href="https://galodev.com"
+            target="_blank"
+            rel="noopener noreferrer author"
+          >
+            GaloDev
+          </a>
+        </p>
       </div>
     </footer>
   );

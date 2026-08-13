@@ -306,6 +306,24 @@ export function CustomRequestForm({ baseProductSlug, baseProductName }: Props) {
         />
       </fieldset>
 
+      {/* La casilla es donde se sostiene la protección del encargo: sin una
+          declaración explícita de derechos sobre las fotos, cualquier reclamo de un
+          tercero cae sobre VYVO. Es `required`, así que el navegador no deja enviar
+          sin marcarla, y el texto dice exactamente qué se está declarando. */}
+      <fieldset>
+        <legend>Antes de enviar</legend>
+        <label className="consent-check">
+          <input type="checkbox" name="consent" required />
+          <span>
+            Confirmo que tengo los derechos o la autorización sobre las fotos y
+            referencias que envío, y que si aparece otra persona cuento con su
+            permiso. Acepto los{" "}
+            <Link href="/terminos">términos y condiciones</Link> y la{" "}
+            <Link href="/privacidad">política de privacidad</Link>.
+          </span>
+        </label>
+      </fieldset>
+
       {error && (
         <p className="form-feedback form-feedback--error" role="alert">
           {error}

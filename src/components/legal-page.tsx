@@ -9,12 +9,15 @@ export function LegalPage({
   title,
   intro,
   sections,
+  updated,
   draft = false,
 }: {
   eyebrow: string;
   title: string;
   intro: string;
   sections: LegalSection[];
+  /** Fecha de la última revisión. Un documento legal sin fecha no sirve de prueba. */
+  updated?: string;
   draft?: boolean;
 }) {
   return (
@@ -24,6 +27,9 @@ export function LegalPage({
           <span className="eyebrow">{eyebrow}</span>
           <h1>{title}</h1>
           <p>{intro}</p>
+          {updated ? (
+            <p className="legal-updated">Última actualización: {updated}</p>
+          ) : null}
         </header>
         <div className="prose">
           {draft ? (

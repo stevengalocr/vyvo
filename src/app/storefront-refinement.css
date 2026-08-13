@@ -290,3 +290,39 @@
   font-size: 0.8rem;
   line-height: 1.5;
 }
+
+/* Fecha de revisión de los documentos legales. Un documento sin fecha no sirve
+   como prueba de qué condiciones regían cuando alguien compró. */
+/* Con el selector suelto la pisaba `.content-page__header p`, que es más
+   específica: la fecha salía a 17 px, más grande que el propio cuerpo del texto. */
+.content-page__header .legal-updated {
+  margin-top: 18px;
+  color: var(--muted);
+  font-size: 0.82rem;
+  letter-spacing: 0.02em;
+}
+
+/* Crédito de autoría en el pie. Discreto a propósito: acompaña, no compite con
+   la marca de la tienda. */
+.footer__credit a {
+  /* 42x13 px era demasiado chico para tocar con el dedo. El padding lo lleva por
+     encima del mínimo sin cambiar cómo se ve la línea. */
+  display: inline-block;
+  min-height: 24px;
+  padding: 5px 2px;
+  color: rgba(255, 255, 255, 0.72);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color var(--motion-ui) ease;
+}
+
+.footer__credit a:hover {
+  color: white;
+}
+
+@media (max-width: 780px) {
+  .footer__bottom {
+    flex-direction: column;
+    gap: 10px;
+  }
+}
