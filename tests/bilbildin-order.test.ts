@@ -119,3 +119,19 @@ test("order errors are classified without exposing provider details", () => {
   assert.equal(classifyOrderError("connection timeout"), "retryable");
   assert.equal(classifyOrderError("database detail"), "internal");
 });
+
+test("every BilBildin order code reaches the buyer as something actionable", () => {
+  // Lo que el comprador puede arreglar cambiando el carrito.
+  for (const code of [
+    "store_not_active",
+    "product_unavailable",
+    "insufficient_stock",
+    "invalid_product",
+    "purchase_limit_exceeded",
+  ]) {
+    assert.equal(classifyOrderError(code), "availability", code);
+  }
+  assert.equal(classifyOrderError("temporarily_unavailable"), "retryable");
+  assert.equal(classifyOrderError("internal_error"), "internal");
+  assert.equal(classifyOrderError("invalid_request"), "internal");
+});

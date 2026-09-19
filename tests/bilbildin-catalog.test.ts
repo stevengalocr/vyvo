@@ -3,6 +3,7 @@ import test from "node:test";
 import { products } from "../src/data/products";
 import {
   mapBilbildinProduct,
+  mapStandaloneBilbildinProduct,
   type BilbildinProductRow,
 } from "../src/lib/bilbildin/catalog";
 
@@ -140,4 +141,25 @@ test("Bilbildin mapping accepts only a validated lead time attribute", () => {
     max: 8,
   });
   assert.equal(invalid.commerce.fulfillment.leadTimeDays, null);
+});
+
+test("a product without editorial copy never claims to be a render", () => {
+  const foto = "https://wgicaiphzwppnshagxve.supabase.co/storage/v1/object/public/productos/x/foto.jpg";
+  const descrita = mapStandaloneBilbildinProduct(
+    makeRow({
+      slug: "pieza-nueva",
+      name: "Pieza Nueva",
+      images: [foto],
+      attributes: { gallery: { [foto]: { alt: "Fotografía de Pieza Nueva sobre madera.", kind: "photo" } } },
+    }),
+    10,
+  );
+  assert.equal(descrita.alt, "Fotografía de Pieza Nueva sobre madera.");
+
+  const sinDescribir = mapStandaloneBilbildinProduct(
+    makeRow({ slug: "pieza-nueva", name: "Pieza Nueva", images: [foto], attributes: {} }),
+    10,
+  );
+  assert.doesNotMatch(sinDescribir.alt, /render/i);
+  assert.match(sinDescribir.alt, /Pieza Nueva/);
 });

@@ -1,8 +1,17 @@
 export type OrderErrorKind = "availability" | "retryable" | "internal";
 
+/**
+ * BilBildin devuelve ocho códigos. Acá estaban tres, y el resto caía en
+ * «internal»: un comprador con una pieza dada de baja (`invalid_product`) o que
+ * pedía más del tope (`purchase_limit_exceeded`) leía «no pudimos confirmar el
+ * pedido», que no le dice qué hacer. Los dos se arreglan igual que un agotado:
+ * revisando el carrito.
+ */
 export function classifyOrderError(message: string): OrderErrorKind {
   if (
-    /store_not_active|product_unavailable|insufficient_stock/i.test(message)
+    /store_not_active|product_unavailable|insufficient_stock|invalid_product|purchase_limit_exceeded/i.test(
+      message,
+    )
   ) {
     return "availability";
   }

@@ -97,6 +97,23 @@ function lineFromCategory(category: string | null): {
   return { line: "mini", lineLabel: "VYVO Mini" };
 }
 
+/**
+ * El texto alternativo que el negocio escribió en Bilbildin para esa imagen
+ * (`attributes.gallery`, indexado por URL).
+ *
+ * Antes toda pieza sin ficha editorial se anunciaba como «Render conceptual»,
+ * fuera render o fotografía real. Para quien usa lector de pantalla un dato
+ * inventado es peor que ninguno: si nadie describió la imagen, se dice sólo lo
+ * que sí se sabe —el nombre de la pieza—.
+ */
+function altFromGallery(gallery: unknown, url: string | undefined): string | null {
+  if (!url || !gallery || typeof gallery !== "object" || Array.isArray(gallery)) return null;
+  const entry = (gallery as Record<string, unknown>)[url];
+  if (!entry || typeof entry !== "object") return null;
+  const alt = (entry as { alt?: unknown }).alt;
+  return typeof alt === "string" && alt.trim().length > 0 ? alt.trim().slice(0, 300) : null;
+}
+
 /** Acento visual estable: el mismo producto recibe siempre el mismo color. */
 function accentFromSlug(slug: string): Product["accent"] {
   const palette: Product["accent"][] = ["purple", "orange", "green"];
@@ -149,7 +166,7 @@ export function mapStandaloneBilbildinProduct(
     cta: `Quiero conocer a ${row.name}`,
     sizeTarget: "Medidas por confirmar",
     image: sameOriginImage(row.images?.[0], "/landing/hero-family-concept-v1.png", row.slug),
-    alt: `Render conceptual de VYVO ${row.name}.`,
+    alt: altFromGallery(attributes.gallery, row.images?.[0]) ?? `VYVO ${row.name}.`,
     tags: row.tags?.length ? row.tags : [lineLabel],
     included: [],
     packagingTier: "Signature",
