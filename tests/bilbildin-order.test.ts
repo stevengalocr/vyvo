@@ -132,6 +132,10 @@ test("every BilBildin order code reaches the buyer as something actionable", () 
     assert.equal(classifyOrderError(code), "availability", code);
   }
   assert.equal(classifyOrderError("temporarily_unavailable"), "retryable");
+  // Lo que se arregla corrigiendo el formulario: un dato que falta o los
+  // términos sin aceptar. Reintentar tal cual da el mismo rechazo.
+  assert.equal(classifyOrderError("invalid_request"), "request");
+  assert.equal(classifyOrderError("invalid_checkout_payload"), "request");
+  // Falla de BilBildin: el comprador no puede arreglarla, sólo avisar.
   assert.equal(classifyOrderError("internal_error"), "internal");
-  assert.equal(classifyOrderError("invalid_request"), "internal");
 });

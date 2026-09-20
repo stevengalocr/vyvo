@@ -14,6 +14,7 @@ import {
   checkoutRequestSchema,
 } from "@/lib/bilbildin/order-schema";
 import { classifyOrderError } from "@/lib/bilbildin/order-errors";
+import { LEGAL_WHATSAPP } from "@/lib/legal";
 
 export const runtime = "nodejs";
 
@@ -115,8 +116,14 @@ export async function POST(request: Request) {
         503,
       );
     }
+    if (kind === "request") {
+      return errorResponse(
+        "Falta un dato o hay uno mal escrito. Revisá el formulario y volvé a enviarlo.",
+        400,
+      );
+    }
     return errorResponse(
-      "No pudimos confirmar el pedido. Intentá nuevamente.",
+      `No pudimos registrar tu pedido y no se te cobró nada. Escribinos por WhatsApp al ${LEGAL_WHATSAPP} y lo resolvemos.`,
       500,
     );
   }

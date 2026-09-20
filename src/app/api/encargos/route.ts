@@ -16,6 +16,7 @@ import {
   uploadReferenceImages,
 } from "@/lib/bilbildin/custom-requests";
 import { classifyOrderError } from "@/lib/bilbildin/order-errors";
+import { LEGAL_WHATSAPP } from "@/lib/legal";
 
 export const runtime = "nodejs";
 
@@ -182,8 +183,9 @@ export async function POST(request: Request) {
     const message = error instanceof Error ? error.message : "";
     const kind = classifyOrderError(message);
     if (kind === "availability") {
+      // En un encargo no hay carrito que revisar: reintentar da el mismo rechazo.
       return errorResponse(
-        "No pudimos registrar el encargo en este momento. Intentá más tarde.",
+        `Los encargos no están disponibles en este momento. Escribinos por WhatsApp al ${LEGAL_WHATSAPP} y lo coordinamos.`,
         409,
       );
     }
@@ -193,6 +195,15 @@ export async function POST(request: Request) {
         503,
       );
     }
-    return errorResponse("No pudimos registrar el encargo. Intentá nuevamente.", 500);
+    if (kind === "request") {
+      return errorResponse(
+        "Falta un dato o hay uno mal escrito. Revisá el formulario y volvé a enviarlo.",
+        400,
+      );
+    }
+    return errorResponse(
+      `No pudimos registrar el encargo. Escribinos por WhatsApp al ${LEGAL_WHATSAPP} y lo coordinamos.`,
+      500,
+    );
   }
 }
