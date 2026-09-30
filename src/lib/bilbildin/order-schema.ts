@@ -51,6 +51,12 @@ export const checkoutRequestSchema = z
       })
       .strict(),
     paymentMethod: z.enum(["sinpe", "transfer", "cash"]),
+    /**
+     * Sólo el «sí» viaja. La casilla del paso 3 es `required` en el navegador; acá
+     * se exige otra vez porque un POST armado a mano no pasa por la casilla, y un
+     * pedido sin aceptación no es exigible. La versión aceptada la fija BilBildin.
+     */
+    acceptedTerms: z.literal(true),
     idempotencyKey: z.uuid(),
     items: z
       .array(

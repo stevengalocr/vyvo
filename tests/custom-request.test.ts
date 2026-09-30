@@ -27,6 +27,7 @@ const validRequest = {
   brief: {
     idea: "Quiero una figura de mi perro Rocco, un schnauzer gris, sentado y con su pañuelo azul.",
   },
+  acceptedTerms: true,
 };
 
 test("un encargo mínimo válido pasa el esquema", () => {
@@ -117,6 +118,7 @@ test("la configuración del pedido admite la idea completa y las fotos", () => {
     customer: validRequest.customer,
     shippingAddress: validRequest.shippingAddress,
     paymentMethod: "cash",
+    acceptedTerms: true,
     idempotencyKey: "424ef6ac-5eba-4f3d-8d95-6b9d672b040f",
     items: [
       {
@@ -194,8 +196,10 @@ test("el producto de encargo se excluye del catálogo de forma explícita", () =
 
 test("el encargo se registra en efectivo y sin precio propio", () => {
   const lib = readFileSync("src/lib/bilbildin/custom-requests.ts", "utf8");
-  assert.match(lib, /payment_method: "cash"/);
-  assert.match(lib, /create_storefront_order_idempotent/);
+  assert.match(lib, /paymentMethod: "cash"/);
+  // La puerta y la forma del payload viven en un solo módulo, compartido con el checkout.
+  assert.match(lib, /STOREFRONT_ORDER_RPC/);
+  assert.match(lib, /buildStorefrontOrderPayload/);
   assert.match(lib, /Encargo sin cotizar/);
   // No inventa montos: el precio lo pone el producto de encargo en Bilbildin.
   assert.doesNotMatch(lib, /amountMinor|unit_price|subtotal/);

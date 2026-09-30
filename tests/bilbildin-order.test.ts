@@ -22,6 +22,7 @@ const validCheckout = {
     country: "CR",
   },
   paymentMethod: "sinpe",
+  acceptedTerms: true,
   idempotencyKey: "424ef6ac-5eba-4f3d-8d95-6b9d672b040f",
   items: [
     {
@@ -45,6 +46,18 @@ test("checkout accepts only customer choices, never client prices or costs", () 
       paymentMethod: "card",
     }),
   );
+});
+
+test("checkout rejects an order without explicit acceptance of the terms", () => {
+  // La casilla es `required` en el navegador; el servidor lo exige otra vez porque
+  // un POST armado a mano no pasa por la casilla.
+  for (const acceptedTerms of [undefined, false, "true", 1]) {
+    assert.equal(
+      checkoutRequestSchema.safeParse({ ...validCheckout, acceptedTerms }).success,
+      false,
+      String(acceptedTerms),
+    );
+  }
 });
 
 test("order references are signed and reject tampering", () => {

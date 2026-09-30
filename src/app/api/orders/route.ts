@@ -1,5 +1,4 @@
 import { NextResponse } from "next/server";
-import { z } from "zod";
 import {
   createPrivateBilbildinClient,
 } from "@/lib/bilbildin/client";
@@ -14,17 +13,15 @@ import {
   checkoutRequestSchema,
 } from "@/lib/bilbildin/order-schema";
 import { classifyOrderError } from "@/lib/bilbildin/order-errors";
+import {
+  STOREFRONT_ORDER_RPC,
+  buildStorefrontOrderPayload,
+  buildStorefrontOrderRpcArgs,
+  storefrontOrderResultSchema,
+} from "@/lib/bilbildin/order-payload";
 import { LEGAL_WHATSAPP } from "@/lib/legal";
 
 export const runtime = "nodejs";
-
-const rpcResultSchema = z.object({
-  orderId: z.uuid(),
-  orderNumber: z.string().min(8).max(40),
-  status: z.literal("pending"),
-  total: z.union([z.string(), z.number()]),
-  currency: z.literal("CRC"),
-});
 
 function errorResponse(message: string, status: number) {
   return NextResponse.json(
@@ -75,31 +72,20 @@ export async function POST(request: Request) {
 
   const config = getPrivateBilbildinConfig(process.env);
   const supabase = createPrivateBilbildinClient();
-  const payload = {
+  const payload = buildStorefrontOrderPayload({
     customer: parsed.data.customer,
-    shipping_address: {
-      address: parsed.data.shippingAddress.address,
-      city: parsed.data.shippingAddress.city,
-      province: parsed.data.shippingAddress.province,
-      postal_code: parsed.data.shippingAddress.postalCode,
-      country: parsed.data.shippingAddress.country,
-    },
-    payment_method: parsed.data.paymentMethod,
-    items: parsed.data.items.map((item) => ({
-      product_id: item.productId,
-      quantity: item.quantity,
-      ...(item.configuration
-        ? { configuration: item.configuration }
-        : {}),
-    })),
-  };
+    shippingAddress: parsed.data.shippingAddress,
+    paymentMethod: parsed.data.paymentMethod,
+    acceptedTerms: parsed.data.acceptedTerms,
+    items: parsed.data.items,
+  });
   const { data, error } = await supabase.rpc(
-    "create_storefront_order_idempotent",
-    {
-      p_business_id: config.businessId,
-      p_idempotency_key: parsed.data.idempotencyKey,
-      p_payload: payload,
-    },
+    STOREFRONT_ORDER_RPC,
+    buildStorefrontOrderRpcArgs(
+      config.businessId,
+      parsed.data.idempotencyKey,
+      payload,
+    ),
   );
 
   if (error) {
@@ -128,7 +114,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const result = rpcResultSchema.safeParse(data);
+  const result = storefrontOrderResultSchema.safeParse(data);
   if (!result.success) {
     return errorResponse("Bilbildin devolvió una respuesta inesperada.", 502);
   }

@@ -97,6 +97,8 @@ export function CheckoutClient() {
             country: "CR",
           },
           paymentMethod,
+          // La casilla de términos es `required`: si llegamos acá, está marcada.
+          acceptedTerms: true,
           idempotencyKey: idempotencyKey.current,
           items: lines.map((line) => ({
             productId: line.product.id,

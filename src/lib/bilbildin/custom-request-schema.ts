@@ -69,6 +69,12 @@ export const customRequestSchema = z
           .optional(),
       })
       .strict(),
+    /**
+     * La casilla «Antes de enviar» declara dos cosas a la vez: derechos sobre las
+     * fotos y aceptación de los términos. Sólo el «sí» viaja; la versión aceptada
+     * la fija BilBildin al registrar el pedido.
+     */
+    acceptedTerms: z.literal(true),
     /** Campo trampa: los bots lo rellenan, las personas no lo ven. */
     website: z.string().max(0).optional(),
   })

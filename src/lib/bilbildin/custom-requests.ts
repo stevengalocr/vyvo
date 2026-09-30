@@ -2,6 +2,12 @@ import "server-only";
 
 import { createPrivateBilbildinClient } from "./client";
 import { getPrivateBilbildinConfig } from "./config";
+import {
+  STOREFRONT_ORDER_RPC,
+  buildStorefrontOrderPayload,
+  buildStorefrontOrderRpcArgs,
+  storefrontOrderResultSchema,
+} from "./order-payload";
 import { getCustomOrderProduct } from "./provider";
 import {
   ACCEPTED_IMAGE_TYPES,
@@ -149,44 +155,37 @@ export async function createCustomOrder(
   const config = getPrivateBilbildinConfig(process.env);
   const supabase = createPrivateBilbildinClient();
 
-  const { data, error } = await supabase.rpc(
-    "create_storefront_order_idempotent",
-    {
-      p_business_id: config.businessId,
-      p_idempotency_key: idempotencyKey,
-      p_payload: {
-        customer: input.customer,
-        shipping_address: {
-          address: input.shippingAddress.address,
-          city: input.shippingAddress.city,
-          province: input.shippingAddress.province,
-          postal_code: input.shippingAddress.postalCode,
-          country: input.shippingAddress.country,
+  const payload = buildStorefrontOrderPayload({
+    customer: input.customer,
+    shippingAddress: input.shippingAddress,
+    // Efectivo: el encargo todavía no tiene precio, así que no hay nada que
+    // transferir. El pago se coordina cuando la cotización esté aceptada.
+    paymentMethod: "cash",
+    acceptedTerms: input.acceptedTerms,
+    items: [
+      {
+        productId: product.id,
+        quantity: 1,
+        configuration: {
+          id: `cfg-${idempotencyKey}`,
+          label: "Encargo personalizado",
+          details: buildDetails(input, images),
         },
-        // Efectivo: el encargo todavía no tiene precio, así que no hay nada que
-        // transferir. El pago se coordina cuando la cotización esté aceptada.
-        payment_method: "cash",
-        items: [
-          {
-            product_id: product.id,
-            quantity: 1,
-            configuration: {
-              id: `cfg-${idempotencyKey}`,
-              label: "Encargo personalizado",
-              details: buildDetails(input, images),
-            },
-          },
-        ],
       },
-    },
+    ],
+  });
+
+  const { data, error } = await supabase.rpc(
+    STOREFRONT_ORDER_RPC,
+    buildStorefrontOrderRpcArgs(config.businessId, idempotencyKey, payload),
   );
 
   if (error) throw new Error(error.message);
 
-  const result = data as { orderId?: string; orderNumber?: string } | null;
-  if (!result?.orderId || !result.orderNumber) {
+  const result = storefrontOrderResultSchema.safeParse(data);
+  if (!result.success) {
     throw new Error("invalid_custom_order_response");
   }
 
-  return { orderId: result.orderId, orderNumber: result.orderNumber };
+  return { orderId: result.data.orderId, orderNumber: result.data.orderNumber };
 }

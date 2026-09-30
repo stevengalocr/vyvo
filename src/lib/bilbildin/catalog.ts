@@ -205,6 +205,9 @@ export function mapBilbildinProduct(
     shortDescription: row.short_description ?? product.shortDescription,
     longDescription: row.description ?? product.longDescription,
     image: sameOriginImage(row.images?.[0], product.image, row.slug),
+    // Si el negocio describió la foto en BilBildin, esa descripción manda sobre el
+    // texto editorial local: la ficha habla de un concepto; la foto es la que se ve.
+    alt: altFromGallery(attributes.gallery, row.images?.[0]) ?? product.alt,
     tags: row.tags?.length ? row.tags : product.tags,
     availability: purchasable ? "in_stock" : "sold_out",
     commerce: {

@@ -72,6 +72,8 @@ export function CustomRequestForm({ baseProductSlug, baseProductName }: Props) {
         deadlineHint: String(form.get("deadlineHint") ?? "").trim() || undefined,
         baseProductSlug,
       },
+      // La casilla «Antes de enviar» es `required`: si llegamos acá, está marcada.
+      acceptedTerms: true as const,
       website: String(form.get("website") ?? ""),
     };
 

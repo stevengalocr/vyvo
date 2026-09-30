@@ -138,9 +138,19 @@ Dominio verificado y en producción desde el 2026-08-09.
 ## Integración de pedidos
 
 La escritura usa
-`public.create_storefront_order_idempotent(uuid, uuid, jsonb)`, que serializa
-reintentos y delega en
-`public.create_storefront_order(uuid, jsonb)`.
+`public.create_storefront_order_idempotent(uuid, uuid, jsonb)`. **Desde el 19 de
+septiembre de 2026 esa puerta conserva su firma pero delega en `crear_pedido`**, la
+única función de BilBildin que crea pedidos para todas las tiendas
+(`bilbildin/supabase/migrations/20260919_puertas_viejas_delegan.sql`). Las
+migraciones de `supabase/migrations/` de este repo son historia, no la fuente:
+ver `supabase/migrations/LEEME.md`.
+
+La forma del payload y de la respuesta vive en un solo módulo,
+`src/lib/bilbildin/order-payload.ts`, que usan el checkout y los encargos y que
+`tests/bilbildin-order-payload.test.ts` fija. Del carrito solo viaja qué y cuánto;
+`accepted_terms: true` viaja cuando la persona marcó la casilla, y la versión de
+términos la pone BilBildin. Los ocho códigos de rechazo de `crear_pedido` están
+nombrados uno por uno en `src/lib/bilbildin/order-errors.ts`.
 
 La transacción:
 
@@ -444,7 +454,7 @@ npm run verify:responsive
 npm run verify:browser
 ```
 
-La suite contiene 36 pruebas unitarias/de contrato. La matriz responsive cubre
+La suite contiene 76 pruebas unitarias/de contrato (al 2026-09-30). La matriz responsive cubre
 24 combinaciones de cuatro rutas críticas en seis tamaños, de 375 a 1440 px.
 El recorrido integral audita 23 rutas y completa personalización, carrito y
 checkout demo en escritorio y móvil sin crear pedidos comerciales.

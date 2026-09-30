@@ -163,3 +163,34 @@ test("a product without editorial copy never claims to be a render", () => {
   assert.doesNotMatch(sinDescribir.alt, /render/i);
   assert.match(sinDescribir.alt, /Pieza Nueva/);
 });
+
+test("the gallery alt from BilBildin wins over the local editorial alt", () => {
+  assert.ok(core);
+  const foto = "https://wgicaiphzwppnshagxve.supabase.co/storage/v1/object/public/productos/core/foto.jpg";
+
+  const descrita = mapBilbildinProduct(
+    core,
+    makeRow({
+      images: [foto],
+      attributes: {
+        sku: "VYV-MINI-CORE-001",
+        gallery: { [foto]: { alt: "Fotografía de CORE sobre fondo blanco.", kind: "photo" } },
+      },
+    }),
+  );
+  assert.equal(descrita.alt, "Fotografía de CORE sobre fondo blanco.");
+
+  // Sin descripción en BilBildin, la ficha local sigue mandando: no se inventa nada.
+  const sinDescribir = mapBilbildinProduct(core, makeRow({ images: [foto] }));
+  assert.equal(sinDescribir.alt, core.alt);
+
+  // Una descripción de otra imagen no describe la que se pinta.
+  const otra = mapBilbildinProduct(
+    core,
+    makeRow({
+      images: [foto],
+      attributes: { gallery: { "https://otra/imagen.jpg": { alt: "Otra", kind: "detail" } } },
+    }),
+  );
+  assert.equal(otra.alt, core.alt);
+});
