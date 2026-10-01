@@ -15,7 +15,7 @@ Unidad U06 del loop: VYVO auditada contra el Contrato de Alineación de Tiendas,
 - Contradicción: README decía que la puerta delega en `create_storefront_order`; el código del CORE dice `crear_pedido` desde el 09-19. Gana el CORE; README corregido.
 Aplicado en vault: sí
 
-### U06-B · `CLAUDE.md` con protocolo de vault y sub-nodo completo · commit (este) · despliegue n/a
+### U06-B · `CLAUDE.md` con protocolo de vault y sub-nodo completo · commit cfd3d34 · despliegue n/a
 **Pendientes.md** — Cierra (k): «el repo no tiene `CLAUDE.md`». Sin ítems nuevos.
 **Decisiones.md** — ninguna.
 **Seguridad.md** — sin cambios. `CLAUDE.md` documenta el `business_id` y los nombres de variables, ninguna clave.
